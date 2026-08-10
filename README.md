@@ -1,6 +1,6 @@
 # Ingeniería de Software — Materiales de Cátedra
 
-**Licenciatura en Bioinformática (FIUNER) · 2.° Cuatrimestre 2026**
+**Licenciatura en Bioinformática y Licenciatura en Ciencias de Datos (FIUNER) · 2.° Cuatrimestre 2026**
 
 Este repositorio contiene todas las guías de Trabajo Práctico, instructivos técnicos y procedimientos de la materia. Es de **solo lectura** para los estudiantes — el trabajo de cada grupo vive en su propio repositorio (que van a crear más adelante, en el TP1).
 
@@ -9,8 +9,8 @@ Este repositorio contiene todas las guías de Trabajo Práctico, instructivos t�
 Tu primera tarea de la materia es traer este repositorio a tu computadora. Ese es, literalmente, tu primer comando de Git del cuatrimestre:
 
 ```bash
-git clone https://github.com/<usuario-o-organizacion-catedra>/catedra-ingenieria-de-software-2026.git
-cd catedra-ingenieria-de-software-2026
+git clone https://github.com/jalbornozlaferrara/ingenieria-del-software-2026.git
+cd ingenieria-del-software-2026
 ```
 
 Si es la primera vez que usás Git, no hace falta que entiendas todavía qué hace `clone` por dentro — con eso alcanza para tener el material. La explicación completa está en [`docs/instructivos/git-github-y-documentacion.md`](docs/instructivos/git-github-y-documentacion.md), y la vas a necesitar de verdad recién en el TP1, cuando crees el repositorio de tu propio grupo.
@@ -33,4 +33,4 @@ docs/
 
 ## Sitio publicado
 
-Este repositorio también se publica como sitio navegable con GitHub Pages: `https://<usuario-o-organizacion-catedra>.github.io/catedra-ingenieria-de-software-2026/` *(activar en Settings → Pages una vez creado el repo remoto — ver instructivo)*.
+Este repositorio también se publica como sitio navegable con GitHub Pages: `https://jalbornozlaferrara.github.io/ingenieria-del-software-2026/` *(activar en Settings → Pages — ver instructivo)*.
