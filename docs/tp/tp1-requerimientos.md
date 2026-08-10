@@ -3,6 +3,10 @@ title: TP1 — Requerimientos del Sistema
 nav_order: 1
 ---
 
+# Ingeniería del Software - 2026 - TP 1
+
+---
+
 # Guía de Trabajo Práctico N.° 1 — Requerimientos del Sistema
 
 | | |
@@ -140,7 +144,7 @@ Este diagrama se escribe directamente como bloque Mermaid en un archivo `.md` de
 
 Los casos de uso de este TP se redactan en **formato textual estructurado (Cockburn)** — actor, precondición, flujo principal, flujos alternativos, postcondición — y no como diagrama gráfico UML de casos de uso.
 
-La razón es técnica, no una simplificación: Mermaid (la única herramienta de diagramación del curso, por la regla de todo-en-GitHub) **no tiene un tipo de diagrama de casos de uso nativo**. Forzarlo con una aproximación en `flowchart` produce algo que se parece a un diagrama de casos de uso pero no respeta la notación real — peor que no tener diagrama.
+La razón es técnica, no una simplificación: Mermaid (la única herramienta de diagramación del curso, por la regla de todo-en-GitHub) no incluye un tipo de diagrama de casos de uso nativo. Una aproximación mediante `flowchart` no respeta la semántica de la notación UML de casos de uso (actor, caso de uso, límite del sistema, relaciones de inclusión y extensión), por lo que produce un artefacto visualmente similar pero conceptualmente incorrecto, con el riesgo adicional de inducir a error sobre la notación real.
 
 > **Esto no exime de saber la notación.** El diagrama de casos de uso UML —actor, elipse de caso de uso, límite del sistema, relaciones `<<include>>` y `<<extend>>`, generalización de actores— sigue siendo contenido exigible del curso. El grupo debe poder **dibujarlo a mano y explicarlo** (en el pizarrón, en una hoja, o verbalmente) durante las clases de práctica y en la Instancia 1, si el docente lo solicita. No entregar el diagrama gráfico como artefacto del repositorio no significa no saberlo — significa que el repositorio no es el lugar para una notación que la herramienta del curso no soporta correctamente.
 
@@ -153,10 +157,10 @@ La razón es técnica, no una simplificación: Mermaid (la única herramienta de
 | 2 | 10/08 | **Inicio** — elección de área de dolencia/interés, actividad de descubrimiento, identificación de stakeholders, exploración del dominio | Sección inicial del SRS (visión y alcance), lista de stakeholders, diagrama de contexto inicial (DFD Nivel 0) |
 | 3 | 17/08 | **Feriado nacional (Paso a la Inmortalidad del Gral. San Martín) — sin sesión de práctica.** El grupo puede seguir commiteando avances por su cuenta, pero no hay actividad de cátedra pautada esta semana. | — |
 | 4 | 24/08 | **Trabajo** — modelo de dominio refinado, casos de uso detallados, historias de usuario con criterios de aceptación | Modelo de dominio (Mermaid ER o de clases conceptual), CU/HU |
-| 5 | 31/08 | **Cierre** — especificación detallada de un caso de uso/HU representativo, preparación de la presentación | SRS consolidado, atributos de calidad según ISO 25010 (con al menos un escenario de calidad completo), primera línea base del repositorio (tag `v1.0.0`) |
+| 5 | 31/08 | **Cierre** — especificación detallada de un caso de uso/HU representativo, preparación de la presentación | SRS consolidado, atributos de calidad según ISO 25010 con sus escenarios de calidad correspondientes, primera línea base del repositorio (tag `v1.0.0`) |
 | — | 01/09 | **Instancia 1** — presentación oral (Módulos 1+2) | Defensa de decisiones ante el docente |
 
-No hace falta esperar a la Semana 5 para escribir el SRS: se construye de forma incremental, con commits frecuentes desde la Semana 2 (ver sección 6). Los atributos de calidad recién se trabajan en la práctica a partir de la Semana 5, porque la teoría de ISO 25010 se dicta el martes 25/08 (Semana 4) — antes de eso, el grupo cuenta como máximo con el video de aula invertida como primer contacto con el tema, no con la sesión de profundización.
+No hace falta esperar a la Semana 5 para escribir el SRS: se construye de forma incremental, con commits frecuentes desde la Semana 2 (ver sección 6). La especificación de requerimientos no funcionales avanza en la práctica progresivamente junto con los funcionales; los escenarios de calidad (fuente–estímulo–artefacto–entorno–respuesta–medida) se redactan en más de una variante por atributo, cubriendo distintas condiciones de entorno — la cantidad exacta y el criterio de cobertura los define el docente.
 
 ---
 
@@ -221,7 +225,7 @@ Esta etiqueta marca formalmente la primera línea base del proyecto — el punto
 - [ ] Diagrama de contexto inicial en notación DFD Nivel 0 (Mermaid — ver secc. 4.4 e instructivo `docs/instructivos/diagrama-de-contexto-dfd.md`).
 - [ ] Modelo de dominio inicial (Mermaid — diagrama ER o de clases conceptual).
 - [ ] Casos de uso en formato textual Cockburn (ver secc. 4.5) y/o historias de usuario con criterios de aceptación verificables (formato *Como… quiero… para…*, criterios en estilo Given-When-Then si el grupo ya lo maneja). Sin diagrama gráfico de casos de uso en el repositorio — ver por qué en secc. 4.5.
-- [ ] Atributos de calidad identificados según ISO 25010, con al menos un escenario de calidad completo (fuente–estímulo–artefacto–entorno–respuesta–medida).
+- [ ] Atributos de calidad identificados según ISO 25010, con sus escenarios de calidad correspondientes (fuente–estímulo–artefacto–entorno–respuesta–medida), cubriendo más de una condición de entorno por atributo — cantidad exacta a definir por el docente.
 - [ ] SRS consolidado en `docs/requirements/`, con la sección de visión y alcance surgida del canvas de descubrimiento (secc. 4.2-4.3).
 - [ ] Bitácora de uso de IA (`docs/uso-ia.md`) — ver sección 8.
 - [ ] Repositorio con historial de commits real y tag `v1.0.0`.
@@ -259,7 +263,7 @@ Preguntas que conviene poder responder sin dudar: *¿por qué eligieron este alc
 
 - [ ] Todos los `.md` están commiteados en el repositorio del grupo (no en Google Docs, Word ni Notion).
 - [ ] Los diagramas están en bloques ```` ```mermaid ```` dentro de archivos `.md`, no como imágenes pegadas.
-- [ ] El SRS cubre requerimientos funcionales y atributos de calidad, con al menos un escenario de calidad completo.
+- [ ] El SRS cubre requerimientos funcionales y atributos de calidad, con los escenarios de calidad correspondientes a cada atributo.
 - [ ] Cada historia de usuario/caso de uso tiene criterios de aceptación verificables.
 - [ ] `docs/uso-ia.md` está actualizado.
 - [ ] El tag `v1.0.0` está creado y publicado (`git push origin v1.0.0`).
