@@ -26,7 +26,7 @@ Al finalizar este TP, cada integrante del grupo debería poder:
 - Identificar las causas recurrentes de fracaso en proyectos de software (Módulo 1: problemas de duración, costo, compromisos y manejo de desvíos) y anticipar cuál de ellas es más probable en el proyecto propio.
 - Aplicar al menos una técnica de elicitación de requerimientos sobre un dominio bioinformático real.
 - Distinguir requerimientos funcionales de atributos de calidad (no funcionales) y expresarlos con precisión.
-- Redactar casos de uso y/o historias de usuario con criterios de aceptación verificables.
+- Redactar casos de uso en formato textual (Cockburn) y/o historias de usuario, con criterios de aceptación verificables — y conocer las reglas de notación UML de casos de uso (actores, `<<include>>`/`<<extend>>`, límite del sistema) lo suficiente como para representarlas a mano si se solicita.
 - Construir un modelo de dominio inicial: las entidades y relaciones esenciales del problema.
 - Dejar el repositorio Git del grupo configurado y con evidencia real de proceso desde el primer commit.
 
@@ -100,6 +100,14 @@ flowchart LR
 ```
 
 Este diagrama se escribe directamente como bloque Mermaid en un archivo `.md` del repositorio — ver sección 6. Si el grupo no vio aún las convenciones de Mermaid/Markdown de la cátedra, es el momento de revisarlas: [`docs/instructivos/git-github-y-documentacion.md`](../instructivos/git-github-y-documentacion.md).
+
+### 4.4 Especificación de casos de uso: formato textual, no diagrama
+
+Los casos de uso de este TP se redactan en **formato textual estructurado (Cockburn)** — actor, precondición, flujo principal, flujos alternativos, postcondición — y no como diagrama gráfico UML de casos de uso.
+
+La razón es técnica, no una simplificación: Mermaid (la única herramienta de diagramación del curso, por la regla de todo-en-GitHub) **no tiene un tipo de diagrama de casos de uso nativo**. Forzarlo con una aproximación en `flowchart` produce algo que se parece a un diagrama de casos de uso pero no respeta la notación real — peor que no tener diagrama.
+
+> **Esto no exime de saber la notación.** El diagrama de casos de uso UML —actor, elipse de caso de uso, límite del sistema, relaciones `<<include>>` y `<<extend>>`, generalización de actores— sigue siendo contenido exigible del curso. El grupo debe poder **dibujarlo a mano y explicarlo** (en el pizarrón, en una hoja, o verbalmente) durante las clases de práctica y en la Instancia 1, si el docente lo solicita. No entregar el diagrama gráfico como artefacto del repositorio no significa no saberlo — significa que el repositorio no es el lugar para una notación que la herramienta del curso no soporta correctamente.
 
 ---
 
@@ -177,7 +185,7 @@ Esta etiqueta marca formalmente la primera línea base del proyecto — el punto
 - [ ] Lista de stakeholders y usuarios, con roles.
 - [ ] Diagrama de contexto inicial (Mermaid, `docs/architecture/contexto-inicial.md` o similar).
 - [ ] Modelo de dominio inicial (Mermaid — diagrama ER o de clases conceptual).
-- [ ] Casos de uso y/o historias de usuario con criterios de aceptación verificables (formato *Como… quiero… para…*, criterios en estilo Given-When-Then si el grupo ya lo maneja).
+- [ ] Casos de uso en formato textual Cockburn (ver secc. 4.4) y/o historias de usuario con criterios de aceptación verificables (formato *Como… quiero… para…*, criterios en estilo Given-When-Then si el grupo ya lo maneja). Sin diagrama gráfico de casos de uso en el repositorio — ver por qué en secc. 4.4.
 - [ ] Atributos de calidad identificados según ISO 25010, con al menos un escenario de calidad completo (fuente–estímulo–artefacto–entorno–respuesta–medida).
 - [ ] SRS consolidado en `docs/requirements/`.
 - [ ] Bitácora de uso de IA (`docs/uso-ia.md`) — ver sección 8.
@@ -207,6 +215,8 @@ La presentación es oral y grupal. El docente evalúa, según la rúbrica de la 
 5. **El repositorio Git como evidencia del proceso**: historial de commits, no solo el resultado final.
 
 Preguntas que conviene poder responder sin dudar: *¿por qué eligieron este alcance y no uno más amplio o más acotado? ¿Qué stakeholder quedó fuera de la primera versión y por qué? ¿Qué requerimiento fue el más difícil de acotar y cómo lo resolvieron?*
+
+> El docente puede pedir, sin previo aviso, que el grupo **dibuje en el pizarrón** el diagrama UML de casos de uso correspondiente a una de las especificaciones textuales entregadas (actor, límite del sistema, `<<include>>`/`<<extend>>`). No entregar el diagrama como artefacto no implica no tener que saberlo — ver secc. 4.4.
 
 ---
 
