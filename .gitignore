@@ -1,0 +1,12 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+*.swp
+
+# Jekyll (build local de GitHub Pages, si se prueba localmente)
+_site/
+.jekyll-cache/
+.jekyll-metadata
