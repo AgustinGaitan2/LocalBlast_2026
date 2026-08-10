@@ -64,31 +64,22 @@ flowchart LR
 
 ### 3.1 Actividad: elegir y justificar el modelo de ciclo de vida del proyecto (Semana 2)
 
-Esta actividad se hace junto con la actividad de descubrimiento (sección 4), en la primera sesión de práctica del TP1 — es una de las primeras decisiones de ingeniería documentadas del proyecto, no un ejercicio teórico aislado. La teoría de modelos de ciclo de vida ya se vio el martes 04/08 (Semana 1), así que el grupo llega con el marco conceptual necesario.
+Esta actividad se hace junto con la actividad de descubrimiento (sección 4), en la primera sesión de práctica del TP1 — es una de las primeras decisiones de ingeniería documentadas del proyecto.
 
-Cada grupo completa esta comparación y decide, con criterio propio, qué modelo aplica mejor a **su** proyecto:
+Cada grupo debe **seleccionar el modelo de ciclo de vida** (cascada, iterativo, incremental, espiral, basado en componentes, ágil, o una combinación) que va a guiar la construcción de su proyecto, y justificar esa elección con criterios propios — no alcanza con nombrar el modelo.
 
-| Modelo | Idea central | Ventajas | Desventajas | Cuándo conviene |
-|---|---|---|---|---|
-| **Cascada** (secuencial) | Fases secuenciales; cada una se cierra antes de pasar a la siguiente | Simple de planificar, documentación clara etapa por etapa | Rígido ante cambios, feedback del usuario recién al final, alto riesgo si el problema no está bien entendido desde el inicio | Requerimientos muy estables y conocidos, fuertes restricciones contractuales |
-| **Iterativo** | El sistema se refina en ciclos sucesivos sobre una versión previa | Corrige rumbo con feedback temprano, tolera requerimientos poco claros al inicio | Exige disciplina para no perder de vista el objetivo global | Dominios donde el problema se entiende mejor a medida que se avanza |
-| **Incremental** | Se entrega en partes funcionales crecientes, cada una utilizable | Valor visible desde etapas tempranas, reduce riesgo de no mostrar nada hasta el final | Requiere una arquitectura que soporte crecer sin rehacerse | Cuando existe un núcleo mínimo de valor identificable para entregar primero |
-| **Espiral** | Iteración + análisis explícito de riesgo en cada vuelta | Gestión de riesgo sistemática, apto para proyectos grandes o críticos | Overhead de gestión alto, exige experiencia para evaluar riesgos | Proyectos grandes, de alto costo de fracaso (ej. sistemas críticos) |
-| **Basado en componentes** | Se ensambla a partir de componentes ya existentes o de terceros | Reduce tiempo de desarrollo si hay componentes reutilizables maduros | Depende de la calidad y compatibilidad de lo externo, menos control sobre el resultado | Cuando hay librerías/frameworks maduros que cubren buena parte del dominio |
-| **Ágil** (ej. Scrum) | Ciclos cortos, entrega continua de valor, fuerte involucramiento del "cliente" | Responde bien a requerimientos cambiantes, feedback muy frecuente | Exige disponibilidad constante de un referente del dominio; puede descuidar la arquitectura de largo plazo si no se cuida | Equipos chicos, aprendizaje progresivo del dominio |
-
-> **Una aclaración honesta:** el propio diseño de la materia —5 TP, cada uno construyendo sobre el anterior, con una presentación cada 2 a 3 semanas— ya es, en los hechos, iterativo-incremental. Un cascada puro no es compatible con ese ritmo: no se puede cerrar "toda" la etapa de requerimientos antes de tocar UX si el TP2 arranca con los requerimientos todavía vivos. Esto **no** vuelve trivial la decisión — el grupo igual tiene que argumentar, con criterios propios de su proyecto (no solo "porque lo impone la cátedra"), por qué ese enfoque les sirve, y si además van a sumar prácticas ágiles puntuales dentro de cada TP (sprints cortos, tablero Kanban, daily breve) más allá del ritmo iterativo-incremental que ya viene dado.
+Para fundamentar la decisión, indaguen qué atributos del proyecto condicionan o habilitan la elección de un modelo u otro. Algunos ejemplos de esos atributos: grado de claridad y estabilidad de los requerimientos, tamaño y disponibilidad del equipo, tolerancia al riesgo del proyecto, necesidad de mostrar valor tempranamente, existencia de componentes o librerías reutilizables, y restricciones de tiempo o de entrega. Investiguen las características, ventajas y desventajas de cada modelo, y usen esos atributos para argumentar por qué el modelo elegido es el más adecuado para su proyecto puntual.
 
 Preguntas guía para la decisión:
 
 - ¿Qué tan claros están hoy los requerimientos del proyecto? ¿Es esperable que cambien a medida que entienden mejor el dominio?
-- ¿Hay un núcleo mínimo de valor que se pueda entregar temprano (pensando en incremental)?
-- ¿Qué riesgo puntual de este proyecto (dato sensible, dependencia de una fuente externa, complejidad del dominio) conviene gestionar con iteraciones cortas?
-- ¿Van a incorporar alguna práctica ágil concreta (sprints de una semana, tablero, reuniones breves) además del marco iterativo-incremental de la cátedra? ¿Cuál y por qué?
+- ¿Hay un núcleo mínimo de valor que se pueda entregar temprano?
+- ¿Qué riesgo puntual de este proyecto conviene gestionar con iteraciones cortas?
+- ¿Van a incorporar alguna práctica ágil concreta (sprints, tablero, reuniones breves)? ¿Cuál y por qué?
 
-La decisión y su justificación (3 a 5 líneas, citando al menos dos criterios de la tabla) se documentan en el `README.md` — es el mismo ítem que ya figura en el checklist de entregables (sección 7).
+La decisión y su justificación (3 a 5 líneas, citando al menos dos atributos propios del proyecto) se documentan en el `README.md` — es el mismo ítem que ya figura en el checklist de entregables (sección 7).
 
-Esto conecta directamente con el principio de **anticipación del cambio**, uno de los principios fundamentales de la Ingeniería de Software (Módulo 1): el software cambia por naturaleza —por la evolución del dominio, por requerimientos que se ajustan, por decisiones que se revisan— y ese cambio se gestiona con las herramientas adecuadas para almacenar y recuperar versiones de manera controlada. Esa es, en definitiva, la razón de fondo por la que el repositorio Git se abre desde el primer día del TP1 y no recién en el Módulo 7.
+Esto conecta directamente con el principio de **anticipación del cambio**, uno de los principios fundamentales de la Ingeniería de Software: el software cambia por naturaleza —por la evolución del dominio, por requerimientos que se ajustan, por decisiones que se revisan— y ese cambio se gestiona con las herramientas adecuadas para almacenar y recuperar versiones de manera controlada. Esa es, en definitiva, la razón de fondo por la que el repositorio Git se abre desde el primer día del TP1 y no recién en el Módulo 7.
 
 ---
 
@@ -273,7 +264,7 @@ Preguntas que conviene poder responder sin dudar: *¿por qué eligieron este alc
 
 ## Referencias rápidas
 
-**Material de cátedra (Módulo 1, lectura obligatoria antes de la Semana 2):** Introducción a la Ingeniería de Software · La Crisis del Software · Fracasos por el Software · Consecuencias de la Mala Calidad · La Ingeniería de Software · Principios de la Ingeniería de Software · SWEBOK · Ética Profesional · La Problemática. Estos nueve documentos son la base directa de la sección 1 (objetivos), la sección 3 (marco de ciclo de vida) y las filas de "riesgos de fracaso" y "datos sensibles" del canvas de descubrimiento (sección 4).
+**Material de cátedra (Módulo 1):** Introducción a la Ingeniería de Software · La Crisis del Software · Fracasos por el Software · Consecuencias de la Mala Calidad · La Ingeniería de Software · Principios de la Ingeniería de Software · SWEBOK · Ética Profesional · La Problemática. Estos nueve documentos son la base directa de la sección 1 (objetivos), la sección 3 (marco de ciclo de vida) y las filas de "riesgos de fracaso" y "datos sensibles" del canvas de descubrimiento (sección 4).
 
 **Bibliografía complementaria (Módulo 2, requerimientos):**
 
