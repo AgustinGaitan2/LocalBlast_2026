@@ -21,7 +21,7 @@ Actualmente, la realización de alineamientos locales de secuencias mediante BLA
 * **Filtros Avanzados y Personalizados:** Opciones de visualización y filtrado dinámico sobre la lista de resultados (ej. umbrales de identidad, cobertura, E-value, taxones).
 * **Exportación de Resultados:** Descarga de resultados filtrados en formatos estándar (CSV, JSON, FASTA).
 
-#### **Fuera del Alcance (Out of Scope)**
+### **Fuera del Alcance (Out of Scope)**
 * Reescritura o modificación del algoritmo de alineamiento subyacente de BLAST.
 * Implementación de herramientas de alineamiento múltiple (como ClustalW o Muscle) o modelado 3D de estructuras.
 * Creación o administración de bases de datos genómicas complejas desde la aplicación.
