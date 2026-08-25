@@ -34,3 +34,4 @@ docs/
 ## Sitio publicado
 
 Este repositorio también se publica como sitio navegable con GitHub Pages: `https://jalbornozlaferrara.github.io/ingenieria-del-software-2026/` *(activar en Settings → Pages — ver instructivo)*.
+# LocalBlast_2026
