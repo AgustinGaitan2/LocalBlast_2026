@@ -1,37 +1,27 @@
-# Ingeniería de Software — Materiales de Cátedra
-
-**Licenciatura en Bioinformática y Licenciatura en Ciencias de Datos (FIUNER) · 2.° Cuatrimestre 2026**
-
-Este repositorio contiene todas las guías de Trabajo Práctico, instructivos técnicos y procedimientos de la materia. Es de **solo lectura** para los estudiantes — el trabajo de cada grupo vive en su propio repositorio (que van a crear más adelante, en el TP1).
-
-## Empezá acá
-
-Tu primera tarea de la materia es traer este repositorio a tu computadora. Ese es, literalmente, tu primer comando de Git del cuatrimestre:
-
-```bash
-git clone https://github.com/jalbornozlaferrara/ingenieria-del-software-2026.git
-cd ingenieria-del-software-2026
-```
-
-Si es la primera vez que usás Git, no hace falta que entiendas todavía qué hace `clone` por dentro — con eso alcanza para tener el material. La explicación completa está en [`docs/instructivos/git-github-y-documentacion.md`](docs/instructivos/git-github-y-documentacion.md), y la vas a necesitar de verdad recién en el TP1, cuando crees el repositorio de tu propio grupo.
-
-## Qué hay en este repositorio
-
-```
-docs/
-├── tp/                     ← una guía por Trabajo Práctico
-│   └── tp1-requerimientos.md
-├── instructivos/           ← cómo trabajamos: Git, Markdown, Mermaid, GitHub Pages
-│   └── git-github-y-documentacion.md
-└── procedimientos/         ← reglas transversales a todos los TP
-    ├── uso-de-ia.md
-    └── entrega-y-rubrica.md
-```
-
-- **`docs/tp/`** — cada guía es autocontenida: se lee de punta a punta para preparar esa instancia. Enlaza a los instructivos y procedimientos en vez de repetirlos.
-- **`docs/instructivos/`** y **`docs/procedimientos/`** — contenido transversal, válido para TP1 a TP5 y el Trabajo Integrador. Se actualiza en un solo lugar.
-
-## Sitio publicado
-
-Este repositorio también se publica como sitio navegable con GitHub Pages: `https://jalbornozlaferrara.github.io/ingenieria-del-software-2026/` *(activar en Settings → Pages — ver instructivo)*.
 # LocalBlast_2026
+## Integrantes
+* Agustin Facundo Gaitan
+* Wursten Augusto
+* Farias Valentin
+
+---
+### Problema
+Actualmente, la realización de alineamientos locales de secuencias mediante BLAST presenta barreras de entrada significativas según el canal utilizado:
+* **Línea de comandos (Consola):** Requiere recordar comandos complejos, sintaxis rigurosa y navegar por documentación extensa, lo que ralentiza el trabajo de usuarios sin perfil puramente bioinformático o técnico.
+* **Interfaz Web Oficial (NCBI BLAST):** Aunque es accesible, carece de opciones avanzadas de filtrado directo e interactivo (como filtros instantáneos por % de identidad o cobertura posterior a la búsqueda) y resulta sobrecargada para consultas simples y rápidas.
+
+### StakeHolders
+* **Estudiantes de Grado y Posgrado:** Que necesitan realizar alineamientos locales rápidos para trabajos prácticos o investigación sin perder tiempo en la configuración de entornos por terminal.
+* **Investigadores y Docentes de Bioinformática / Biología Molecular:** Que buscan una herramienta ágil e intuitiva para explorar resultados con filtros visuales personalizados que no están disponibles de forma nativa en la web tradicional.
+
+### Alcance del Proyecto
+
+* **Interfaz Gráfica Intuitiva:** Diseño web o desktop amigable para la introducción de secuencias query (FASTA/texto plano) y configuración simple de parámetros.
+* **Integración con Motor BLAST:** Capacidad de enviar consultas y recibir resultados conectándose a NCBI (vía API/remoto) o ejecutables de BLAST local.
+* **Filtros Avanzados y Personalizados:** Opciones de visualización y filtrado dinámico sobre la lista de resultados (ej. umbrales de identidad, cobertura, E-value, taxones).
+* **Exportación de Resultados:** Descarga de resultados filtrados en formatos estándar (CSV, JSON, FASTA).
+
+#### **Fuera del Alcance (Out of Scope)**
+* Reescritura o modificación del algoritmo de alineamiento subyacente de BLAST.
+* Implementación de herramientas de alineamiento múltiple (como ClustalW o Muscle) o modelado 3D de estructuras.
+* Creación o administración de bases de datos genómicas complejas desde la aplicación.
