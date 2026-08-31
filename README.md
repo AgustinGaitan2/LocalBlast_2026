@@ -25,28 +25,3 @@ Actualmente, la realización de alineamientos locales de secuencias mediante BLA
 * Reescritura o modificación del algoritmo de alineamiento subyacente de BLAST.
 * Implementación de herramientas de alineamiento múltiple (como ClustalW o Muscle) o modelado 3D de estructuras.
 * Creación o administración de bases de datos genómicas complejas desde la aplicación.
-
-%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px'}}}%%
-graph TD
-    %% Definición de los nodos con sus formas y textos
-    A("<b>Usuario</b><br/>Envía secuencia")
-    B(("<b>Sistema BLAST</b><br/><span style='color:#6a5acd'>amigable</span>"))
-    C("<b>Motor BLAST</b><br/>NCBI / local")
-
-    %% Conexiones con etiquetas de texto
-    A <-->|Consulta y resultados| B
-    B <-->|Alineamiento BLAST| C
-
-    %% Definición de estilos para los nodos (formas, colores de fondo y bordes)
-    %% style A (Rectángulo beige claro)
-    style A fill:#f3f0e8,stroke:#9d9a90,stroke-width:1px,rx:8,ry:8,color:black
-    
-    %% style B (Círculo azul/púrpura pálido)
-    style B fill:#eff1ff,stroke:#a4b4f0,stroke-width:1px,color:#6a5acd
-    
-    %% style C (Rectángulo verde menta pálido)
-    style C fill:#e4f2eb,stroke:#77ae96,stroke-width:1px,rx:8,ry:8,color:#004d3e
-    
-    %% Configuración general para las conexiones y el texto
-    %% LinkStyle para todas las líneas (más gruesas y color gris)
-    linkStyle 0,1 stroke:#808080,stroke-width:2px,color:black;
