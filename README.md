@@ -25,3 +25,16 @@ Actualmente, la realización de alineamientos locales de secuencias mediante BLA
 * Reescritura o modificación del algoritmo de alineamiento subyacente de BLAST.
 * Implementación de herramientas de alineamiento múltiple (como ClustalW o Muscle) o modelado 3D de estructuras.
 * Creación o administración de bases de datos genómicas complejas desde la aplicación.
+
+graph TD
+    A["Usuario
+    (Envía secuencia)"]
+    
+    B(("Sistema BLAST
+    amigable"))
+    
+    C["Motor BLAST
+    (NCBI / local)"]
+
+    A <-->|Consulta y resultados| B
+    B <-->|Alineamiento BLAST| C
