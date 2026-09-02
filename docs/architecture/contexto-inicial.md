@@ -1,4 +1,4 @@
-El diagrama de nivel cero o diagrama de contexto inicial de este proyecto corresponde a: 
+El diagrama de nivel cero de este proyecto corresponde a:
 
 ```mermaid
 graph TD
