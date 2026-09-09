@@ -23,6 +23,13 @@ flowchart LR
     BLAST -->|resultado del alineamiento<br/>o índice DB construida| P
 ```
 
+**Aclaración sobre el modo local vs remoto.** Ambos modos son, desde el punto de vista de nuestra GUI, **una invocación al motor BLAST+**; la diferencia está enteramente del lado de BLAST+:
+
+- En **modo local**, BLAST+ lee los índices de las bases de datos que residen en el mismo servidor.
+- En **modo remoto**, BLAST+ recibe la flag `-remote` y él mismo se comunica con los servidores públicos de NCBI para resolver la búsqueda. Nuestro sistema no participa de ese diálogo.
+
+Por eso desde el DFD ambos casos comparten los mismos dos flujos externos hacia BLAST+ (invocación y resultado). El comportamiento distinto de BLAST+ según la flag no cambia el diagrama de contexto de nuestro sistema.
+
 El diagrama de nivel 1 corresponde a:
 
 ```mermaid
