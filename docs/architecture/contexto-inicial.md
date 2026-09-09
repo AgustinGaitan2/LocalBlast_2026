@@ -1,5 +1,3 @@
----
-
 ## Nivel 0 · Diagrama de contexto
 
 El sistema completo se representa como un único proceso (0), con sus tres entidades externas: los dos actores humanos (Investigador/a y Administrador/a) y el único sistema externo con el que dialoga (**BLAST+**, el motor de alineamiento sobre el que se apoya).
