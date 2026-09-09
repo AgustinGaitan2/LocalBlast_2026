@@ -73,11 +73,8 @@ flowchart TD
     D2 -.->|historial consultable<br/>uso futuro| P2
 ```
 
----
-
 **Chequeo de balanceo:** los seis flujos externos aparecen en Nivel 1 con los mismos extremos externos que en Nivel 0. Los que van hacia BLAST+ se dividen entre P1 (para búsqueda) y P3 (para construir índices), pero desde afuera del sistema siguen siendo los dos mismos flujos.
 
----
 
 ## Descripción de los procesos y almacenes
 
