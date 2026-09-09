@@ -30,45 +30,53 @@ flowchart LR
 
 Por eso desde el DFD ambos casos comparten los mismos dos flujos externos hacia BLAST+ (invocación y resultado). El comportamiento distinto de BLAST+ según la flag no cambia el diagrama de contexto de nuestro sistema.
 
-El diagrama de nivel 1 corresponde a:
+## Nivel 1 · Descomposición del proceso 0
+
+El proceso 0 se descompone en **tres procesos internos**, más dos almacenes. La regla de balanceo se respeta: los seis flujos externos que cruzan el límite del sistema son los mismos que en Nivel 0, redistribuidos entre los procesos internos.
 
 ```mermaid
-graph TD
-    U["Investigador/a"]
-    N["Servidor NCBI API"]
-    F["Repositorio FTP de índices BLAST+"]
+flowchart TD
+    INV[Investigador/a]
+    ADM[Administrador/a]
+    BLAST[BLAST+<br/>motor de alineamiento]
 
-    P1(("1<br/>Gestionar entrada<br/>y validar secuencia"))
-    P2(("2<br/>Ejecutar búsqueda<br/>y aplicar filtros avanzados"))
-    P3(("3<br/>Gestionar reportes<br/>y recursos locales"))
+    P1((1<br/>Ejecutar búsqueda<br/>BLAST))
+    P2((2<br/>Filtrar y entregar<br/>resultados))
+    P3((3<br/>Administrar bases<br/>de datos))
 
-    D1[("D1 · Bases de Datos Locales<br/>+ Caché de Resultados")]
+    D1[(D1 · Catálogo de<br/>bases de datos)]
+    D2[(D2 · Búsquedas y<br/>resultados históricos)]
 
-    %% FLUJOS EXTERNOS (balanceados con Nivel 0)
-    U -->|"Flujo 1: Envía secuencia, parámetros y modo"| P1
-    P3 -->|"Flujo 2: Devuelve alineamientos filtrados, gráficas y reportes"| U
+    %% Flujos externos — Investigador
+    INV -->|secuencia query, programa,<br/>modo, id base de datos,<br/>parámetros y filtros| P1
+    P2 -->|tabla de resultados<br/>y archivo descargable| INV
 
-    P2 -->|"Flujo 3: Petición QBlast con filtros estándar"| N
-    N -->|"Flujo 4: Resultados XML/JSON crudos"| P2
+    %% Flujos externos — Administrador
+    ADM -->|FASTA + tipo +<br/>orden alta/actualizar/baja| P3
+    P3 -->|catálogo y estado<br/>de bases de datos| ADM
 
-    P3 -->|"Flujo 8a: Descarga/actualización de índices"| F
-    F -->|"Flujo 8b: Índices BLAST+ descargados"| P3
+    %% Flujos externos — BLAST+
+    P1 -->|invocación blastn/blastp<br/>con inputs y -remote si aplica| BLAST
+    BLAST -->|resultado del alineamiento| P1
+    P3 -->|invocación makeblastdb<br/>con FASTA y tipo| BLAST
+    BLAST -->|confirmación del<br/>índice construido| P3
 
-    %% FLUJOS INTERNOS
-    P1 -->|"Secuencia validada y parámetros de ejecución"| P2
-    P2 -->|"Resultados ya filtrados"| P3
+    %% Flujos internos entre procesos
+    P1 -->|resultados crudos<br/>+ criterios post-búsqueda| P2
 
-    %% FLUJOS CON EL ALMACÉN D1
-    P2 -->|"Flujo 5: Ejecuta blast contra índices locales"| D1
-    D1 -->|"Retorna hits desde índices locales"| P2
+    %% Flujos con almacenes
+    P3 -->|entrada del catálogo| D1
+    D1 -->|lista de bases de datos<br/>disponibles con ubicación| P1
+    D1 -->|catálogo para el admin| P3
 
-    P2 -->|"Consulta datos de taxonomía para filtrar"| D1
-    D1 -->|"Retorna taxonomía de los hits"| P2
-
-    P3 -->|"Flujo 7: Guarda resultados históricos en caché"| D1
-
-    P3 -->|"Registra/actualiza índices descargados"| D1
+    P2 -->|guarda búsqueda + resultados| D2
+    D2 -.->|historial consultable<br/>uso futuro| P2
 ```
+
+**Chequeo de balanceo:** los seis flujos externos aparecen en Nivel 1 con los mismos extremos externos que en Nivel 0. Los que van hacia BLAST+ se dividen entre P1 (para búsqueda) y P3 (para construir índices), pero desde afuera del sistema siguen siendo los dos mismos flujos.
+
+---
+
 Procesos y entidades:
 
 
