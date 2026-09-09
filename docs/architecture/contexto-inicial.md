@@ -75,27 +75,23 @@ flowchart TD
 
 **Chequeo de balanceo:** los seis flujos externos aparecen en Nivel 1 con los mismos extremos externos que en Nivel 0. Los que van hacia BLAST+ se dividen entre P1 (para búsqueda) y P3 (para construir índices), pero desde afuera del sistema siguen siendo los dos mismos flujos.
 
+---
 
-Procesos y entidades:
+## Descripción de los procesos y almacenes
 
+### Procesos
 
-Del proceso general del sistema P0, se descomponen 3 procesos principales: P1, P2 y P3:
-- P1: Gestionar entrada y validar secuencia
-Recibe la secuencia cruda y los parámetros del usuario. Verifica el formato (FASTA/RAW), detecta si es ADN o proteína, y confirma que el algoritmo BLAST elegido sea compatible. Entrega la secuencia normalizada y los parámetros listos para ejecutar.
-- P2: Ejecutar búsqueda y aplicar filtros avanzados
-Es el núcleo operativo. Obtiene los alineamientos en bruto, ya sea consultando la API remota de NCBI o ejecutando BLAST+ contra las bases de datos locales (D1). Inmediatamente después, aplica los filtros combinados (taxonomía, longitud mínima de alineamiento y presencia de gaps) consultando los archivos de linaje en D1. Solo entrega resultados ya depurados.
-- P3: Gestionar reportes y recursos locales
-Centraliza toda la salida hacia el exterior: genera las gráficas visuales, prepara los reportes descargables (CSV, JSON, PDF y FASTA compilado) para el usuario. Además, mantiene la infraestructura local: guarda resultados en caché (D1) y se encarga de descargar/actualizar los índices BLAST+ desde el FTP cuando es necesario.
+- **P1 · Ejecutar búsqueda BLAST.** Recibe del investigador el archivo FASTA con la secuencia query, la elección del programa BLAST (`blastn`, `blastp`, `blastx`, `tblastn`, `tblastx`), el modo (local o remoto), la base de datos elegida y los parámetros pre-búsqueda que afectan al algoritmo (E-value, matriz de sustitución, tamaño de palabra, penalizaciones de gap, etc.). Verifica la compatibilidad entre el programa BLAST elegido, el tipo de la secuencia query y el tipo de la base de datos, valida el resto de la entrada e **invoca a BLAST+** con la combinación correcta de opciones — incluida la flag `-remote` cuando el modo es remoto. Recibe de vuelta el conjunto crudo de alineamientos.
 
-- Usuario / Investigador: Persona que envía la consulta y recibe los resultados enriquecidos (gráficos y reportes).
+- **P2 · Filtrar y entregar resultados.** Recibe los resultados crudos y los criterios de filtrado post-búsqueda que el usuario definió (por ejemplo umbrales de % identidad, cobertura, E-value, taxones), aplica esos filtros, arma la vista de resultados que se muestra en la interfaz y prepara el archivo descargable en el formato pedido (CSV, JSON, FASTA, tabular BLAST, XML). Al cerrar la búsqueda, escribe una copia del resultado en el historial D2.
 
-- Servidor NCBI API:  Fuente remota de datos. Recibe peticiones QBlast (Flujo 3) y devuelve resultados en XML/JSON sin filtrar (Flujo 4).
+- **P3 · Administrar bases de datos.** Es el proceso del rol Administrador. Recibe el archivo FASTA subido por el admin y el tipo declarado (nucleótidos o proteínas), junto con las órdenes de alta, actualización o baja de una base de datos local. **Invoca a BLAST+** con `makeblastdb` para construir los índices, y mantiene actualizado en D1 el catálogo de bases de datos disponibles (nombre visible, tipo, ubicación del índice, fecha) que P1 va a ofrecer al investigador. Devuelve al administrador el estado del proceso (base de datos creada, actualizada, con errores, etc.).
 
-- Repositorio Público FTP:  Fuente externa de índices. Provee los archivos de bases de datos BLAST+ (y taxonomía) para que el sistema pueda funcionar en modo local.
+### Almacenes
 
-Almacén:
- 
-- D1:  Bases de Datos Locales + Caché de Resultados: Guarda los índices BLAST (.nhr, .nin, etc.), los archivos de taxonomía (names.dmp/nodes.dmp) y los resultados de búsquedas históricas para reutilización rápida.
+- **D1 · Catálogo de bases de datos.** Contiene los **metadatos** de cada base de datos local disponible: nombre visible, tipo (nucleótidos / proteínas), ruta al conjunto de archivos de índice que produjo `makeblastdb`, fecha de alta, tamaño. Los archivos físicos de índice (`.nhr`, `.nin`, `.nsq`, etc.) los escribe y los lee **BLAST+**; nuestro sistema los registra en D1 pero no los interpreta.
+
+- **D2 · Búsquedas y resultados históricos.** Guarda la traza de cada búsqueda ejecutada (parámetros, base de datos usada, timestamp) junto con su resultado, para que el usuario pueda volver a consultar o descargar sin repetir la ejecución. En esta primera versión del sistema solo se **escribe** en D2 (flujo lleno); la lectura (flujo punteado) queda documentada como uso futuro — no está en el alcance profundizado del cuatrimestre.
 
 Flujos de datos:
 
