@@ -92,21 +92,10 @@ flowchart TD
 - **D1 · Catálogo de bases de datos.** Contiene los **metadatos** de cada base de datos local disponible: nombre visible, tipo (nucleótidos / proteínas), ruta al conjunto de archivos de índice que produjo `makeblastdb`, fecha de alta, tamaño. Los archivos físicos de índice (`.nhr`, `.nin`, `.nsq`, etc.) los escribe y los lee **BLAST+**; nuestro sistema los registra en D1 pero no los interpreta.
 
 - **D2 · Búsquedas y resultados históricos.** Guarda la traza de cada búsqueda ejecutada (parámetros, base de datos usada, timestamp) junto con su resultado, para que el usuario pueda volver a consultar o descargar sin repetir la ejecución. En esta primera versión del sistema solo se **escribe** en D2 (flujo lleno); la lectura (flujo punteado) queda documentada como uso futuro — no está en el alcance profundizado del cuatrimestre.
+---
 
-Flujos de datos:
+## Nota sobre el alcance profundizado
 
-- Flujo 1: secuencia + parámetros + modo de ejecución.
+De los tres procesos identificados, el grupo lleva a profundidad **únicamente P1 (Ejecutar búsqueda BLAST)** durante el cuatrimestre. Los otros dos procesos (P2 y P3) quedan documentados a nivel de alcance en este DFD y en el modelo de dominio, pero **no** se detallan como casos de uso ni historias de usuario propios: no tienen RF profundizados en el SRS y no forman parte de la cadena `RF → CU → slice → HU` de este TP.
 
-- Flujo 2: alineamientos ya filtrados + gráficas + reportes.
-
-- Flujo 3: petición a NCBI con filtros estándar.
-
-- Flujo 4: resultados crudos desde NCBI (sin filtros avanzados).
-
-- Flujo 5: ejecución de BLAST local contra índices.
-
-- Flujo 7: guardado de resultados en caché.
-
-- Flujo 8a: solicitud de descarga/actualización de índices.
-
-- Flujo 8b: entrega de los índices descargados desde el FTP.
+Los casos de uso escritos en `docs/requirements/casos-de-uso.md` son **todos** derivados del proceso P1. Ver la justificación completa en la sección [Selección de procesos a profundizar](../requirements/srs.md#5-selección-de-procesos-a-profundizar) del SRS.
