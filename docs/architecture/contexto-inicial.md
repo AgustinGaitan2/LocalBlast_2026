@@ -1,21 +1,26 @@
-El diagrama de nivel 0 de este proyecto corresponde a:
+---
+
+## Nivel 0 · Diagrama de contexto
+
+El sistema completo se representa como un único proceso (0), con sus tres entidades externas: los dos actores humanos (Investigador/a y Administrador/a) y el único sistema externo con el que dialoga (**BLAST+**, el motor de alineamiento sobre el que se apoya).
 
 ```mermaid
-graph TD
-    U["Investigador/a"]
-    N["Servidor NCBI API"]
-    F["Repositorio FTP de índices BLAST+"]
+flowchart LR
+    INV[Investigador/a]
 
-    P0(("0<br/>Sistema BLAST Híbrido<br/>"))
+    P((0<br/>LocalBlast<br/>GUI web para BLAST+))
 
-    U -->|"Flujo 1: Envía secuencia, parámetros y modo"| P0
-    P0 -->|"Flujo 2: Devuelve alineamientos filtrados, gráficas y reportes"| U
+    ADM[Administrador/a]
+    BLAST[BLAST+<br/>motor de alineamiento<br/>local y remoto]
 
-    P0 -->|"Flujo 3: Petición QBlast con filtros estándar"| N
-    N -->|"Flujo 4: Resultados XML/JSON crudos"| P0
+    INV -->|secuencia query, programa,<br/>modo, id base de datos,<br/>parámetros y filtros| P
+    P -->|tabla de resultados<br/>y archivo descargable| INV
 
-    P0 -->|"Flujo 8a: Solicitud de descarga/actualización de índices"| F
-    F -->|"Flujo 8b: Índices BLAST+ descargados"| P0
+    ADM -->|FASTA + tipo +<br/>orden alta/actualizar/baja| P
+    P -->|catálogo y estado<br/>de bases de datos| ADM
+
+    P -->|invocación de blastn/blastp/<br/>makeblastdb con inputs<br/>y flag -remote si aplica| BLAST
+    BLAST -->|resultado del alineamiento<br/>o índice DB construida| P
 ```
 
 El diagrama de nivel 1 corresponde a:
