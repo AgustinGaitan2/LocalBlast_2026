@@ -8,6 +8,13 @@ Cada caso de uso declara qué requerimientos funcionales realiza. La cadena comp
 
 **RF → CU → slice → HU**
 
+## Enfoque de los casos de uso
+
+Un caso de uso representa **una capacidad discreta que el sistema le brinda al actor** , un objetivo alcanzable , no un trazo secuencial de pasos que el actor tiene que recorrer de punta a punta. Dos consecuencias prácticas de esa definición para este TP:
+
+- **Del proceso P1 salen más de un CU.** Aunque a primera vista parece que "ejecutar una búsqueda BLAST" es un único flujo largo, en realidad la capacidad de correr una búsqueda (`CU001`) y la capacidad de trabajar sobre sus resultados —filtrarlos, exportarlos— (`CU002`) son objetivos distintos del mismo actor. El investigador puede correr una búsqueda una sola vez, y sobre ese resultado usar `CU002` varias veces (probar distintos filtros, descargar en distintos formatos) sin volver a correr BLAST. Modelarlos como un único CU secuencial esconde esa reutilización.
+- **Cuando el camino feliz de un CU queda largo, se descompone en slices.** No los CU en sí, sino su flujo principal. Los slices son módulos que aportan valor por sí mismos hacia el objetivo del CU. En este TP, `CU001` se descompone en dos slices básicos (`B1` y `B2`); `CU002` queda como un único slice básico (`B`) porque su flujo es corto.
+
 ---
 
 ## CU001 · Ejecutar búsqueda BLAST
