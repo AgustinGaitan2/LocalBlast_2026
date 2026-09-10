@@ -119,6 +119,17 @@ De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elig
 
 ...
 
+## 7. Casos de uso e historias de usuario
+
+Los casos de uso en formato Cockburn (flujo principal detallado y slices secundarios nombrados), todos derivados del proceso profundizado P1, están en:
+
+👉 [`docs/requirements/casos-de-uso.md`](casos-de-uso.md)
+
+Las historias de usuario asociadas a cada slice (relación 1:1 slice ↔ HU), con criterios de aceptación en formato **Given-When-Then**, están en:
+
+👉 [`docs/requirements/historias-usuario.md`](historias-usuario.md)
+
+
 ### CU-01 · Configurar y lanzar búsqueda BLAST
 
 Actor:           Investigador/a
