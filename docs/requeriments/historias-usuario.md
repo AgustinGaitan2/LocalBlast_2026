@@ -42,3 +42,26 @@ Para el TP1 se detallan las HU de los **tres slices básicos** del camino feliz 
   - **Then** la lista muestra únicamente las bases de datos del catálogo local (leídas de D1), sin las bases estándar de NCBI que aparecían en modo remoto.
 
 ---
+
+### HU02_CU001_B2 · Ejecutar la búsqueda BLAST y presentar los resultados
+
+- **Deriva de:** `CU001`, slice `B2` (pasos 8-9 del camino feliz)
+- **Realiza:** RF-07, RF-08
+
+> **Como** investigador/a,
+> **quiero** que el sistema ejecute la búsqueda en segundo plano y me muestre los resultados en una tabla dentro de la misma vista cuando termine,
+> **para** para poder seguir trabajando en la aplicación mientras la búsqueda corre, sin quedarme atado a una pantalla de espera.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Ejecución asíncrona con indicador de progreso:
+  - **Given** una búsqueda ya configurada y validada (postcondición del slice `B1`),
+  - **When** el sistema invoca a BLAST+ en segundo plano,
+  - **Then** la interfaz muestra un indicador de progreso visible y permanece navegable — el investigador puede desplazarse dentro de la aplicación sin que la ejecución se interrumpa.
+
+- **CA-02.** Presentación de la tabla al finalizar:
+  - **Given** una búsqueda que finalizó correctamente y BLAST+ devolvió al menos un hit,
+  - **When** el sistema recibe los resultados,
+  - **Then** los presenta en una tabla con al menos las columnas: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura.
+
+---
