@@ -83,3 +83,22 @@ Son terminaciones abruptas del flujo: el sistema detecta una condición que impi
 - **`CU001_E4` · Fallo del modo remoto de BLAST+.** En el paso 8, con modo remoto seleccionado, BLAST+ reporta un error de comunicación con NCBI (sin respuesta, timeout, o error explícito devuelto por la API). El sistema captura el error de BLAST+, corta el flujo del CU e informa al investigador con el detalle del error. Un reintento posterior es un CU nuevo, no la continuación de este. **Realiza:** RF-07.
 
 ---
+
+## Trazabilidad RF → CU → slice
+
+La tabla completa `RF → CU → slice → HU` (con las HU incluidas) está en [`historias-usuario.md`](historias-usuario.md). Acá se resume la parte `RF → CU → slice`:
+
+| RF | CU | Slice(s) que lo realizan |
+|---|---|---|
+| RF-01 | CU001 | B1 |
+| RF-02 | CU001 | B1 |
+| RF-03 | CU001 | B1, A3 |
+| RF-04 | CU001 | B1, E2 |
+| RF-05 | CU001 | B1, E3 |
+| RF-06 | CU001 | B1, E1, E2 |
+| RF-07 | CU001 | B2, A1, E4 |
+| RF-08 | CU001 | B2 |
+| RF-09 | CU001 | B3, A2 |
+| RF-10 | CU001 | B3, A2 |
+
+Un mismo RF puede aparecer en varios slices — por ejemplo RF-06 (validación pre-ejecución) se realiza parcialmente en el camino feliz (`B1`, cuando la validación pasa) y también en las excepciones `E1` y `E2` (cuando la validación falla y corta el flujo).
