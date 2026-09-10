@@ -66,6 +66,22 @@ LocalBlast es una **interfaz web para BLAST+** que resuelve las tres carencias:
 
 ---
 
+## 3. Diagrama de contexto (DFD)
+
+Los diagramas de contexto (Nivel 0) y su descomposición (Nivel 1), junto con la descripción de procesos, almacenes y flujos, están en:
+
+👉 [`docs/architecture/contexto-inicial.md`](../architecture/contexto-inicial.md)
+
+---
+
+## 4. Modelo de dominio
+
+El modelo de dominio conceptual — entidades esenciales del problema y sus relaciones, sin atributos ni detalles de implementación — está en:
+
+👉 [`docs/requirements/modelo-dominio.md`](modelo-dominio.md)
+
+---
+
 ## 3. Requisitos Específicos
 
 ### 3.1 Requisitos Funcionales: Detalle estructurado de las entradas, procesos y salidas de cada funcionalidad (casos de uso, historias de usuario).
