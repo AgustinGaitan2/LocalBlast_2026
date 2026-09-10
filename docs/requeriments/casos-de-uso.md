@@ -58,3 +58,9 @@ CU001 · Ejecutar búsqueda BLAST
    ├─ CU001_E3  — combinación programa / query / base de datos incompatible
    └─ CU001_E4  — fallo del modo remoto de BLAST+
 ```
+
+### Slices básicos — descripción
+
+- **`CU001_B1` · Cargar, configurar y validar la búsqueda (pasos 1-7).** El investigador ingresa la secuencia query, elige el modo (local o remoto), la base de datos correspondiente, el programa BLAST y los parámetros pre-búsqueda; al presionar **Ejecutar búsqueda**, el sistema valida el alfabeto de la secuencia, los rangos de los parámetros y la compatibilidad programa/query/base de datos. **Valor entregado:** una búsqueda queda configurada y validada, lista para ser ejecutada. **Realiza:** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06.
+- **`CU001_B2` · Ejecutar la búsqueda y presentar resultados crudos (pasos 8-9).** El sistema invoca a BLAST+ con la configuración ya validada, muestra un indicador de progreso sin bloquear la interfaz y, al terminar, presenta la tabla de alineamientos con las columnas mínimas. **Valor entregado:** el investigador ve los hits crudos de BLAST. **Realiza:** RF-07, RF-08.
+- **`CU001_B3` · Filtrar, descargar y persistir la búsqueda (pasos 10-12).** El investigador aplica filtros post-búsqueda sobre la tabla (sin volver a correr BLAST), elige un formato de descarga y baja el archivo; el sistema guarda la búsqueda y sus resultados en el historial (D2). **Valor entregado:** un archivo de resultados filtrados en el equipo del investigador. **Realiza:** RF-09, RF-10.
