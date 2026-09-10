@@ -1,28 +1,23 @@
-## 1. Introducción
+# SRS — LocalBlast
 
-### 1.1 Propósito: Objetivo del documento y a quién va dirigido.
+**Especificación de Requerimientos de Software (SRS)**
+Este documento es la línea base del proyecto **LocalBlast** al cierre del TP1. Se estructura en secciones y se apoya en documentos hermanos para el detalle de diagramas, casos de uso e historias de usuario.
 
-### 1.2 Alcance (Scope): Nombre del software, qué hará y qué no hará el sistema.
+---
 
-### 1.3 Definiciones, acrónimos y abreviaturas: Glosario técnico y del dominio.
+## Índice
 
-### 1.4 Referencias: Documentación técnica, estándares o APIs externas consultadas.
+1. [Visión y alcance](#1-visión-y-alcance)
+2. [Stakeholders y usuarios](#2-stakeholders-y-usuarios)
+3. [Diagrama de contexto (DFD)](#3-diagrama-de-contexto-dfd)
+4. [Modelo de dominio](#4-modelo-de-dominio)
+5. [Selección de procesos a profundizar](#5-selección-de-procesos-a-profundizar)
+6. [Requerimientos funcionales](#6-requerimientos-funcionales)
+7. [Casos de uso e historias de usuario](#7-casos-de-uso-e-historias-de-usuario)
+8. [Suposiciones y dependencias](#8-suposiciones-y-dependencias)
+9. [Glosario](#9-glosario)
 
-### 1.5 Visión general: Organización del resto del documento.
-
-## 2. Descripción General
-
-### 2.1 Perspectiva del producto: Si es un sistema independiente o componente de uno mayor (incluye el diagrama de contexto/nivel 0).
-
-### 2.2 Funciones del producto: Resumen de las funcionalidades principales.
-
-### 2.3 Características y clases de usuarios: Tipos de usuarios y sus niveles de acceso o experiencia.
-
-### 2.4 Entorno operativo: Hardware, sistemas operativos y plataformas requeridas.
-
-### 2.5 Restricciones de diseño e implementación: Lenguajes obligatorios, normativas, límites de rendimiento o frameworks.
-
-### 2.6 Suposiciones y dependencias: Factores externos que se asumen verdaderos para el éxito del desarrollo.
+---
 
 ## 3. Requisitos Específicos
 
