@@ -12,3 +12,33 @@ Formato de cada HU:
 Para el TP1 se detallan las HU de los **tres slices básicos** del camino feliz (`B1`, `B2`, `B3`) del único caso de uso profundizado (`CU001`), más una HU de un slice de excepción representativo (`E1`, secuencia con formato inválido). El resto de los slices están **nombrados en el caso de uso** ([`casos-de-uso.md`](casos-de-uso.md)) y se detallarán como HU cuando algún TP posterior los necesite — no es obligación abrirlos todos ya, como aclara la propia guía del TP1.
 
 ---
+
+## HU derivadas de CU001 · Ejecutar una búsqueda BLAST
+
+### HU01_CU001_B1 · Cargar, configurar y validar una búsqueda BLAST
+
+- **Deriva de:** `CU001`, slice `B1` (pasos 1-7 del camino feliz)
+- **Realiza:** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06
+
+> **Como** investigador/a,
+> **quiero** cargar mi secuencia query, elegir el modo (local o remoto), la base de datos, el programa BLAST y los parámetros pre-búsqueda, y que el sistema valide todo antes de habilitar la ejecución,
+> **para** no perder tiempo lanzando búsquedas mal configuradas.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Configuración completa y válida en modo remoto:
+  - **Given** una secuencia FASTA de proteína válida pegada en el formulario, modo remoto seleccionado, base de datos remota "nr", programa `blastp` y parámetros pre-búsqueda en sus valores por defecto,
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema valida la secuencia y los parámetros, no muestra errores, y habilita la ejecución de la búsqueda (transición al slice `B2`).
+
+- **CA-02.** Valores por defecto sensatos según el programa:
+  - **Given** un formulario donde el investigador acaba de seleccionar el programa `blastp`,
+  - **When** la interfaz carga los parámetros pre-búsqueda,
+  - **Then** los campos de E-value máximo, matriz de sustitución, tamaño de palabra y penalización de gaps aparecen prellenados con los valores por defecto correspondientes al programa `blastp` (no los mismos que para `blastn`).
+
+- **CA-03.** Base de datos coherente con el modo elegido:
+  - **Given** el investigador cambia el modo de "remoto" a "local",
+  - **When** el sistema recarga la lista de bases de datos disponibles,
+  - **Then** la lista muestra únicamente las bases de datos del catálogo local (leídas de D1), sin las bases estándar de NCBI que aparecían en modo remoto.
+
+---
