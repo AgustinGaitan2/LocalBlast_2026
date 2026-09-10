@@ -125,19 +125,19 @@ CU002 · Refinar y descargar los resultados de una búsqueda
 
 ## Trazabilidad RF → CU → slice
 
-La tabla completa `RF → CU → slice → HU` (con las HU incluidas) está en [`historias-usuario.md`](historias-usuario.md). Acá se resume la parte `RF → CU → slice`:
+La tabla `RF → CU → slice → HU` (con las HU incluidas) está en [`historias-usuario.md`](historias-usuario.md). Acá se resume la parte `RF → CU → slice`:
 
 | RF | CU | Slice(s) que lo realizan |
 |---|---|---|
-| RF-01 | CU001 | B1 |
-| RF-02 | CU001 | B1 |
-| RF-03 | CU001 | B1, A3 |
-| RF-04 | CU001 | B1, E2 |
-| RF-05 | CU001 | B1, E3 |
-| RF-06 | CU001 | B1, E1, E2 |
-| RF-07 | CU001 | B2, A1, E4 |
-| RF-08 | CU001 | B2 |
-| RF-09 | CU001 | B3, A2 |
-| RF-10 | CU001 | B3, A2 |
+| RF-01 | CU001 | CU001_B1 |
+| RF-02 | CU001 | CU001_B1 |
+| RF-03 | CU001 | CU001_B1, CU001_A2 |
+| RF-04 | CU001 | CU001_B1, CU001_E2 |
+| RF-05 | CU001 | CU001_B1, CU001_E3 |
+| RF-06 | CU001 | CU001_B1, CU001_E1, CU001_E2 |
+| RF-07 | CU001 | CU001_B2, CU001_A1, CU001_E4 |
+| RF-08 | CU001 | CU001_B2 |
+| RF-09 | CU002 | CU002_B, CU002_A1 |
+| RF-10 | CU002 | CU002_B, CU002_A1 |
 
-Un mismo RF puede aparecer en varios slices — por ejemplo RF-06 (validación pre-ejecución) se realiza parcialmente en el camino feliz (`B1`, cuando la validación pasa) y también en las excepciones `E1` y `E2` (cuando la validación falla y corta el flujo).
+Un mismo RF puede aparecer en varios slices del mismo CU — por ejemplo RF-06 (validación pre-ejecución) se realiza en el camino feliz `B1` (cuando la validación pasa) y también en `E1` y `E2` (cuando falla y corta el flujo). Esa dispersión es esperable: los slices de excepción son otra forma en que se cumple el RF de validación.
