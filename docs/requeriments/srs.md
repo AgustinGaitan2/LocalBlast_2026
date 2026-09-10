@@ -107,6 +107,7 @@ De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elig
 | ID | Requerimiento |
 |---|---|
 | **RF-01** | El sistema debe permitir al usuario ingresar la secuencia query como texto pegado en el formulario o como archivo FASTA subido. |
+| **RF-02** | El sistema debe permitir al usuario elegir entre dos modos de ejecución mutuamente excluyentes: **local** (invoca a BLAST+ contra una base de datos del catálogo del laboratorio) o **remoto** (invoca a BLAST+ con la flag `-remote`, y es BLAST+ el que se comunica con NCBI). |
 
 - RF-01: El sistema debe permitir al usuario seleccionar entre ejecución local  o remota.
 - RF-02: El sistema debe ejecutar la búsqueda de forma asíncrona, mostrando una barra de progreso o indicador de estado sin bloquear la interfaz de usuario.
