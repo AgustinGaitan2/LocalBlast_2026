@@ -37,3 +37,24 @@ Cada caso de uso declara qué requerimientos funcionales realiza. La cadena comp
 12. El sistema entrega el archivo con los resultados filtrados y guarda una copia de la búsqueda en el historial (D2).
 
 **Postcondición:** El investigador tiene un archivo con los alineamientos filtrados en su equipo. La búsqueda queda registrada en el historial del sistema.
+
+### Descomposición en slices
+
+El camino feliz de 12 pasos es grande y contiene tres módulos que aportan valor en sí mismos hacia el objetivo del CU: configurar y validar una búsqueda (deja lista una búsqueda ejecutable), ejecutar y ver los resultados crudos (deja los alineamientos frente al investigador), y refinar y descargar (deja el archivo entregable). Se descompone en tres slices básicos, más los slices alternativos y de excepción que se explican debajo.
+
+```
+CU001 · Ejecutar búsqueda BLAST
+├─ Camino feliz (slices básicos)
+│  ├─ CU001_B1  — pasos 1-7:  cargar, configurar y validar la búsqueda
+│  ├─ CU001_B2  — pasos 8-9:  ejecutar la búsqueda y presentar resultados crudos
+│  └─ CU001_B3  — pasos 10-12: filtrar, descargar y persistir la búsqueda
+├─ Caminos alternativos (slices A)
+│  ├─ CU001_A1  — cancelación manual de la búsqueda en curso
+│  ├─ CU001_A2  — ningún resultado supera los filtros post-búsqueda
+│  └─ CU001_A3  — base de datos local no disponible
+└─ Terminaciones abruptas (slices E)
+   ├─ CU001_E1  — secuencia query con formato inválido
+   ├─ CU001_E2  — parámetros pre-búsqueda fuera de rango
+   ├─ CU001_E3  — combinación programa / query / base de datos incompatible
+   └─ CU001_E4  — fallo del modo remoto de BLAST+
+```
