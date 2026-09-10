@@ -82,6 +82,24 @@ El modelo de dominio conceptual, entidades esenciales del problema y sus relacio
 
 ---
 
+## 5. Selección de procesos a profundizar
+
+De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elige llevar a profundidad **únicamente P1 (Ejecutar búsqueda BLAST)**. P2 (Filtrar y entregar resultados) y P3 (Administrar bases de datos) quedan documentados a nivel de alcance en el DFD y en el modelo de dominio, pero **no** se detallan como casos de uso propios ni tienen RF profundizados en este SRS.
+
+### 5.1 Qué se profundiza y por qué
+
+- **P1 · Ejecutar búsqueda BLAST — profundizado.** Es el proceso *core* del sistema: sin él no hay valor entregable. Concentra toda la complejidad interesante del dominio (dos modos de invocación a BLAST+ — con o sin `-remote` —, validación de parámetros pre-búsqueda, verificación de compatibilidad programa/query/base de datos, ejecución asíncrona con cancelación, y refinamiento posterior de resultados). Se detalla como `CU001`, descompuesto en slices en [`docs/requirements/casos-de-uso.md`](casos-de-uso.md).
+
+### 5.2 Qué queda fuera del profundizado y por qué
+
+- **P2 · Filtrar y entregar resultados — no profundizado.** Se ejecuta enteramente sobre datos ya en memoria (filtros a la tabla y serialización a un formato) y su lógica es previsible: comparaciones numéricas y export a formatos estándar. En la primera versión del sistema, además, el resultado de P2 es visible como parte del flujo del investigador.
+
+- **P3 · Administrar bases de datos — no profundizado.** Es el proceso de un actor distinto (Administrador), con objetivo distinto y precondición distinta al de P1. Un caso de uso derivado de P3. Ppor ejemplo "Administrar base de datos BLAST local" pertenece conceptualmente a ese proceso, no a P1, y por lo tanto queda fuera de la cadena `RF → CU → slice → HU` de este TP. Se documenta a nivel de alcance en el DFD Nivel 1 (con sus flujos hacia BLAST+ y hacia D1) y sus entidades siguen presentes en el modelo de dominio, pero sin RF ni CU propios profundizados en este cuatrimestre.
+
+**Criterio general.** Esta decisión respeta la recomendación explícita de la cátedra: *"elegir uno bien resuelto vale más que varios a medio desarrollar"*. Concentrar el trabajo en P1 nos permite descomponer su flujo en slices con valor incremental (carga y configuración → ejecución y resultados → refinamiento y descarga), en lugar de dispersar el esfuerzo entre procesos que responden a objetivos y actores diferentes.
+
+---
+
 ## 3. Requisitos Específicos
 
 ### 3.1 Requisitos Funcionales: Detalle estructurado de las entradas, procesos y salidas de cada funcionalidad (casos de uso, historias de usuario).
