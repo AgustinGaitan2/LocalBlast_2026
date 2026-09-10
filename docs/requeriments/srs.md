@@ -76,7 +76,7 @@ Los diagramas de contexto (Nivel 0) y su descomposición (Nivel 1), junto con la
 
 ## 4. Modelo de dominio
 
-El modelo de dominio conceptual — entidades esenciales del problema y sus relaciones, sin atributos ni detalles de implementación — está en:
+El modelo de dominio conceptual, entidades esenciales del problema y sus relaciones sin atributos ni detalles de implementación, está en:
 
 👉 [`docs/requirements/modelo-dominio.md`](modelo-dominio.md)
 
