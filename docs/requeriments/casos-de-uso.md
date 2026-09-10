@@ -117,6 +117,11 @@ CU002 · Refinar y descargar los resultados de una búsqueda
 └─ Caminos alternativos
    └─ CU002_A1  — ningún resultado supera los filtros post-búsqueda
 ```
+### Slices alternativos — descripción
+
+- **`CU002_A1` · Ningún resultado supera los filtros post-búsqueda.** El investigador aplicó filtros que dejan la tabla vacía. El sistema no impide la descarga: entrega un archivo con encabezados y los metadatos de la búsqueda (parámetros, base de datos, timestamp) pero sin filas de hits, y guarda igualmente la búsqueda en D2, para que el investigador tenga constancia del intento. **Realiza:** RF-09, RF-10.
+
+---
 
 ## Trazabilidad RF → CU → slice
 
