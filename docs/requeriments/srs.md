@@ -102,9 +102,10 @@ De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elig
 
 ## 6. Requerimientos funcionales
 
-## 3. Requisitos Específicos
+### Proceso P1 — Ejecución de búsqueda BLAST
 
-### 3.1 Requisitos Funcionales: Detalle estructurado de las entradas, procesos y salidas de cada funcionalidad (casos de uso, historias de usuario).
+| ID | Requerimiento |
+|---|---|
 
 - RF-01: El sistema debe permitir al usuario seleccionar entre ejecución local  o remota.
 - RF-02: El sistema debe ejecutar la búsqueda de forma asíncrona, mostrando una barra de progreso o indicador de estado sin bloquear la interfaz de usuario.
