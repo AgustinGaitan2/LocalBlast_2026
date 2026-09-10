@@ -106,6 +106,7 @@ De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elig
 
 | ID | Requerimiento |
 |---|---|
+| **RF-01** | El sistema debe permitir al usuario ingresar la secuencia query como texto pegado en el formulario o como archivo FASTA subido. |
 
 - RF-01: El sistema debe permitir al usuario seleccionar entre ejecución local  o remota.
 - RF-02: El sistema debe ejecutar la búsqueda de forma asíncrona, mostrando una barra de progreso o indicador de estado sin bloquear la interfaz de usuario.
