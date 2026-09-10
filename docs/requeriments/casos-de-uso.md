@@ -44,18 +44,16 @@ Un caso de uso representa **una capacidad discreta que el sistema le brinda al a
 
 ### Descomposición en slices
 
-El camino feliz de 12 pasos es grande y contiene tres módulos que aportan valor en sí mismos hacia el objetivo del CU: configurar y validar una búsqueda (deja lista una búsqueda ejecutable), ejecutar y ver los resultados crudos (deja los alineamientos frente al investigador), y refinar y descargar (deja el archivo entregable). Se descompone en tres slices básicos, más los slices alternativos y de excepción que se explican debajo.
+El camino feliz de 9 pasos está en el borde de "largo" y tiene dos módulos con valor propio: dejar una búsqueda configurada y validada (valor: el investigador sabe que su búsqueda es lanzable), y ejecutar y presentar los resultados (valor: el investigador ve los hits). Se divide en dos slices básicos, más los alternativos y de excepción que se explican debajo.
 
 ```
-CU001 · Ejecutar búsqueda BLAST
+CU001 · Ejecutar una búsqueda BLAST
 ├─ Camino feliz (slices básicos)
 │  ├─ CU001_B1  — pasos 1-7:  cargar, configurar y validar la búsqueda
-│  ├─ CU001_B2  — pasos 8-9:  ejecutar la búsqueda y presentar resultados crudos
-│  └─ CU001_B3  — pasos 10-12: filtrar, descargar y persistir la búsqueda
+│  └─ CU001_B2  — pasos 8-9:  ejecutar la búsqueda y presentar los resultados
 ├─ Caminos alternativos (slices A)
 │  ├─ CU001_A1  — cancelación manual de la búsqueda en curso
-│  ├─ CU001_A2  — ningún resultado supera los filtros post-búsqueda
-│  └─ CU001_A3  — base de datos local no disponible
+│  └─ CU001_A2  — base de datos local no disponible
 └─ Terminaciones abruptas (slices E)
    ├─ CU001_E1  — secuencia query con formato inválido
    ├─ CU001_E2  — parámetros pre-búsqueda fuera de rango
