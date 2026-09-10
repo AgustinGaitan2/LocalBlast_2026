@@ -57,6 +57,14 @@ LocalBlast es una **interfaz web para BLAST+** que resuelve las tres carencias:
 - Anotación funcional o enriquecimiento biológico de los hits más allá de lo que devuelve BLAST.
 
 ---
+## 2. Stakeholders y usuarios
+
+| Actor / Stakeholder | Rol | Usa el sistema | Interés en el proyecto |
+|---|---|---|---|
+| **Investigador/a** | Estudiante de grado/posgrado, tesista, becario/a, docente-investigador/a | Sí (usuario final principal) | Reducir el tiempo de las búsquedas BLAST recurrentes y evitar la fricción de la terminal o de la web de NCBI. |
+| **Administrador/a de bases de datos** | Bioinformático/a del laboratorio, técnico/a de IT del grupo de investigación | Sí | Poder mantener bases de datos propias (secuencias del laboratorio) y espejos de bases públicas sin depender del acceso externo. |
+
+---
 
 ## 3. Requisitos Específicos
 
