@@ -104,6 +104,19 @@ Son terminaciones abruptas del flujo: el sistema detecta una condición que impi
 
 **Postcondición:** El archivo con los resultados filtrados está en el equipo del investigador y la búsqueda queda persistida en D2.
 
+### Por qué este CU no se subdivide en slices
+
+El camino feliz de `CU002` es corto (4 pasos) y no tiene módulos internos que aporten valor por separado: ajustar filtros sin descargar no deja nada útil fuera de la sesión, y descargar sin ajustar filtros previamente da el mismo comportamiento que aplicar los filtros por defecto (los que están al abrir la tabla). El slice básico es entonces uno solo, identificado como `CU002_B`.
+
+### Slices del CU
+
+```
+CU002 · Refinar y descargar los resultados de una búsqueda
+├─ Camino feliz
+│  └─ CU002_B   — pasos 1-4:  refinar con filtros post-búsqueda, elegir formato y descargar
+└─ Caminos alternativos
+   └─ CU002_A1  — ningún resultado supera los filtros post-búsqueda
+```
 
 ## Trazabilidad RF → CU → slice
 
