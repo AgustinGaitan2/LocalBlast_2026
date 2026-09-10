@@ -100,6 +100,8 @@ De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elig
 
 ---
 
+## 6. Requerimientos funcionales
+
 ## 3. Requisitos Específicos
 
 ### 3.1 Requisitos Funcionales: Detalle estructurado de las entradas, procesos y salidas de cada funcionalidad (casos de uso, historias de usuario).
