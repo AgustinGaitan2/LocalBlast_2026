@@ -85,6 +85,26 @@ Son terminaciones abruptas del flujo: el sistema detecta una condición que impi
 
 ---
 
+## CU002 · Refinar y descargar los resultados de una búsqueda
+
+- **Actor principal:** Investigador/a
+- **Objetivo:** Obtener un archivo con los alineamientos relevantes en el formato adecuado para su análisis posterior, aplicando filtros post-búsqueda sobre resultados ya calculados.
+- **Realiza:** RF-09, RF-10
+- **Precondición:** Existe una búsqueda con resultados visibles en la interfaz (postcondición de `CU001`). No se ejecuta BLAST+ en este CU: los filtros son operaciones sobre los datos ya en memoria.
+- **Disparador:** El investigador decide refinar y bajar los resultados de la búsqueda que tiene a la vista.
+- **Garantía de éxito:** El investigador tiene, en su equipo, un archivo con los alineamientos filtrados en el formato pedido. La búsqueda queda registrada en el historial (D2).
+- **Garantía mínima:** El sistema nunca entrega un archivo cuyo contenido no coincida con los filtros aplicados en la interfaz al momento de la descarga, y nunca deja el historial en estado inconsistente respecto al archivo entregado.
+
+### Flujo principal
+
+1. El investigador ajusta los **filtros post-búsqueda** (umbrales de identidad, cobertura, E-value observado; filtro por taxonomía cuando la información esté disponible). La tabla se re-filtra en el momento, sin volver a invocar a BLAST+.
+2. El investigador elige el **formato de descarga** (CSV, JSON, FASTA, tabular BLAST `-outfmt 6`, o XML) y presiona **Descargar**.
+3. El sistema arma el archivo con los resultados filtrados en el formato pedido.
+4. El sistema entrega el archivo al investigador y guarda una copia de la búsqueda (parámetros pre-búsqueda + resultados) en el historial (D2).
+
+**Postcondición:** El archivo con los resultados filtrados está en el equipo del investigador y la búsqueda queda persistida en D2.
+
+
 ## Trazabilidad RF → CU → slice
 
 La tabla completa `RF → CU → slice → HU` (con las HU incluidas) está en [`historias-usuario.md`](historias-usuario.md). Acá se resume la parte `RF → CU → slice`:
