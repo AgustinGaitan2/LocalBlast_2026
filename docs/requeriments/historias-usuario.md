@@ -259,3 +259,19 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+## Tabla de trazabilidad completa `RF → CU → slice → HU`
+
+| RF | CU | Slice | HU |
+|---|---|---|---|
+| RF-01, RF-02, RF-03, RF-04, RF-05, RF-06 | CU001 | CU001_B1 | **HU01_CU001_B1** |
+| RF-07, RF-08 | CU001 | CU001_B2 | **HU02_CU001_B2** |
+| RF-07 | CU001 | CU001_A1 (cancelación manual) | **HU03_CU001_A1** |
+| RF-03 | CU001 | CU001_A2 (BD local no disponible) | **HU04_CU001_A2** |
+| RF-06 | CU001 | CU001_E1 (secuencia inválida) | **HU05_CU001_E1** |
+| RF-04, RF-06 | CU001 | CU001_E2 (parámetros fuera de rango) | **HU06_CU001_E2** |
+| RF-05 | CU001 | CU001_E3 (combinación incompatible) | **HU07_CU001_E3** |
+| RF-07 | CU001 | CU001_E4 (fallo modo remoto) | **HU08_CU001_E4** |
+| RF-09, RF-10 | CU002 | CU002_B | **HU09_CU002_B** |
+| RF-09, RF-10 | CU002 | CU002_A1 (resultado vacío) | **HU10_CU002_A1** |
+
+
