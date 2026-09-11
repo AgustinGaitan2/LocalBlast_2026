@@ -9,7 +9,9 @@ Formato de cada HU:
 - **Rol – meta – motivo**: "Como … quiero … para …".
 - **Criterios de aceptación**: en formato **Given-When-Then**, trazables a la precondición y postcondición del slice.
 
-Para el TP1 se detallan las HU de los **tres slices básicos** del camino feliz (`B1`, `B2`, `B3`) del único caso de uso profundizado (`CU001`), más una HU de un slice de excepción representativo (`E1`, secuencia con formato inválido). El resto de los slices están **nombrados en el caso de uso** ([`casos-de-uso.md`](casos-de-uso.md)) y se detallarán como HU cuando algún TP posterior los necesite — no es obligación abrirlos todos ya, como aclara la propia guía del TP1.
+Para el TP1 se detallan las HU de **todos los slices identificados en los casos de uso** — los tres básicos (`CU001_B1`, `CU001_B2`, `CU002_B`), las tres alternativas (`CU001_A1`, `CU001_A2`, `CU002_A1`) y las cuatro excepciones (`CU001_E1`, `CU001_E2`, `CU001_E3`, `CU001_E4`). En total, 10 historias de usuario.
+
+**Numeración:** las HU se enumeran de forma consecutiva por CU y, dentro de cada CU, en el orden: slices básicos (`B` / `B1`, `B2`) → slices alternativos (`A1`, `A2`, …) → slices de excepción (`E1`, `E2`, …). Así los identificadores acompañan el orden en el que aparecen los slices en [`casos-de-uso.md`](casos-de-uso.md).
 
 ---
 
@@ -65,3 +67,27 @@ Para el TP1 se detallan las HU de los **tres slices básicos** del camino feliz 
   - **Then** los presenta en una tabla con al menos las columnas: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura.
 
 ---
+
+### HU03_CU001_A1 · Cancelación manual de una búsqueda en curso
+
+- **Deriva de:** `CU001`, slice `A1` (camino alternativo durante el slice `B2`)
+- **Realiza:** RF-07
+
+> **Como** investigador/a,
+> **quiero** poder cancelar una búsqueda que está en ejecución,
+> **para** dejar de esperar y no consumir recursos remotos ni locales cuando me di cuenta que configuré algo mal o el resultado ya dejó de importarme.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Cancelación de una búsqueda local:
+  - **Given** una búsqueda en modo local que BLAST+ está ejecutando en el servidor (indicador de progreso visible),
+  - **When** el investigador presiona "Cancelar",
+  - **Then** el sistema aborta el subproceso local de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero y no muestra tabla de resultados.
+
+- **CA-02.** Cancelación de una búsqueda remota:
+  - **Given** una búsqueda en modo remoto que BLAST+ tramita contra NCBI (indicador de progreso visible),
+  - **When** el investigador presiona "Cancelar",
+  - **Then** el sistema cancela la solicitud a través de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero y no muestra tabla de resultados.
+
+---
+
