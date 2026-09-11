@@ -159,3 +159,26 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que señala el campo "Tamaño de palabra" e indica el rango válido para el programa `blastn`.
 
 ---
+
+### HU07_CU001_E3 · Rechazo de combinación programa / query / base de datos incompatible
+
+- **Deriva de:** `CU001`, slice `E3` (terminación abrupta detectada en el paso 7)
+- **Realiza:** RF-05
+
+> **Como** investigador/a,
+> **quiero** que el sistema me impida lanzar una combinación de programa BLAST y tipos de secuencia/base incompatibles, y me sugiera qué combinaciones sí funcionan con lo que ya cargué,
+> **para** no perder tiempo esperando un resultado que no va a existir.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** `blastp` sobre una query de nucleótidos:
+  - **Given** una secuencia query de nucleótidos (ADN o ARN), programa `blastp` seleccionado, y cualquier base de datos,
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El programa `blastp` espera queries de proteína. Para su query de nucleótidos, opciones válidas son: `blastn` (contra base de nucleótidos), `blastx` o `tblastx`".
+
+- **CA-02.** `blastn` contra una base de datos de proteínas:
+  - **Given** una secuencia query de nucleótidos, programa `blastn` seleccionado, y una base de datos de proteínas seleccionada,
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El programa `blastn` requiere base de datos de nucleótidos. Elija otra base de datos, o cambie el programa a `blastx`".
+
+---
