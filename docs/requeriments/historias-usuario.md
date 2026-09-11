@@ -205,3 +205,34 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **Then** el sistema corta el flujo del CU y muestra el error literal que devolvió BLAST+, incluyendo el mensaje original de NCBI, sin traducirlo ni reinterpretarlo.
 
 ---
+
+## HU derivadas de CU002 · Refinar y descargar los resultados de una búsqueda
+
+### HU09_CU002_B · Filtrar los alineamientos y descargarlos en un formato
+
+- **Deriva de:** `CU002`, slice `B` (único slice básico; el camino feliz no se subdivide)
+- **Realiza:** RF-09, RF-10
+
+> **Como** investigador/a,
+> **quiero** aplicar filtros post-búsqueda sobre la tabla de resultados sin volver a correr BLAST y descargar los alineamientos filtrados en el formato que necesite,
+> **para** llevarme solo los hits relevantes y en la forma en que voy a seguir procesándolos.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Filtrado interactivo sin re-ejecución de BLAST:
+  - **Given** una tabla de resultados con al menos 20 alineamientos y filtros post-búsqueda establecidos en identidad ≥ 80% y cobertura ≥ 50%,
+  - **When** el investigador confirma los filtros,
+  - **Then** la tabla se re-filtra en el momento mostrando solo los hits que cumplen ambos umbrales, sin volver a invocar a BLAST+.
+
+- **CA-02.** Descarga en el formato elegido:
+  - **Given** una tabla de resultados con filtros post-búsqueda ya aplicados,
+  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
+  - **Then** el sistema entrega un archivo `.csv` que contiene únicamente los hits filtrados, con una fila de encabezados que incluye al menos las columnas mínimas (identificador, score, E-value observado, % identidad, % cobertura).
+
+- **CA-03.** Persistencia en el historial al descargar:
+  - **Given** una descarga que finalizó correctamente,
+  - **When** el archivo termina de entregarse al investigador,
+  - **Then** el sistema guarda en el historial (D2) una entrada con los parámetros de la búsqueda, la base de datos usada, el timestamp y el conjunto de resultados obtenidos (antes de aplicar los filtros post-búsqueda).
+
+---
+
