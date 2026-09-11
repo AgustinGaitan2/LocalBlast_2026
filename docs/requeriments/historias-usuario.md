@@ -113,3 +113,26 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **Then** el sistema muestra un mensaje que explica que el índice está corrupto y sugiere contactar al administrador de bases de datos, y devuelve al investigador al paso 3.
 
 ---
+
+### HU05_CU001_E1 · Rechazo de secuencia query con formato inválido
+
+- **Deriva de:** `CU001`, slice `E1` (terminación abrupta detectada en el paso 7)
+- **Realiza:** RF-06
+
+> **Como** investigador/a,
+> **quiero** recibir un mensaje claro cuando la secuencia que subo o pego no es reconocible,
+> **para** poder corregirla de inmediato sin tener que adivinar qué le pasa.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Caracter fuera del alfabeto:
+  - **Given** un texto pegado como query que contiene al menos un carácter fuera del alfabeto de ADN, ARN o proteína (por ejemplo un dígito o un símbolo de puntuación),
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que indica cuál es el carácter inválido y en qué posición aparece.
+
+- **CA-02.** FASTA con encabezado sin cuerpo:
+  - **Given** un archivo FASTA con una línea de encabezado (`>ID`) pero sin ninguna línea de secuencia debajo,
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El FASTA contiene un encabezado pero ninguna secuencia asociada".
+
+---
