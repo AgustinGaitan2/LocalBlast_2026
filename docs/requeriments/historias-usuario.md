@@ -136,3 +136,26 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El FASTA contiene un encabezado pero ninguna secuencia asociada".
 
 ---
+
+### HU06_CU001_E2 · Rechazo de parámetros pre-búsqueda fuera de rango
+
+- **Deriva de:** `CU001`, slice `E2` (terminación abrupta detectada en el paso 7)
+- **Realiza:** RF-04, RF-06
+
+> **Como** investigador/a,
+> **quiero** que el sistema me señale exactamente qué parámetro está fuera de rango y cuál es el rango válido para el programa BLAST que elegí,
+> **para** poder corregirlo sin consultar la documentación de BLAST+ por afuera.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** E-value negativo:
+  - **Given** un formulario completo con el campo "E-value máximo" en `-1`,
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que señala el campo "E-value" e indica que debe ser un número positivo (típicamente entre 0 y 10).
+
+- **CA-02.** Tamaño de palabra fuera del rango del programa:
+  - **Given** un formulario con programa `blastn` seleccionado y "Tamaño de palabra" = 3 (por debajo del mínimo válido para `blastn`),
+  - **When** el investigador presiona "Ejecutar búsqueda",
+  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que señala el campo "Tamaño de palabra" e indica el rango válido para el programa `blastn`.
+
+---
