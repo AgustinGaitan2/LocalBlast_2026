@@ -10,11 +10,19 @@ Cada caso de uso declara qué requerimientos funcionales realiza. La cadena comp
 
 ## Enfoque de los casos de uso
 
-Un caso de uso representa **una capacidad discreta que el sistema le brinda al actor** , un objetivo alcanzable , no un trazo secuencial de pasos que el actor tiene que recorrer de punta a punta. Dos consecuencias prácticas de esa definición para este TP:
+Un caso de uso representa **una capacidad discreta que el sistema le brinda al actor** — un objetivo alcanzable —, no un trazo secuencial de pasos que el actor tiene que recorrer de punta a punta. Dos consecuencias prácticas de esa definición para este TP:
 
 - **Del proceso P1 salen más de un CU.** Aunque a primera vista parece que "ejecutar una búsqueda BLAST" es un único flujo largo, en realidad la capacidad de correr una búsqueda (`CU001`) y la capacidad de trabajar sobre sus resultados —filtrarlos, exportarlos— (`CU002`) son objetivos distintos del mismo actor. El investigador puede correr una búsqueda una sola vez, y sobre ese resultado usar `CU002` varias veces (probar distintos filtros, descargar en distintos formatos) sin volver a correr BLAST. Modelarlos como un único CU secuencial esconde esa reutilización.
 - **Cuando el camino feliz de un CU queda largo, se descompone en slices.** No los CU en sí, sino su flujo principal. Los slices son módulos que aportan valor por sí mismos hacia el objetivo del CU. En este TP, `CU001` se descompone en dos slices básicos (`B1` y `B2`); `CU002` queda como un único slice básico (`B`) porque su flujo es corto.
 
+## Convención de identificadores y trazabilidad
+
+**Cadena de trazabilidad:** `RF → CU → slice → HU`.
+
+- Un **CU** puede realizar uno o varios RF, y a la inversa un RF puede estar realizado por varios slices del mismo CU (por ejemplo la validación previa aparece tanto en el camino feliz como en los slices de excepción).
+- El identificador del **slice básico** es la letra `B` (`CU00X_B`); si además se subdivide, pasa a `B1`, `B2`, … Los **slices alternativos** se numeran `A1`, `A2`, … y los **de excepción** `E1`, `E2`, …
+- La relación **slice ↔ HU es 1:1**. La HU conserva el identificador de trazabilidad del slice: `HU01_CU001_B1` detalla el slice `CU001_B1`; `HU09_CU002_B` detalla el (único) slice básico de `CU002`.
+- Los diez slices identificados en los dos CU tienen **cada uno** su HU detallada en [`historias-usuario.md`](historias-usuario.md), con criterios Given-When-Then. 
 ---
 
 ## CU001 · Ejecutar una búsqueda BLAST
