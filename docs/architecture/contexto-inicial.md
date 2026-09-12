@@ -6,7 +6,7 @@ El sistema completo se representa como un único proceso (0), con sus tres entid
 flowchart LR
     INV[Investigador/a]
 
-    P((0<br/>LocalBlast<br/>GUI web para BLAST+))
+    P((0<br/>LocalBlast<br/>GUI para BLAST+))
 
     ADM[Administrador/a]
     BLAST[BLAST+<br/>motor de alineamiento<br/>local y remoto]
