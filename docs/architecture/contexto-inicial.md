@@ -17,7 +17,7 @@ flowchart LR
     ADM -->|FASTA + tipo +<br/>orden alta/actualizar/baja| P
     P -->|catálogo y estado<br/>de bases de datos| ADM
 
-    P -->|type blast | blastp | etc <br/>inputs de makeblastdb<br/>y flag (remote | remote) si aplica| BLAST
+    P -->|type blast / blastp | etc <br/>inputs de makeblastdb<br/>y flag (local / remote)| BLAST
     BLAST -->|resultado del alineamiento<br/>o índice DB construida| P
 ```
 
