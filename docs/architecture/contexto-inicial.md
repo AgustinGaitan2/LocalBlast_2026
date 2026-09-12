@@ -54,7 +54,7 @@ flowchart TD
     P3 -->|catálogo y estado<br/>de bases de datos| ADM
 
     %% Flujos externos — BLAST+
-    P1 -->|invocación blastn/blastp<br/>con inputs y -remote si aplica| BLAST
+    P1 -->|sec. query + type blast<br/>flag local / remote| BLAST
     BLAST -->|resultado del alineamiento| P1
     P3 -->|invocación makeblastdb<br/>con FASTA y tipo| BLAST
     BLAST -->|confirmación del<br/>índice construido| P3
