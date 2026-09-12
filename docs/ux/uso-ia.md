@@ -51,7 +51,7 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
  
 ## Entrada 4 — Corrección posterior a la devolución del profesor (iteración de casos de uso, slices, alternativas/excepciones y HU en formato Given-When-Then)
 
-- **Herramienta usada:** Claude, asistente de IA generativa basado en LLM..
+- **Herramienta usada:** Claude, asistente de IA generativa basado en LLM.
 - **Tarea concreta:** después de una aclaración del profesor sobre la primera versión del TP1, le pasamos a la IA la guía de la cátedra (`tp1-requerimientos.md` y `ejemplo-resuelto-tp1.md`) junto con nuestro repo actual, y le pedimos que aplicara todas las correcciones señaladas en clase, manteniendo el resto del trabajo intacto.
 - **Correcciones que había que aplicar (según lo que anotamos de la clase):**
   1. Los casos de uso deben derivar todos de **un solo proceso** del DFD Nivel 1. Elegimos **P1 · Ejecutar búsqueda BLAST**. Esto implica que el anterior `CU-02 · Administrar base de datos BLAST local` (que venía del proceso P3) **no corresponde** en este TP y debía eliminarse del documento de casos de uso.
@@ -76,3 +76,26 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
   - Una propuesta inicial de la IA de dejar un `HU03_CU001_A1` (cancelación manual) también detallado. Decidimos no hacerlo por dos razones: (a) la guía del TP1 pide detallar el slice básico y "un slice secundario relevante por CU", y (b) el slice de excepción `E1` ya es el "slice secundario relevante" más informativo del CU en esta iteración, porque toca directamente la validación previa a la invocación de BLAST+, que es lo distintivo del proceso.
 - **Errores / imprecisiones detectadas:**
   - La IA, en su primera pasada, mantuvo referencias a "CU-02" en varios lados del SRS y del contexto inicial, aunque le habíamos dicho explícitamente que había que eliminarlo. Tuvimos que pedirle una segunda pasada de barrido para asegurarnos de que ninguna sección quedaba mencionando a CU-02 o al proceso P3 profundizado. Volvió a demostrar lo que ya habíamos anotado: la IA es útil como generador rápido, pero requiere una revisión sistemática por parte del grupo antes de commitear.
+
+ ## Entrada 5 — Reestructuración de casos de uso: capacidades del sistema, no trazos secuenciales del actor
+
+- **Herramienta usada:** Claude, asistente de IA generativa basado en LLM.
+- **Tarea concreta:** volver a iterar sobre el `casos-de-uso.md` a partir de un comentario del profesor que uno de los integrantes recordaba de clase: *"no se debe pensar el caso de uso como algo secuencial que hace el actor"*. Le pedimos a la IA que revisara nuestro modelado, hasta ese momento un único `CU001` con tres slices básicos (`B1` config, `B2` ejecución, `B3` filtrado y descarga)— y evaluara si esa forma no era justamente "pensar el CU como secuencia".
+- **Qué generó:**
+  - Una propuesta de reestructurar el modelado en **dos casos de uso** derivados del proceso P1, donde cada CU representa una capacidad discreta del sistema hacia el actor y no un tramo de un workflow:
+    - `CU001 · Ejecutar una búsqueda BLAST` (objetivo: obtener alineamientos visibles en la interfaz), con 9 pasos en el camino feliz, se subdivide en dos slices porque está en el borde de "largo": `B1` (cargar, configurar y validar) y `B2` (ejecutar y presentar resultados).
+    - `CU002 · Refinar y descargar los resultados de una búsqueda` (objetivo: obtener un archivo con los alineamientos filtrados), con 4 pasos en el camino feliz — no se subdivide.
+  - Una tabla de trazabilidad `RF → CU → slice → HU` reorganizada, donde ningún RF cruza entre los dos CU (RF-01 a RF-08 → `CU001`; RF-09 y RF-10 → `CU002`), lo cual es una consecuencia natural de haber separado los CU por capacidad.
+  - Una explicación de por qué un CU no es una secuencia de pasos del actor, para que la decisión de tener dos CU en vez de uno quede justificada por escrito.
+- **Qué aceptamos:**
+  - La separación en dos CU. Discutimos primero si tres podían tener sentido (por ejemplo, un tercer CU aparte para "Cancelar una búsqueda"), y lo descartamos con un razonamiento del propio Cockburn: cancelar es abandonar un objetivo, no un objetivo en sí, así que corresponde como slice alternativo dentro del CU al que pertenece la acción cancelada (`CU001_A1`), no como CU independiente.
+  - El slicing de `CU001` en `B1` y `B2`. 9 pasos son el borde superior de lo que Cockburn considera un happy path sano; dividirlo en dos slices con valor incremental —dejar la búsqueda validada versus mostrar los alineamientos— hace más natural la trazabilidad a HU.
+  - El uso de `CU002_B` (letra `B` sin número) como identificador del slice básico único de `CU002`, siguiendo el ejemplo del profesor sobre la notación (`"CU001_B pasaría a CU001_B1 y CU001_B2"` cuando se subdivide → si no se subdivide, queda como `CU00X_B`).
+- **Qué modificamos:**
+  - **Precondición de `CU002`.** La IA en un primer borrador escribió la precondición como *"`CU001` fue ejecutado exitosamente"*. La reescribimos como *"existe una búsqueda con resultados visibles en la interfaz"* — que es el mismo hecho, pero expresado como estado del sistema y no como dependencia entre CU. Cockburn recomienda explícitamente eso: la precondición fija un estado que el CU necesita encontrar, no obliga a que otro CU se haya ejecutado antes en la misma sesión.
+  - **Persistencia en el historial (D2).** La IA la incluyó primero como paso final de `CU001`, luego como paso final de `CU002`. Discutimos entre nosotros y la dejamos en `CU002`, se guarda cuando el investigador cierra el ciclo con una descarga. La decisión implica que una búsqueda ejecutada pero nunca descargada no queda en el historial; lo dejamos anotado como decisión consciente en el propio CU.
+  - **`A2` de `CU001` (BD local no disponible).** En esta reestructuración volvimos a mirar ese slice y confirmamos la definición honesta que ya habíamos acordado: el sistema informa y devuelve el control al investigador, sin proponer equivalencias con bases remotas (que no existen). La numeración del slice pasa de `A3` (versión anterior) a `A2` (versión actual), porque ahora `CU001` tiene menos alternativas — el "resultado vacío" pasó a ser `CU002_A1`, ya que ocurre en el momento de descargar, no en el de ejecutar.
+- **Qué descartamos:**
+  - Una propuesta inicial de la IA de tener **tres CU** (`CU001` configurar, `CU002` ejecutar, `CU003` filtrar y descargar). La rechazamos porque "configurar" sin ejecutar no le deja nada al actor, no es un objetivo terminado, es un paso intermedio, y por lo tanto no cumple con la definición de CU como capacidad discreta. Terminó siendo, en la versión final, el slice `CU001_B1` dentro del CU de ejecución.
+- **Errores / imprecisiones detectadas:**
+  - En la primera versión de la tabla `RF → CU → slice`, la IA olvidó que la validación previa a la invocación de BLAST+ (RF-06) también se realiza en los slices de excepción `E1` y `E2` — cuando la validación falla y corta el flujo. Igual que en la iteración anterior, tuvimos que pedirle expresamente que verificara la trazabilidad de cada RF sobre todos los slices, no solo el básico.
