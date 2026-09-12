@@ -38,4 +38,21 @@ Para consultar la Especificación de Requisitos de Software (SRS) completa, visi
 ---
 
 ## 3. Modelo de Ciclo de Vida Específico
-*(Agregar aquí la justificación de 3 a 5 líneas del modelo de ciclo de vida seleccionado para el proyecto).*
+
+El grupo se decanta por una **metodologia incremental con practicas agiles**. 
+
+Esta elección se basa en que la herramienta posee características
+funcionales intrínsecas que se pueden modularizar naturalmente.
+Donde es posible la entrega de un modulo operativo cuyo desarrollo
+es independiente de otros del mismo sistema (Por ejemplo, *procesar_secuencia*). 
+
+Cada incremento añade una capacidad operativa completa y utilizable.
+
+• Descartamos enfoques como *Cascada* dado que es un flujo estrictamente secuencial, donde no se avanza a la siguiente fase sin cerrar por completo al anterior, lo cual no es caracteristico de este proyecto dado que como bien mencionamos es posible separar responsabilidades. 
+• Descartamos enfoques como *Modelo en V* porque es en parte una variacion del metodo en cascada. 
+• Descartamos enfoques como *Espiral* dado que esta pensado para proyectos más grandes en donde un fallo implica consecuencias catastroficas y por eso
+se deben llevar a cabo gestion de riesgos, en un proyecto como el presente añadir la complejidad de un modelo en espiral supera ampliamente la complejidad del software en si, lo que ralentiza el desarrollo.
+• Descartamos enfoques como *iterativo* debido a que obligaria a rehacer todo
+el sistema en cada ciclo, lo cual es ineficiente cuando **ya contamos con requisitos bien definidos**. Por lo que no seria necesario primero desarrollar un esqueleto basico del sistema para luego ir refinandolo, sino que al conocer bien los requisitos podemos simplemente construir un modulo dejandolo listo para produccion y luego construir el siguiente. 
+
+
