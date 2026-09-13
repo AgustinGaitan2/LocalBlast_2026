@@ -39,13 +39,14 @@ LocalBlast es una **interfaz web para BLAST+** que resuelve las tres carencias:
 - Los **filtros pre-búsqueda** se cargan en un formulario con valores por defecto sensatos; los **filtros post-búsqueda** se aplican en la tabla de resultados sin volver a correr BLAST.
 - Los **resultados** se descargan en CSV, JSON, FASTA, tabular BLAST o XML.
 
-### 1.3 Dentro del alcance (TP1 → TP5)
+### 1.3 Dentro del alcance
 
 - Interfaz web para investigador y administrador.
 - Ejecución de búsquedas BLAST local (`blastn`, `blastp`, `blastx`, `tblastn`, `tblastx`) y remota (`-remote`).
 - Formulario de parámetros pre-búsqueda con valores por defecto.
 - Aplicación interactiva de filtros post-búsqueda sobre la tabla de resultados.
 - Descarga de resultados en múltiples formatos.
+- Persistencia automática de las búsquedas ejecutadas en un historial, para uso futuro.
 - Alta, actualización y baja de bases de datos locales por parte del administrador, a partir de un archivo FASTA subido desde su equipo.
 - Autenticación básica con dos roles (Investigador y Administrador).
 
