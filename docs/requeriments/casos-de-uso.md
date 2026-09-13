@@ -62,13 +62,13 @@ Un caso de uso representa **una capacidad discreta que el sistema le brinda al a
 
 ### Descomposición en slices
 
-El camino feliz de 9 pasos está en el borde de "largo" y tiene dos módulos con valor propio: dejar una búsqueda configurada y validada (valor: el investigador sabe que su búsqueda es lanzable), y ejecutar y presentar los resultados (valor: el investigador ve los hits). Se divide en dos slices básicos, más los alternativos y de excepción que se explican debajo.
+El camino feliz de 9 pasos está en el borde de "largo" y tiene dos módulos con valor propio: dejar una búsqueda configurada y validada (valor: el investigador sabe que su búsqueda es lanzable), y ejecutar, presentar y persistir los resultados (valor: el investigador ve los hits y queda registro de la búsqueda). Se divide en dos slices básicos, más los alternativos y de excepción que se explican debajo.
 
 ```
 CU001 · Ejecutar una búsqueda BLAST
 ├─ Camino feliz (slices básicos)
 │  ├─ CU001_B1  — pasos 1-7:  cargar, configurar y validar la búsqueda
-│  └─ CU001_B2  — pasos 8-9:  ejecutar la búsqueda y presentar los resultados
+│  └─ CU001_B2  — pasos 8-9:  ejecutar la búsqueda, presentar resultados y persistir en D2
 ├─ Caminos alternativos (slices A)
 │  ├─ CU001_A1  — cancelación manual de la búsqueda en curso
 │  └─ CU001_A2  — base de datos local no disponible
