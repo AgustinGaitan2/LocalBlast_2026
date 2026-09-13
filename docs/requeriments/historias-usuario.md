@@ -309,3 +309,8 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 | RF-09 | CU002 | CU002_B | **HU09_CU002_B** |
 | RF-10 | CU003 | CU003_B | **HU10_CU003_B** |
 | RF-10 | CU003 | CU003_A1 (resultado vacío) | **HU11_CU003_A1** |
+
+## Notas sobre el enfoque de este TP
+
+- **Un CU puede implementar varios RF**, y viceversa un mismo RF puede estar realizado por varios slices del mismo CU — por ejemplo RF-06 (validación pre-ejecución) aparece en el slice `B1` de `CU001` cuando la validación pasa y también en los slices `E1` y `E2` cuando falla y corta el flujo. La trazabilidad refleja esa realidad.
+- **La unidad mínima de sprint es la HU**, no el CU ni el slice. Por eso las HU tienen un identificador propio (`HU01`, `HU02`, …) además del sufijo de trazabilidad — para que la planificación de sprints pueda referirse a ellas sin ambigüedad.
