@@ -1,6 +1,6 @@
 # Historias de Usuario — LocalBlast
 
-Cada historia de usuario detalla **un slice puntual** de un caso de uso (relación 1:1). El identificador de la HU conserva explícitamente el del slice de origen, para que la trazabilidad sea directa: la HU llamada `HU01_CU001_B1` detalla el slice `B1` del caso de uso `CU001`.
+Cada historia de usuario detalla **un slice puntual** de un caso de uso (relación 1:1). El identificador de la HU conserva explícitamente el del slice de origen, para que la trazabilidad sea directa: la HU llamada `HU01_CU001_B1` detalla el slice `B1` del caso de uso `CU001`; la HU `HU10_CU003_B` detalla el (único) slice básico `B` del caso de uso `CU003`.
 
 Formato de cada HU:
 
@@ -9,7 +9,8 @@ Formato de cada HU:
 - **Rol – meta – motivo**: "Como … quiero … para …".
 - **Criterios de aceptación**: en formato **Given-When-Then**, trazables a la precondición y postcondición del slice.
 
-Para el TP1 se detallan las HU de **todos los slices identificados en los casos de uso** — los tres básicos (`CU001_B1`, `CU001_B2`, `CU002_B`), las tres alternativas (`CU001_A1`, `CU001_A2`, `CU002_A1`) y las cuatro excepciones (`CU001_E1`, `CU001_E2`, `CU001_E3`, `CU001_E4`). En total, 10 historias de usuario.
+Para el TP1 se detallan las HU de **todos los slices identificados en los casos de uso** — los cuatro básicos (`CU001_B1`, `CU001_B2`, `CU002_B`, `CU003_B`), las tres alternativas (`CU001_A1`, `CU001_A2`, `CU003_A1`) y las cuatro excepciones (`CU001_E1`, `CU001_E2`, `CU001_E3`, `CU001_E4`). En total, 11 historias de usuario.
+
 
 **Numeración:** las HU se enumeran de forma consecutiva por CU y, dentro de cada CU, en el orden: slices básicos (`B` / `B1`, `B2`) → slices alternativos (`A1`, `A2`, …) → slices de excepción (`E1`, `E2`, …). Así los identificadores acompañan el orden en el que aparecen los slices en [`casos-de-uso.md`](casos-de-uso.md).
 
