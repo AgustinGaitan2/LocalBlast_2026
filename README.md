@@ -1,9 +1,9 @@
 # LocalBlast_2026
 
 ## Integrantes
-* Agustin Facundo Gaitan
-* Wursten Augusto
+* Gaitan Agustin Facundo
 * Farias Valentin
+* Wursten Augusto
 
 ---
 
