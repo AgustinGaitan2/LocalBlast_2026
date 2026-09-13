@@ -1,8 +1,13 @@
 # Casos de Uso — LocalBlast
 
-Los casos de uso se redactan en **formato textual estructurado (Cockburn)** — actor, objetivo, precondición, flujo principal, alternativos, excepciones, postcondición — según pide el TP1, y **no** como diagrama gráfico (Mermaid no incluye un tipo de diagrama de casos de uso nativo).
+Los casos de uso se redactan en **formato textual estructurado (Cockburn)**, actor, objetivo, precondición, flujo principal, alternativos, excepciones, postcondición, según pide el TP1, y **no** como diagrama gráfico (Mermaid no incluye un tipo de diagrama de casos de uso nativo).
 
-Todos los casos de uso de este documento derivan del proceso profundizado **P1 · Ejecutar búsqueda BLAST** del DFD Nivel 1. Los procesos P2 y P3 quedan documentados a nivel de alcance en el DFD y en el modelo de dominio, pero **no** tienen casos de uso propios en este TP (ver justificación en la sección 5 del [SRS](srs.md#5-selección-de-procesos-a-profundizar)).
+Los casos de uso de este documento derivan de los dos procesos profundizados del DFD Nivel 1:
+
+- `CU001` deriva del proceso **P1 · Ejecutar búsqueda BLAST**.
+- `CU002` y `CU003` derivan del proceso **P2 · Filtrar y entregar resultados**.
+
+Ambos procesos son necesarios para cerrar una interacción típica del investigador con el sistema: P1 le corre la búsqueda y la persiste, y P2 le deja trabajar con esos resultados (filtrar y descargar) a su conveniencia. El tercer proceso, **P3 (Administrar bases de datos)**, queda documentado a nivel de alcance en el DFD y en el modelo de dominio pero **no** tiene casos de uso propios en este TP (ver justificación en la sección 5 del [SRS](srs.md#5-selección-de-procesos-a-profundizar)).
 
 Cada caso de uso declara qué requerimientos funcionales realiza. La cadena completa de trazabilidad es:
 
