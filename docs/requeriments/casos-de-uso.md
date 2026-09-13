@@ -103,41 +103,35 @@ Son terminaciones abruptas del flujo: el sistema detecta una condición que impi
 
 ---
 
-## CU002 · Refinar y descargar los resultados de una búsqueda
+## CU002 · Refinar los resultados con filtros post-búsqueda
 
+- **Deriva del proceso:** P2 · Filtrar y entregar resultados
 - **Actor principal:** Investigador/a
-- **Objetivo:** Obtener un archivo con los alineamientos relevantes en el formato adecuado para su análisis posterior, aplicando filtros post-búsqueda sobre resultados ya calculados.
-- **Realiza:** RF-09, RF-10
-- **Precondición:** Existe una búsqueda con resultados visibles en la interfaz (postcondición de `CU001`). No se ejecuta BLAST+ en este CU: los filtros son operaciones sobre los datos ya en memoria.
-- **Disparador:** El investigador decide refinar y bajar los resultados de la búsqueda que tiene a la vista.
-- **Garantía de éxito:** El investigador tiene, en su equipo, un archivo con los alineamientos filtrados en el formato pedido. La búsqueda queda registrada en el historial (D2).
-- **Garantía mínima:** El sistema nunca entrega un archivo cuyo contenido no coincida con los filtros aplicados en la interfaz al momento de la descarga, y nunca deja el historial en estado inconsistente respecto al archivo entregado.
+- **Objetivo:** Ver la lista de alineamientos filtrada por criterios post-búsqueda (identidad, cobertura, E-value observado, taxonomía), sin re-ejecutar BLAST.
+- **Realiza:** RF-09
+- **Precondición:** Existe una búsqueda con resultados visibles en la interfaz (postcondición de `CU001`). En una versión futura del sistema, cuando D2 sea legible desde la interfaz, esos resultados también podrán provenir del historial sin haber ejecutado `CU001` en la sesión actual.
+- **Disparador:** El investigador quiere restringir la vista a un subconjunto de los alineamientos según criterios post-búsqueda.
+- **Garantía de éxito:** La tabla muestra los alineamientos que superan los criterios elegidos. No se ejecuta BLAST+ ni se persiste nada nuevo en D2 (la búsqueda ya quedó registrada en `CU001` con sus resultados crudos).
+- **Garantía mínima:** La tabla filtrada nunca "inventa" hits que no estaban en el conjunto crudo; los filtros son estrictamente restrictivos sobre el conjunto ya calculado.
 
 ### Flujo principal
 
-1. El investigador ajusta los **filtros post-búsqueda** (umbrales de identidad, cobertura, E-value observado; filtro por taxonomía cuando la información esté disponible). La tabla se re-filtra en el momento, sin volver a invocar a BLAST+.
-2. El investigador elige el **formato de descarga** (CSV, JSON, FASTA, tabular BLAST `-outfmt 6`, o XML) y presiona **Descargar**.
-3. El sistema arma el archivo con los resultados filtrados en el formato pedido.
-4. El sistema entrega el archivo al investigador y guarda una copia de la búsqueda (parámetros pre-búsqueda + resultados) en el historial (D2).
+1. El investigador ajusta los **filtros post-búsqueda** (umbrales de identidad, cobertura, E-value observado; filtro por taxonomía cuando la información esté disponible).
+2. El sistema re-filtra la tabla en el momento, mostrando únicamente los hits que superan todos los umbrales fijados, **sin volver a invocar a BLAST+**.
 
-**Postcondición:** El archivo con los resultados filtrados está en el equipo del investigador y la búsqueda queda persistida en D2.
+**Postcondición:** La tabla de resultados visible en la interfaz refleja los filtros post-búsqueda actuales. Los resultados crudos originales siguen intactos en la sesión (y en D2), disponibles para probar otros filtros o para descargar sin filtrar.
 
 ### Por qué este CU no se subdivide en slices
 
-El camino feliz de `CU002` es corto (4 pasos) y no tiene módulos internos que aporten valor por separado: ajustar filtros sin descargar no deja nada útil fuera de la sesión, y descargar sin ajustar filtros previamente da el mismo comportamiento que aplicar los filtros por defecto (los que están al abrir la tabla). El slice básico es entonces uno solo, identificado como `CU002_B`.
+`CU002` es corto (2 pasos) y no tiene módulos internos con valor separado: ajustar filtros sin ver la tabla re-filtrada no aporta nada, y la re-filtración sin el ajuste previo no tiene sentido. El slice básico es entonces uno solo, identificado como `CU002_B`. Tampoco tiene alternativas ni excepciones dignas de nota: el caso "el filtro deja la tabla vacía" no interrumpe el CU (la tabla vacía es un resultado válido del filtro); es un problema recién si el investigador intenta descargar esa tabla vacía, y por eso ese caso vive en `CU003_A1`.
 
 ### Slices del CU
 
 ```
-CU002 · Refinar y descargar los resultados de una búsqueda
-├─ Camino feliz
-│  └─ CU002_B   — pasos 1-4:  refinar con filtros post-búsqueda, elegir formato y descargar
-└─ Caminos alternativos
-   └─ CU002_A1  — ningún resultado supera los filtros post-búsqueda
+CU002 · Refinar los resultados con filtros post-búsqueda
+└─ Camino feliz
+   └─ CU002_B   — pasos 1-2:  ajustar filtros post-búsqueda y ver la tabla re-filtrada
 ```
-### Slices alternativos — descripción
-
-- **`CU002_A1` · Ningún resultado supera los filtros post-búsqueda.** El investigador aplicó filtros que dejan la tabla vacía. El sistema no impide la descarga: entrega un archivo con encabezados y los metadatos de la búsqueda (parámetros, base de datos, timestamp) pero sin filas de hits, y guarda igualmente la búsqueda en D2, para que el investigador tenga constancia del intento. **Realiza:** RF-09, RF-10.
 
 ---
 
