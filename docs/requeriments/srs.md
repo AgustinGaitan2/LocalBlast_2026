@@ -8,7 +8,7 @@ Este documento es la línea base del proyecto **LocalBlast** al cierre del TP1. 
 ## Índice
 
 1. [Visión y alcance](#1-visión-y-alcance)
-2. [Stakeholders y usuarios](#2-stakeholders-y-usuarios)
+2. [Stakeholders y actores del sistema](#2-stakeholders-y-actores-del-sistema)
 3. [Diagrama de contexto (DFD)](#3-diagrama-de-contexto-dfd)
 4. [Modelo de dominio](#4-modelo-de-dominio)
 5. [Selección de procesos a profundizar](#5-selección-de-procesos-a-profundizar)
