@@ -15,10 +15,14 @@ Cada caso de uso declara qué requerimientos funcionales realiza. La cadena comp
 
 ## Enfoque de los casos de uso
 
-Un caso de uso representa **una capacidad discreta que el sistema le brinda al actor** — un objetivo alcanzable —, no un trazo secuencial de pasos que el actor tiene que recorrer de punta a punta. Dos consecuencias prácticas de esa definición para este TP:
+Un caso de uso representa **una capacidad discreta que el sistema le brinda al actor** , un objetivo alcanzable, no un trazo secuencial de pasos que el actor tiene que recorrer de punta a punta. Dos consecuencias prácticas de esa definición para este TP:
 
-- **Del proceso P1 salen más de un CU.** Aunque a primera vista parece que "ejecutar una búsqueda BLAST" es un único flujo largo, en realidad la capacidad de correr una búsqueda (`CU001`) y la capacidad de trabajar sobre sus resultados —filtrarlos, exportarlos— (`CU002`) son objetivos distintos del mismo actor. El investigador puede correr una búsqueda una sola vez, y sobre ese resultado usar `CU002` varias veces (probar distintos filtros, descargar en distintos formatos) sin volver a correr BLAST. Modelarlos como un único CU secuencial esconde esa reutilización.
-- **Cuando el camino feliz de un CU queda largo, se descompone en slices.** No los CU en sí, sino su flujo principal. Los slices son módulos que aportan valor por sí mismos hacia el objetivo del CU. En este TP, `CU001` se descompone en dos slices básicos (`B1` y `B2`); `CU002` queda como un único slice básico (`B`) porque su flujo es corto.
+- **De los procesos profundizados salen tres CU, no uno solo largo.** El investigador tiene tres objetivos distintos que el sistema le habilita, y que puede combinar como necesite:
+  - `CU001` (ejecutar una búsqueda, deriva de **P1**) — obtener alineamientos crudos visibles en la interfaz.
+  - `CU002` (refinar con filtros post-búsqueda, deriva de **P2**) — ver los alineamientos con criterios post-búsqueda aplicados, sin volver a correr BLAST.
+  - `CU003` (descargar, deriva de **P2**) — obtener un archivo con los alineamientos actualmente visibles, en un formato.
+- **La descarga no siempre se ejerce.** A veces el investigador solo quiere mirar los resultados filtrados en pantalla (queda en `CU002`) y no descargarlos. A veces querrá descargar sin haber filtrado (directamente `CU003` sobre los crudos). Y, cuando D2 se profundice como fuente de lectura en una versión futura, el investigador podrá iniciar `CU003` sobre una búsqueda vieja del historial sin volver a ejecutar `CU001`. Ese abanico de combinaciones es lo que justifica tener CU separados por capacidad y no uno solo secuencial.
+- **Cuando el camino feliz de un CU queda largo, se descompone en slices.** No los CU en sí, sino su flujo principal. Los slices son módulos que aportan valor por sí mismos hacia el objetivo del CU. En este TP, `CU001` se descompone en dos slices básicos (`B1` y `B2`); `CU002` y `CU003` quedan cada uno con un único slice básico (`B`) porque sus flujos son cortos.
 
 ## Convención de identificadores y trazabilidad
 
