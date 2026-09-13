@@ -82,7 +82,7 @@ CU001 · Ejecutar una búsqueda BLAST
 ### Slices básicos — descripción
 
 - **`CU001_B1` · Cargar, configurar y validar la búsqueda (pasos 1-7).** El investigador ingresa la secuencia query, elige el modo (local o remoto), la base de datos, el programa BLAST y los parámetros pre-búsqueda; al presionar **Ejecutar búsqueda**, el sistema valida el alfabeto de la secuencia, los rangos de los parámetros y la compatibilidad entre programa/query/base de datos. **Valor entregado:** una búsqueda queda configurada y validada, lista para ser ejecutada. **Realiza:** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06.
-- **`CU001_B2` · Ejecutar la búsqueda y presentar resultados (pasos 8-9).** El sistema invoca a BLAST+ con la configuración ya validada, muestra un indicador de progreso sin bloquear la interfaz y, al terminar, presenta la tabla de alineamientos con las columnas mínimas. **Valor entregado:** el investigador ve los alineamientos que BLAST+ devolvió para su búsqueda. **Realiza:** RF-07, RF-08.
+- **`CU001_B2` · Ejecutar la búsqueda, presentar resultados y persistir (pasos 8-9).** El sistema invoca a BLAST+ con la configuración ya validada, muestra un indicador de progreso sin bloquear la interfaz y, al terminar, presenta la tabla de alineamientos con las columnas mínimas y persiste la búsqueda + resultados crudos en D2. **Valor entregado:** el investigador ve los alineamientos que BLAST+ devolvió, y la búsqueda queda registrada para uso posterior aunque el investigador nunca ejerza `CU002` ni `CU003`. **Realiza:** RF-07, RF-08, RF-11.
 
 ### Slices alternativos — descripción
 
