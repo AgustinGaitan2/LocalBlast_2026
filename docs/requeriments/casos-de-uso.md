@@ -135,6 +135,43 @@ CU002 · Refinar los resultados con filtros post-búsqueda
 
 ---
 
+## CU003 · Descargar los resultados en un formato
+
+- **Deriva del proceso:** P2 · Filtrar y entregar resultados
+- **Actor principal:** Investigador/a
+- **Objetivo:** Obtener, en su equipo, un archivo con los alineamientos actualmente visibles en la interfaz, en el formato adecuado para su análisis posterior.
+- **Realiza:** RF-10
+- **Precondición:** Existe una búsqueda con resultados visibles en la interfaz (postcondición de `CU001`). Los resultados pueden estar filtrados (postcondición de `CU002`) o no; en ambos casos `CU003` descarga lo que está a la vista. En una versión futura del sistema, cuando D2 sea legible desde la interfaz, `CU003` también podrá iniciarse a partir de una búsqueda cargada del historial, sin haber ejecutado `CU001` en la sesión actual.
+- **Disparador:** El investigador quiere llevarse un archivo con los resultados.
+- **Garantía de éxito:** El investigador tiene, en su equipo, un archivo en el formato pedido con los alineamientos que estaban visibles al momento de presionar **Descargar**.
+- **Garantía mínima:** El archivo entregado nunca contiene hits que no estuvieran visibles en la tabla al momento de descargar, ni omite hits que sí lo estaban.
+
+### Flujo principal
+
+1. El investigador elige el **formato de descarga** (CSV, JSON, FASTA, tabular BLAST `-outfmt 6`, o XML) y presiona **Descargar**.
+2. El sistema arma el archivo con los alineamientos actualmente visibles en la tabla, en el formato pedido, e incluye una sección de metadatos con parámetros pre-búsqueda, base de datos usada, timestamp y filtros post-búsqueda aplicados (si los hay).
+3. El sistema entrega el archivo al investigador.
+
+**Postcondición:** El archivo con los resultados (filtrados o no, según el estado de la tabla al momento de la descarga) está en el equipo del investigador. No se modifica D2 (la persistencia ya la hizo `CU001_B2` al ejecutar).
+
+### Por qué este CU no se subdivide en slices
+
+`CU003` es corto (3 pasos) y sus pasos no son separables en módulos con valor propio: elegir formato sin descargar no deja nada útil, y descargar sin elegir formato daría un default arbitrario. El slice básico es entonces uno solo, identificado como `CU003_B`.
+
+### Slices del CU
+
+```
+CU003 · Descargar los resultados en un formato
+├─ Camino feliz
+│  └─ CU003_B   — pasos 1-3:  elegir formato y descargar los resultados actualmente visibles
+└─ Caminos alternativos
+   └─ CU003_A1  — ningún resultado supera los filtros post-búsqueda
+```
+
+### Slices alternativos — descripción
+
+- **`CU003_A1` · Ningún resultado supera los filtros post-búsqueda.** El investigador aplicó filtros que dejan la tabla vacía y de todos modos pide descargar. El sistema no impide la descarga: entrega un archivo con encabezados y la sección de metadatos de la búsqueda (parámetros, base de datos, timestamp, filtros aplicados) pero sin filas de hits, para que el investigador tenga constancia del intento. No hay persistencia adicional (la búsqueda ya está en D2 con sus resultados crudos, desde `CU001_B2`). **Realiza:** RF-10.
+
 ## Trazabilidad RF → CU → slice
 
 La tabla `RF → CU → slice → HU` (con las HU incluidas) está en [`historias-usuario.md`](historias-usuario.md). Acá se resume la parte `RF → CU → slice`:
