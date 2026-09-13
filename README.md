@@ -33,7 +33,7 @@ Actualmente, la realización de alineamientos locales de secuencias mediante BLA
 
 ## 2. Documentación del Proyecto
 Para consultar la Especificación de Requisitos de Software (SRS) completa, visión, casos de uso y escenarios de calidad, diríjase a:
-👉 [`docs/requirements/srs.md`](docs/requirements/srs.md)
+👉 [`docs/requeriments/srs.md`](docs/requeriments/srs.md)
 
 ---
 
