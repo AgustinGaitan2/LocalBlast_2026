@@ -11,7 +11,6 @@ Formato de cada HU:
 
 Para el TP1 se detallan las HU de **todos los slices identificados en los casos de uso** — los cuatro básicos (`CU001_B1`, `CU001_B2`, `CU002_B`, `CU003_B`), las tres alternativas (`CU001_A1`, `CU001_A2`, `CU003_A1`) y las cuatro excepciones (`CU001_E1`, `CU001_E2`, `CU001_E3`, `CU001_E4`). En total, 11 historias de usuario.
 
-
 **Numeración:** las HU se enumeran de forma consecutiva por CU y, dentro de cada CU, en el orden: slices básicos (`B` / `B1`, `B2`) → slices alternativos (`A1`, `A2`, …) → slices de excepción (`E1`, `E2`, …). Así los identificadores acompañan el orden en el que aparecen los slices en [`casos-de-uso.md`](casos-de-uso.md).
 
 ---
@@ -46,14 +45,14 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
-### HU02_CU001_B2 · Ejecutar la búsqueda BLAST y presentar los resultados
+### HU02_CU001_B2 · Ejecutar la búsqueda BLAST, presentar los resultados y persistir en el historial
 
 - **Deriva de:** `CU001`, slice `B2` (pasos 8-9 del camino feliz)
-- **Realiza:** RF-07, RF-08
+- **Realiza:** RF-07, RF-08, RF-11
 
 > **Como** investigador/a,
-> **quiero** que el sistema ejecute la búsqueda en segundo plano y me muestre los resultados en una tabla dentro de la misma vista cuando termine,
-> **para** para poder seguir trabajando en la aplicación mientras la búsqueda corre, sin quedarme atado a una pantalla de espera.
+> **quiero** que el sistema ejecute la búsqueda en segundo plano, me muestre los resultados en una tabla dentro de la misma vista cuando termine, y guarde la búsqueda en el historial automáticamente,
+> **para** poder seguir trabajando en la aplicación mientras la búsqueda corre —sin quedarme atado a una pantalla de espera— y no perder la búsqueda aunque no llegue a descargarla ni refinarla en esta sesión.
 
 **Criterios de aceptación (Given-When-Then)**
 
@@ -66,6 +65,11 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **Given** una búsqueda que finalizó correctamente y BLAST+ devolvió al menos un hit,
   - **When** el sistema recibe los resultados,
   - **Then** los presenta en una tabla con al menos las columnas: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura.
+
+- **CA-03.** Persistencia automática en el historial:
+  - **Given** una búsqueda que finalizó correctamente,
+  - **When** el sistema termina de mostrar los resultados en la tabla,
+  - **Then** queda registrada en el historial (D2) una entrada con los parámetros pre-búsqueda, la base de datos usada, el timestamp y el conjunto **completo** de resultados crudos que devolvió BLAST+ (antes de cualquier filtro post-búsqueda) — sin que el investigador tenga que ejercer `CU002` ni `CU003` para que la persistencia ocurra.
 
 ---
 
@@ -83,12 +87,12 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 - **CA-01.** Cancelación de una búsqueda local:
   - **Given** una búsqueda en modo local que BLAST+ está ejecutando en el servidor (indicador de progreso visible),
   - **When** el investigador presiona "Cancelar",
-  - **Then** el sistema aborta el subproceso local de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero y no muestra tabla de resultados.
+  - **Then** el sistema aborta el subproceso local de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero, no muestra tabla de resultados y no persiste nada en D2.
 
 - **CA-02.** Cancelación de una búsqueda remota:
   - **Given** una búsqueda en modo remoto que BLAST+ tramita contra NCBI (indicador de progreso visible),
   - **When** el investigador presiona "Cancelar",
-  - **Then** el sistema cancela la solicitud a través de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero y no muestra tabla de resultados.
+  - **Then** el sistema cancela la solicitud a través de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero, no muestra tabla de resultados y no persiste nada en D2.
 
 ---
 
@@ -198,25 +202,25 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 - **CA-01.** Timeout de comunicación con NCBI:
   - **Given** una búsqueda en modo remoto en ejecución y la API remota de NCBI que no responde dentro del tiempo esperado,
   - **When** BLAST+ reporta timeout de comunicación,
-  - **Then** el sistema corta el flujo del CU y muestra el mensaje de error de BLAST+, aclarando explícitamente que se trata de un timeout de la conexión remota y no de un problema con los parámetros de la búsqueda.
+  - **Then** el sistema corta el flujo del CU, no persiste nada en D2 y muestra el mensaje de error de BLAST+, aclarando explícitamente que se trata de un timeout de la conexión remota y no de un problema con los parámetros de la búsqueda.
 
 - **CA-02.** Error explícito devuelto por NCBI:
   - **Given** una búsqueda en modo remoto que BLAST+ envió a NCBI,
   - **When** NCBI responde con un error explícito (rate limit, query rejected, u otro) que BLAST+ propaga al sistema,
-  - **Then** el sistema corta el flujo del CU y muestra el error literal que devolvió BLAST+, incluyendo el mensaje original de NCBI, sin traducirlo ni reinterpretarlo.
+  - **Then** el sistema corta el flujo del CU, no persiste nada en D2 y muestra el error literal que devolvió BLAST+, incluyendo el mensaje original de NCBI, sin traducirlo ni reinterpretarlo.
 
 ---
 
-## HU derivadas de CU002 · Refinar y descargar los resultados de una búsqueda
+## HU derivadas de CU002 · Refinar los resultados con filtros post-búsqueda
 
-### HU09_CU002_B · Filtrar los alineamientos y descargarlos en un formato
+### HU09_CU002_B · Refinar la vista con filtros post-búsqueda
 
 - **Deriva de:** `CU002`, slice `B` (único slice básico; el camino feliz no se subdivide)
-- **Realiza:** RF-09, RF-10
+- **Realiza:** RF-09
 
 > **Como** investigador/a,
-> **quiero** aplicar filtros post-búsqueda sobre la tabla de resultados sin volver a correr BLAST y descargar los alineamientos filtrados en el formato que necesite,
-> **para** llevarme solo los hits relevantes y en la forma en que voy a seguir procesándolos.
+> **quiero** aplicar filtros post-búsqueda sobre la tabla de resultados y verla refrescada en el momento, sin correr BLAST otra vez,
+> **para** poder explorar interactivamente los alineamientos con distintos criterios y quedarme mirando el subconjunto relevante, aunque no llegue a descargar nada.
 
 **Criterios de aceptación (Given-When-Then)**
 
@@ -225,22 +229,52 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **When** el investigador confirma los filtros,
   - **Then** la tabla se re-filtra en el momento mostrando solo los hits que cumplen ambos umbrales, sin volver a invocar a BLAST+.
 
-- **CA-02.** Descarga en el formato elegido:
-  - **Given** una tabla de resultados con filtros post-búsqueda ya aplicados,
-  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
-  - **Then** el sistema entrega un archivo `.csv` que contiene únicamente los hits filtrados, con una fila de encabezados que incluye al menos las columnas mínimas (identificador, score, E-value observado, % identidad, % cobertura).
+- **CA-02.** Ajuste sucesivo de filtros no re-ejecuta BLAST:
+  - **Given** una tabla ya filtrada por identidad ≥ 80%,
+  - **When** el investigador afloja el umbral a identidad ≥ 60% y agrega cobertura ≥ 70%,
+  - **Then** la tabla se re-filtra sobre el conjunto crudo original (no sobre el resultado del filtro anterior) y aparecen los hits que cumplen los nuevos umbrales, sin ninguna invocación adicional a BLAST+.
 
-- **CA-03.** Persistencia en el historial al descargar:
-  - **Given** una descarga que finalizó correctamente,
-  - **When** el archivo termina de entregarse al investigador,
-  - **Then** el sistema guarda en el historial (D2) una entrada con los parámetros de la búsqueda, la base de datos usada, el timestamp y el conjunto de resultados obtenidos (antes de aplicar los filtros post-búsqueda).
+- **CA-03.** Filtros no modifican el historial:
+  - **Given** una búsqueda ya persistida en D2 al terminar su ejecución (postcondición de `CU001_B2`),
+  - **When** el investigador aplica cualquier combinación de filtros post-búsqueda,
+  - **Then** la entrada en D2 no se modifica: sigue conteniendo el conjunto **crudo** completo de resultados, para que en el futuro se pueda volver a esa búsqueda y probar filtros distintos.
 
 ---
 
-### HU10_CU002_A1 · Descarga cuando ningún resultado supera los filtros
+## HU derivadas de CU003 · Descargar los resultados en un formato
 
-- **Deriva de:** `CU002`, slice `A1` (camino alternativo dentro del slice `B`)
-- **Realiza:** RF-09, RF-10
+### HU10_CU003_B · Descargar los alineamientos actualmente visibles en un formato
+
+- **Deriva de:** `CU003`, slice `B` (único slice básico; el camino feliz no se subdivide)
+- **Realiza:** RF-10
+
+> **Como** investigador/a,
+> **quiero** descargar los alineamientos que estoy viendo en la tabla —filtrados o no— en el formato que necesite,
+> **para** llevarme el archivo tal cual quedó configurada la vista y seguir procesándolo por fuera del sistema.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Descarga en el formato elegido, sobre resultados sin filtrar:
+  - **Given** una tabla de resultados sin filtros post-búsqueda aplicados (postcondición directa de `CU001_B2`),
+  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
+  - **Then** el sistema entrega un archivo `.csv` con la totalidad de los alineamientos crudos, con una fila de encabezados que incluye al menos las columnas mínimas (identificador, score, E-value observado, % identidad, % cobertura), y una sección de metadatos con los parámetros pre-búsqueda, la base de datos y el timestamp.
+
+- **CA-02.** Descarga en el formato elegido, sobre resultados filtrados:
+  - **Given** una tabla de resultados con filtros post-búsqueda aplicados (postcondición de `CU002_B`),
+  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
+  - **Then** el sistema entrega un archivo `.csv` que contiene únicamente los hits que superan los filtros vigentes al momento de la descarga, con la fila de encabezados y la sección de metadatos donde figuran también los filtros post-búsqueda aplicados.
+
+- **CA-03.** La descarga no modifica el historial:
+  - **Given** una búsqueda ya persistida en D2 (postcondición de `CU001_B2`),
+  - **When** el investigador descarga los resultados (con o sin filtros aplicados),
+  - **Then** la entrada en D2 no se modifica ni se duplica: sigue conteniendo el conjunto crudo de resultados original, con el timestamp de la ejecución (no el de la descarga).
+
+---
+
+### HU11_CU003_A1 · Descarga cuando ningún resultado supera los filtros
+
+- **Deriva de:** `CU003`, slice `A1` (camino alternativo dentro del slice `B`)
+- **Realiza:** RF-10
 
 > **Como** investigador/a,
 > **quiero** poder descargar el archivo aunque los filtros post-búsqueda dejen la tabla vacía,
@@ -253,11 +287,11 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
   - **Then** el sistema entrega un archivo `.csv` con la fila de encabezados y una sección de metadatos de la búsqueda (parámetros pre-búsqueda, base de datos, timestamp, filtros post-búsqueda aplicados), pero **sin** filas de hits.
 
-- **CA-02.** Persistencia en historial con resultado vacío tras filtros:
+- **CA-02.** El historial mantiene los resultados crudos aunque la descarga sea vacía:
   - **Given** una búsqueda cuya descarga se hizo con filtros que dejaron cero hits visibles,
   - **When** el sistema termina de entregar el archivo,
-  - **Then** la entrada en el historial (D2) queda registrada con el conjunto **completo** de resultados originales que devolvió BLAST+ (antes de aplicar los filtros post-búsqueda), no solo con los hits filtrados — de forma que el investigador pueda volver más tarde y probar filtros distintos sin re-ejecutar BLAST.
-
+  - **Then** la entrada en D2 permanece igual que antes: contiene el conjunto **completo** de resultados crudos que devolvió BLAST+ (persistido en `CU001_B2`), no la lista vacía que quedó tras el filtro, de forma que el investigador pueda volver más tarde y probar filtros distintos sin re-ejecutar BLAST.
+    
 ---
 
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
