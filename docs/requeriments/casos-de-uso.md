@@ -36,13 +36,14 @@ Un caso de uso representa **una capacidad discreta que el sistema le brinda al a
 
 ## CU001 · Ejecutar una búsqueda BLAST
 
+- **Deriva del proceso:** P1 · Ejecutar búsqueda BLAST
 - **Actor principal:** Investigador/a
 - **Actor secundario:** Motor **BLAST+** (invocado por el sistema en ambos modos: local, y remoto con la flag `-remote` — es BLAST+ el que se comunica con NCBI del otro lado, nunca directamente nuestra GUI)
-- **Objetivo:** Obtener un conjunto de alineamientos de una secuencia query contra una base de datos elegida, con parámetros del algoritmo bajo control del usuario, y verlos en la interfaz.
-- **Realiza:** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08
+- **Objetivo:** Obtener un conjunto de alineamientos de una secuencia query contra una base de datos elegida, con parámetros del algoritmo bajo control del usuario, verlos en la interfaz, y que la búsqueda quede persistida en el historial para uso posterior.
+- **Realiza:** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-11
 - **Precondición:** Existe al menos una base de datos disponible (local, con su entrada en D1, o remota entre las que ofrece NCBI). El investigador accedió a la interfaz web.
 - **Disparador:** El investigador decide iniciar una nueva búsqueda BLAST.
-- **Garantía de éxito:** El investigador ve la tabla de alineamientos correspondiente a su búsqueda en la interfaz. Ese conjunto de resultados queda disponible en la sesión para que el investigador lo procese después (típicamente con `CU002`).
+- **Garantía de éxito:** El investigador ve la tabla de alineamientos correspondiente a su búsqueda en la interfaz, y la búsqueda (con sus resultados crudos) queda persistida en D2. Esos resultados quedan disponibles en la sesión para que el investigador los procese después con `CU002` (refinar) o `CU003` (descargar), si así lo decide.
 - **Garantía mínima:** El sistema nunca invoca a BLAST+ con datos que no pasaron validación, ni deja búsquedas parcialmente ejecutadas consumiendo recursos indefinidamente.
 
 ### Flujo principal
@@ -55,9 +56,9 @@ Un caso de uso representa **una capacidad discreta que el sistema le brinda al a
 6. El investigador presiona **Ejecutar búsqueda**.
 7. El sistema **valida** que la secuencia sea reconocible como ADN, ARN o proteína, que los parámetros estén dentro de rangos lógicos, y que la combinación de programa BLAST elegido, tipo de la secuencia query y tipo de la base de datos seleccionada sea **compatible** (por ejemplo, no dejar correr `blastp` sobre una secuencia de nucleótidos).
 8. El sistema **invoca a BLAST+** en segundo plano con la combinación de opciones armada a partir del formulario (programa, ruta de la base de datos, query, parámetros pre-búsqueda, y la flag `-remote` cuando el modo elegido es remoto), y muestra un indicador de progreso sin bloquear la interfaz. La comunicación con NCBI, cuando corresponde, la realiza BLAST+ internamente por la flag `-remote`; el sistema solo espera su respuesta.
-9. Cuando termina, el sistema muestra la **lista de alineamientos** (hits) en una tabla, con columnas mínimas: identificador del hit, score, E-value observado, % identidad, % cobertura.
+9. Cuando termina, el sistema muestra la **lista de alineamientos** (hits) en una tabla, con columnas mínimas: identificador del hit, score, E-value observado, % identidad, % cobertura, y **persiste la búsqueda con sus resultados crudos en D2** (parámetros pre-búsqueda, base de datos usada, timestamp y lista completa de alineamientos antes de cualquier filtro).
 
-**Postcondición:** El investigador ve la tabla de alineamientos de su búsqueda en la interfaz. Los resultados quedan disponibles en la sesión para que el investigador los use en `CU002` (refinar y descargar) si así lo decide.
+**Postcondición:** El investigador ve la tabla de alineamientos de su búsqueda en la interfaz, y la búsqueda queda persistida en D2. Los resultados quedan disponibles en la sesión para que el investigador los use en `CU002` (refinar) o `CU003` (descargar) si así lo decide.
 
 ### Descomposición en slices
 
