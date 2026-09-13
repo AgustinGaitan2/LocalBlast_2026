@@ -88,7 +88,7 @@ flowchart TD
 
 - **D1 · Catálogo de bases de datos.** Contiene los **metadatos** de cada base de datos local disponible: nombre visible, tipo (nucleótidos / proteínas), ruta al conjunto de archivos de índice que produjo `makeblastdb`, fecha de alta, tamaño. Los archivos físicos de índice (`.nhr`, `.nin`, `.nsq`, etc.) los escribe y los lee **BLAST+**; nuestro sistema los registra en D1 pero no los interpreta.
 
-- **D2 · Búsquedas y resultados históricos.** Guarda la traza de cada búsqueda ejecutada (parámetros, base de datos usada, timestamp) junto con su resultado, para que el usuario pueda volver a consultar o descargar sin repetir la ejecución. En esta primera versión del sistema solo se **escribe** en D2 (flujo lleno); la lectura (flujo punteado) queda documentada como uso futuro — no está en el alcance profundizado del cuatrimestre.
+- **D2 · Búsquedas y resultados históricos. Guarda la traza de cada búsqueda ejecutada (parámetros, base de datos usada, timestamp) junto con su resultado crudo (antes de aplicar filtros post-búsqueda), para que el usuario pueda volver a consultar o descargar sin repetir la ejecución.
 ---
 
 ## Nota sobre el alcance profundizado
