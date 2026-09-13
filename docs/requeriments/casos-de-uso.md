@@ -186,7 +186,8 @@ La tabla `RF → CU → slice → HU` (con las HU incluidas) está en [`historia
 | RF-06 | CU001 | CU001_B1, CU001_E1, CU001_E2 |
 | RF-07 | CU001 | CU001_B2, CU001_A1, CU001_E4 |
 | RF-08 | CU001 | CU001_B2 |
-| RF-09 | CU002 | CU002_B, CU002_A1 |
-| RF-10 | CU002 | CU002_B, CU002_A1 |
+| RF-09 | CU002 | CU002_B |
+| RF-10 | CU003 | CU003_B, CU003_A1 |
+| RF-11 | CU001 | CU001_B2 |
 
 Un mismo RF puede aparecer en varios slices del mismo CU — por ejemplo RF-06 (validación pre-ejecución) se realiza en el camino feliz `B1` (cuando la validación pasa) y también en `E1` y `E2` (cuando falla y corta el flujo). Esa dispersión es esperable: los slices de excepción son otra forma en que se cumple el RF de validación.
