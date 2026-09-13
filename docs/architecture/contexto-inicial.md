@@ -67,11 +67,11 @@ flowchart TD
     D1 -->|lista de bases de datos<br/>disponibles con ubicación| P1
     D1 -->|catálogo para el admin| P3
 
-    P2 -->|guarda búsqueda + resultados| D2
+    P1 -->|guarda búsqueda<br/>+ resultados crudos| D2
     D2 -.->|historial consultable<br/>uso futuro| P2
 ```
 
-**Chequeo de balanceo:** los seis flujos externos aparecen en Nivel 1 con los mismos extremos externos que en Nivel 0. Los que van hacia BLAST+ se dividen entre P1 (para búsqueda) y P3 (para construir índices), pero desde afuera del sistema siguen siendo los dos mismos flujos.
+**Chequeo de balanceo:** los seis flujos externos aparecen en Nivel 1 con los mismos extremos externos que en Nivel 0.
 
 
 ## Descripción de los procesos y almacenes
