@@ -181,5 +181,6 @@ Las historias de usuario asociadas a cada slice (relación 1:1 slice ↔ HU), co
 | **Filtro pre-búsqueda** | Valor de un parámetro del algoritmo BLAST que se fija antes de ejecutar y que afecta al resultado (E-value máximo, matriz, tamaño de palabra, etc.). |
 | **Filtro post-búsqueda** | Criterio que se aplica sobre resultados ya calculados para restringir qué se muestra o descarga, sin volver a correr BLAST (umbral de % identidad, cobertura, taxón). |
 | **Slice** | Corte de un caso de uso que aporta valor por sí mismo hacia el objetivo del CU. Puede ser básico (parte del camino feliz), alternativo (camino alterno) o de excepción (terminación abrupta). Se corresponde 1:1 con una historia de usuario. |
+| **Historial (D2)** | Almacén interno donde se persisten las búsquedas ejecutadas y sus resultados crudos. En esta versión solo se escribe; la lectura queda como uso futuro. |
 
 
