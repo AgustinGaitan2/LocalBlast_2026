@@ -57,12 +57,25 @@ LocalBlast es una **interfaz web para BLAST+** que resuelve las tres carencias:
 - Anotación funcional o enriquecimiento biológico de los hits más allá de lo que devuelve BLAST.
 
 ---
-## 2. Stakeholders y usuarios
+## 2. Stakeholders y actores del sistema
 
-| Actor / Stakeholder | Rol | Usa el sistema | Interés en el proyecto |
-|---|---|---|---|
-| **Investigador/a** | Estudiante de grado/posgrado, tesista, becario/a, docente-investigador/a | Sí (usuario final principal) | Reducir el tiempo de las búsquedas BLAST recurrentes y evitar la fricción de la terminal o de la web de NCBI. |
-| **Administrador/a de bases de datos** | Bioinformático/a del laboratorio, técnico/a de IT del grupo de investigación | Sí | Poder mantener bases de datos propias (secuencias del laboratorio) y espejos de bases públicas sin depender del acceso externo. |
+### 2.1 Stakeholders
+
+Se conservan los stakeholders identificados en el canvas de descubrimiento (ver [README](../../README.md#1-canvas-de-descubrimiento-síntesis) del repositorio):
+
+- **Estudiantes de Grado y Posgrado.** Necesitan realizar alineamientos locales rápidos para trabajos prácticos o investigación sin perder tiempo en la configuración de entornos por terminal.
+- **Investigadores y Docentes de Bioinformática / Biología Molecular.** Buscan una herramienta ágil e intuitiva para explorar resultados con filtros visuales personalizados que no están disponibles de forma nativa en la web tradicional.
+
+Estos son los grupos humanos cuyo interés motiva el proyecto. No son (necesariamente) categorías exhaustivas de los actores del sistema, ni describen quién tiene qué permiso en la aplicación, para eso ver la subsección siguiente.
+
+### 2.2 Actores del sistema
+
+Los stakeholders anteriores interactúan con el sistema tomando alguno de estos dos roles operativos, que son los que aparecen en el DFD Nivel 0 y en el modelo de dominio:
+
+- **Investigador/a.** El actor principal del proceso profundizado P1. Es quien ejecuta búsquedas, refina resultados y los descarga. Cualquiera de los dos grupos de stakeholders arriba mencionados puede asumir este rol.
+- **Administrador/a de bases de datos.** El actor del proceso P3 (no profundizado en este TP). Es quien mantiene el catálogo de bases de datos locales del laboratorio. Suele ser un bioinformático o técnico de IT del grupo de investigación, aunque nada impide que un investigador con permisos administre su propio catálogo.
+
+Además, el sistema dialoga con un **actor no humano**: **BLAST+**, la suite oficial de línea de comandos de NCBI, que aparece como sistema externo en el DFD. LocalBlast lo invoca, no lo reimplementa.
 
 ---
 
