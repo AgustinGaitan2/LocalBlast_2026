@@ -32,7 +32,7 @@ Ninguna de las dos permite hoy, con una sola herramienta: correr BLAST **local o
 
 ### 1.2 Propuesta de valor
 
-LocalBlast es una **interfaz web para BLAST+** que resuelve las tres carencias:
+LocalBlast es una **interfaz gráfica para BLAST+** que resuelve las tres carencias:
 
 - El **investigador** decide con un botón si el alineamiento se corre localmente (contra bases de datos del laboratorio) o remotamente. En ambos casos el sistema invoca a BLAST+; en modo remoto le pasa la flag `-remote` y es BLAST+ quien se comunica con NCBI del otro lado.
 - El **administrador** puede subir archivos FASTA para dejarlos disponibles como bases de datos locales — sean del propio laboratorio o de bases de datos públicas como SwissProt, que el administrador descarga por su cuenta antes de subirlas al sistema.
