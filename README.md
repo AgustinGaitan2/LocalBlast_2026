@@ -7,6 +7,25 @@
 
 ---
 
+---
+
+## Estructura del Repositorio
+
+````
+LocalBlast_2026/
+├── .gitignore
+├── README.md
+└── docs/
+    ├── architecture/
+    │   └── contexto-inicial.md
+    ├── requeriments/
+    │   ├── casos-de-uso.md
+    │   ├── historias-usuario.md
+    │   ├── modelo-dominio.md
+    │   └── srs.md
+    └── uso-ia.md
+````
+
 ## 1. Canvas de Descubrimiento (Síntesis)
 
 ### Problema
