@@ -6,9 +6,6 @@
 * Wursten Augusto
 
 ---
-
----
-
 ## Estructura del Repositorio
 
 ````
