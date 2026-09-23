@@ -51,6 +51,8 @@ LocalBlast es una **interfaz gráfica para BLAST+** que resuelve las tres carenc
 
 ### 1.4 Fuera del alcance
 
+- **Administración de bases de datos locales por parte del rol Administrador (proceso P3).** El diseño integral del sistema contempla un rol Administrador que da de alta, actualiza y da de baja bases de datos BLAST locales a partir de archivos FASTA subidos desde su equipo, invocando internamente a `makeblastdb`. Esta capacidad **se documenta a nivel conceptual** en el DFD (Nivel 0 y Nivel 1, ver [`docs/architecture/contexto-inicial.md`](../architecture/contexto-inicial.md)) y en el modelo de dominio, para dejar registrada la visión completa del producto, pero **queda fuera del alcance de este cuatrimestre por restricciones de tiempo**: no tiene requerimientos funcionales asociados, no se detalla como casos de uso ni historias de usuario, y no se implementará en el TP. Para las funcionalidades del modo local se asume que el catálogo D1 ya contiene al menos una base de datos, cargada por fuera del sistema.
+- **Autenticación y gestión de usuarios/roles.** Dado que en el cuatrimestre solo se profundiza el rol Investigador, no se implementa autenticación ni gestión de sesiones. Queda para versiones futuras junto con la incorporación del rol Administrador.
 - Modificación del algoritmo BLAST subyacente. LocalBlast **usa** el motor BLAST+; no lo reimplementa.
 - Herramientas de alineamiento múltiple (ClustalW, Muscle) o modelado 3D de estructuras.
 - Búsquedas en lote con múltiples queries simultáneas en una sola ejecución (queda como posible ampliación en el Trabajo Integrador).
