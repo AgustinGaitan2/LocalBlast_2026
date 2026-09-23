@@ -35,9 +35,10 @@ Ninguna de las dos permite hoy, con una sola herramienta: correr BLAST **local o
 LocalBlast es una **interfaz gráfica para BLAST+** que resuelve las tres carencias:
 
 - El **investigador** decide con un botón si el alineamiento se corre localmente (contra bases de datos del laboratorio) o remotamente. En ambos casos el sistema invoca a BLAST+; en modo remoto le pasa la flag `-remote` y es BLAST+ quien se comunica con NCBI del otro lado.
-- El **administrador** puede subir archivos FASTA para dejarlos disponibles como bases de datos locales — sean del propio laboratorio o de bases de datos públicas como SwissProt, que el administrador descarga por su cuenta antes de subirlas al sistema.
 - Los **filtros pre-búsqueda** se cargan en un formulario con valores por defecto sensatos; los **filtros post-búsqueda** se aplican en la tabla de resultados sin volver a correr BLAST.
 - Los **resultados** se descargan en CSV, JSON, FASTA, tabular BLAST o XML.
+
+> **Nota sobre el rol Administrador.** El diseño integral del sistema contempla también un **rol Administrador** encargado de subir archivos FASTA (del propio laboratorio o de bases públicas como SwissProt) para dejarlos disponibles como bases de datos locales. Esta capacidad aparece en los diagramas de contexto y en el modelo de dominio para dejar la visión completa del producto, pero **queda fuera del alcance del TP1 de este cuatrimestre por restricciones de tiempo** (ver 1.4). Para las funcionalidades de modo local se asume que el catálogo ya está poblado por fuera del sistema.
 
 ### 1.3 Dentro del alcance
 
