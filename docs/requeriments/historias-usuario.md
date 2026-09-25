@@ -15,199 +15,33 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
-## HU derivadas de CU001 · Ejecutar una búsqueda BLAST
+## HU derivadas de CU001 · Cargar la secuencia query
 
-### HU01_CU001_B1 · Cargar, configurar y validar una búsqueda BLAST
+### HU01_CU001_B · Cargar la secuencia query y chequear su formato
 
-- **Deriva de:** `CU001`, slice `B1` (pasos 1-7 del camino feliz)
-- **Realiza:** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06
+- **Deriva de:** `CU001`, slice `B` (pasos 1-2 del camino feliz)
+- **Realiza:** RF-01, RF-02
 
 > **Como** investigador/a,
-> **quiero** cargar mi secuencia query, elegir el modo (local o remoto), la base de datos, el programa BLAST y los parámetros pre-búsqueda, y que el sistema valide todo antes de habilitar la ejecución,
-> **para** no perder tiempo lanzando búsquedas mal configuradas.
+> **quiero** subir un archivo FASTA o pegar la secuencia como texto y que el sistema la deje disponible con su alfabeto inferido,
+> **para** poder reutilizar la misma secuencia en distintas configuraciones de búsqueda sin tener que cargarla de nuevo.
 
 **Criterios de aceptación (Given-When-Then)**
 
-- **CA-01.** Configuración completa y válida en modo remoto:
-  - **Given** una secuencia FASTA de proteína válida pegada en el formulario, modo remoto seleccionado, base de datos remota "nr", programa `blastp` y parámetros pre-búsqueda en sus valores por defecto,
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema valida la secuencia y los parámetros, no muestra errores, y habilita la ejecución de la búsqueda (transición al slice `B2`).
+- **CA-01.** Carga de secuencia FASTA de proteína desde archivo:
+  - **Given** un archivo `.fasta` bien formado con un único registro de secuencia de aminoácidos válidos,
+  - **When** el investigador lo sube desde el formulario,
+  - **Then** el sistema deja la secuencia disponible en la sesión, muestra el alfabeto inferido "proteína" y habilita los controles del `CU002` para configurar la búsqueda.
 
-- **CA-02.** Valores por defecto sensatos según el programa:
-  - **Given** un formulario donde el investigador acaba de seleccionar el programa `blastp`,
-  - **When** la interfaz carga los parámetros pre-búsqueda,
-  - **Then** los campos de E-value máximo, matriz de sustitución, tamaño de palabra y penalización de gaps aparecen prellenados con los valores por defecto correspondientes al programa `blastp` (no los mismos que para `blastn`).
+- **CA-02.** Carga de secuencia pegada como texto plano:
+  - **Given** una secuencia de ADN pegada en el textarea del formulario, sin encabezado FASTA,
+  - **When** el investigador confirma la carga,
+  - **Then** el sistema la acepta como secuencia plana, infiere alfabeto "ADN" y la deja disponible para `CU002`.
 
-- **CA-03.** Base de datos coherente con el modo elegido:
-  - **Given** el investigador cambia el modo de "remoto" a "local",
-  - **When** el sistema recarga la lista de bases de datos disponibles,
-  - **Then** la lista muestra únicamente las bases de datos del catálogo local (leídas de D1), sin las bases estándar de NCBI que aparecían en modo remoto.
-
----
-
-### HU02_CU001_B2 · Ejecutar la búsqueda BLAST, presentar los resultados y persistir en el historial
-
-- **Deriva de:** `CU001`, slice `B2` (pasos 8-9 del camino feliz)
-- **Realiza:** RF-07, RF-08, RF-11
-
-> **Como** investigador/a,
-> **quiero** que el sistema ejecute la búsqueda en segundo plano, me muestre los resultados en una tabla dentro de la misma vista cuando termine, y guarde la búsqueda en el historial automáticamente,
-> **para** poder seguir trabajando en la aplicación mientras la búsqueda corre —sin quedarme atado a una pantalla de espera— y no perder la búsqueda aunque no llegue a descargarla ni refinarla en esta sesión.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** Ejecución asíncrona con indicador de progreso:
-  - **Given** una búsqueda ya configurada y validada (postcondición del slice `B1`),
-  - **When** el sistema invoca a BLAST+ en segundo plano,
-  - **Then** la interfaz muestra un indicador de progreso visible y permanece navegable — el investigador puede desplazarse dentro de la aplicación sin que la ejecución se interrumpa.
-
-- **CA-02.** Presentación de la tabla al finalizar:
-  - **Given** una búsqueda que finalizó correctamente y BLAST+ devolvió al menos un hit,
-  - **When** el sistema recibe los resultados,
-  - **Then** los presenta en una tabla con al menos las columnas: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura.
-
-- **CA-03.** Persistencia automática en el historial:
-  - **Given** una búsqueda que finalizó correctamente,
-  - **When** el sistema termina de mostrar los resultados en la tabla,
-  - **Then** queda registrada en el historial (D2) una entrada con los parámetros pre-búsqueda, la base de datos usada, el timestamp y el conjunto **completo** de resultados crudos que devolvió BLAST+ (antes de cualquier filtro post-búsqueda) — sin que el investigador tenga que ejercer `CU002` ni `CU003` para que la persistencia ocurra.
-
----
-
-### HU03_CU001_A1 · Cancelación manual de una búsqueda en curso
-
-- **Deriva de:** `CU001`, slice `A1` (camino alternativo durante el slice `B2`)
-- **Realiza:** RF-07
-
-> **Como** investigador/a,
-> **quiero** poder cancelar una búsqueda que está en ejecución,
-> **para** dejar de esperar y no consumir recursos remotos ni locales cuando me di cuenta que configuré algo mal o el resultado ya dejó de importarme.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** Cancelación de una búsqueda local:
-  - **Given** una búsqueda en modo local que BLAST+ está ejecutando en el servidor (indicador de progreso visible),
-  - **When** el investigador presiona "Cancelar",
-  - **Then** el sistema aborta el subproceso local de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero, no muestra tabla de resultados y no persiste nada en D2.
-
-- **CA-02.** Cancelación de una búsqueda remota:
-  - **Given** una búsqueda en modo remoto que BLAST+ tramita contra NCBI (indicador de progreso visible),
-  - **When** el investigador presiona "Cancelar",
-  - **Then** el sistema cancela la solicitud a través de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero, no muestra tabla de resultados y no persiste nada en D2.
-
----
-
-### HU04_CU001_A2 · Manejo de base de datos local no disponible
-
-- **Deriva de:** `CU001`, slice `A2` (camino alternativo en el paso 3)
-- **Realiza:** RF-03
-
-> **Como** investigador/a,
-> **quiero** que el sistema me informe claramente cuando la base de datos local que elegí no está en condiciones de ser usada, y me devuelva la lista actualizada para que yo decida,
-> **para** no quedarme trabado ni terminar corriendo contra una base equivocada porque el sistema me la sustituyó por su cuenta.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** Base de datos en proceso de actualización:
-  - **Given** modo local seleccionado y una base de datos del catálogo D1 que está en estado "actualizándose" porque P3 la está reconstruyendo en ese momento,
-  - **When** el investigador la selecciona en el paso 3,
-  - **Then** el sistema muestra el mensaje "La base de datos '\<nombre\>' está siendo actualizada y no puede usarse en este momento" y devuelve al investigador al paso 3 con la lista de bases locales actualizada, **sin** proponer un cambio automático a modo remoto.
-
-- **CA-02.** Base de datos con índice en error:
-  - **Given** modo local seleccionado y una base de datos cuyo índice quedó marcado como "con errores" tras un fallo previo de `makeblastdb`,
-  - **When** el investigador la selecciona en el paso 3,
-  - **Then** el sistema muestra un mensaje que explica que el índice está corrupto y sugiere contactar al administrador de bases de datos, y devuelve al investigador al paso 3.
-
----
-
-### HU05_CU001_E1 · Rechazo de secuencia query con formato inválido
-
-- **Deriva de:** `CU001`, slice `E1` (terminación abrupta detectada en el paso 7)
-- **Realiza:** RF-06
-
-> **Como** investigador/a,
-> **quiero** recibir un mensaje claro cuando la secuencia que subo o pego no es reconocible,
-> **para** poder corregirla de inmediato sin tener que adivinar qué le pasa.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** Caracter fuera del alfabeto:
-  - **Given** un texto pegado como query que contiene al menos un carácter fuera del alfabeto de ADN, ARN o proteína (por ejemplo un dígito o un símbolo de puntuación),
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que indica cuál es el carácter inválido y en qué posición aparece.
-
-- **CA-02.** FASTA con encabezado sin cuerpo:
-  - **Given** un archivo FASTA con una línea de encabezado (`>ID`) pero sin ninguna línea de secuencia debajo,
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El FASTA contiene un encabezado pero ninguna secuencia asociada".
-
----
-
-### HU06_CU001_E2 · Rechazo de parámetros pre-búsqueda fuera de rango
-
-- **Deriva de:** `CU001`, slice `E2` (terminación abrupta detectada en el paso 7)
-- **Realiza:** RF-04, RF-06
-
-> **Como** investigador/a,
-> **quiero** que el sistema me señale exactamente qué parámetro está fuera de rango y cuál es el rango válido para el programa BLAST que elegí,
-> **para** poder corregirlo sin consultar la documentación de BLAST+ por afuera.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** E-value negativo:
-  - **Given** un formulario completo con el campo "E-value máximo" en `-1`,
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que señala el campo "E-value" e indica que debe ser un número positivo (típicamente entre 0 y 10).
-
-- **CA-02.** Tamaño de palabra fuera del rango del programa:
-  - **Given** un formulario con programa `blastn` seleccionado y "Tamaño de palabra" = 3 (por debajo del mínimo válido para `blastn`),
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra un mensaje que señala el campo "Tamaño de palabra" e indica el rango válido para el programa `blastn`.
-
----
-
-### HU07_CU001_E3 · Rechazo de combinación programa / query / base de datos incompatible
-
-- **Deriva de:** `CU001`, slice `E3` (terminación abrupta detectada en el paso 7)
-- **Realiza:** RF-05
-
-> **Como** investigador/a,
-> **quiero** que el sistema me impida lanzar una combinación de programa BLAST y tipos de secuencia/base incompatibles, y me sugiera qué combinaciones sí funcionan con lo que ya cargué,
-> **para** no perder tiempo esperando un resultado que no va a existir.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** `blastp` sobre una query de nucleótidos:
-  - **Given** una secuencia query de nucleótidos (ADN o ARN), programa `blastp` seleccionado, y cualquier base de datos,
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El programa `blastp` espera queries de proteína. Para su query de nucleótidos, opciones válidas son: `blastn` (contra base de nucleótidos), `blastx` o `tblastx`".
-
-- **CA-02.** `blastn` contra una base de datos de proteínas:
-  - **Given** una secuencia query de nucleótidos, programa `blastn` seleccionado, y una base de datos de proteínas seleccionada,
-  - **When** el investigador presiona "Ejecutar búsqueda",
-  - **Then** el sistema no invoca a BLAST+, corta el flujo del CU y muestra el mensaje "El programa `blastn` requiere base de datos de nucleótidos. Elija otra base de datos, o cambie el programa a `blastx`".
-
----
-
-### HU08_CU001_E4 · Manejo de fallo del modo remoto de BLAST+
-
-- **Deriva de:** `CU001`, slice `E4` (terminación abrupta durante el slice `B2`)
-- **Realiza:** RF-07
-
-> **Como** investigador/a,
-> **quiero** que cuando la búsqueda remota falla el sistema me muestre el error tal como lo devolvió BLAST+ (o NCBI a través de BLAST+),
-> **para** poder distinguir un problema de red temporal de un problema más grave y decidir si vale la pena reintentar más tarde.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** Timeout de comunicación con NCBI:
-  - **Given** una búsqueda en modo remoto en ejecución y la API remota de NCBI que no responde dentro del tiempo esperado,
-  - **When** BLAST+ reporta timeout de comunicación,
-  - **Then** el sistema corta el flujo del CU, no persiste nada en D2 y muestra el mensaje de error de BLAST+, aclarando explícitamente que se trata de un timeout de la conexión remota y no de un problema con los parámetros de la búsqueda.
-
-- **CA-02.** Error explícito devuelto por NCBI:
-  - **Given** una búsqueda en modo remoto que BLAST+ envió a NCBI,
-  - **When** NCBI responde con un error explícito (rate limit, query rejected, u otro) que BLAST+ propaga al sistema,
-  - **Then** el sistema corta el flujo del CU, no persiste nada en D2 y muestra el error literal que devolvió BLAST+, incluyendo el mensaje original de NCBI, sin traducirlo ni reinterpretarlo.
+- **CA-03.** Reutilización de la secuencia cargada:
+  - **Given** una secuencia ya cargada en la sesión con la que el investigador ya lanzó una búsqueda,
+  - **When** el investigador vuelve al formulario para armar otra configuración distinta,
+  - **Then** la secuencia sigue disponible sin necesidad de volver a cargarla, y solo se reinicia el resto del formulario.
 
 ---
 
