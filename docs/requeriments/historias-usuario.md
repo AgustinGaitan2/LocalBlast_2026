@@ -121,57 +121,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
-## HU derivadas de CU003 · Descargar los resultados en un formato
+## HU derivadas de CU003 · Validar la búsqueda
 
-### HU10_CU003_B · Descargar los alineamientos actualmente visibles en un formato
+### HU05_CU003_B · Obtener el visto bueno del sistema sobre la búsqueda configurada
 
-- **Deriva de:** `CU003`, slice `B` (único slice básico; el camino feliz no se subdivide)
-- **Realiza:** RF-10
+- **Deriva de:** `CU003`, slice `B` (pasos 1-2 del camino feliz)
+- **Realiza:** RF-05, RF-06, RF-07
 
 > **Como** investigador/a,
-> **quiero** descargar los alineamientos que estoy viendo en la tabla —filtrados o no— en el formato que necesite,
-> **para** llevarme el archivo tal cual quedó configurada la vista y seguir procesándolo por fuera del sistema.
+> **quiero** disparar la validación semántica de mi configuración y recibir el visto bueno explícito del sistema antes de comprometer tiempo de BLAST+,
+> **para** no perder tiempo lanzando búsquedas mal configuradas.
 
 **Criterios de aceptación (Given-When-Then)**
 
-- **CA-01.** Descarga en el formato elegido, sobre resultados sin filtrar:
-  - **Given** una tabla de resultados sin filtros post-búsqueda aplicados (postcondición directa de `CU001_B2`),
-  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
-  - **Then** el sistema entrega un archivo `.csv` con la totalidad de los alineamientos crudos, con una fila de encabezados que incluye al menos las columnas mínimas (identificador, score, E-value observado, % identidad, % cobertura), y una sección de metadatos con los parámetros pre-búsqueda, la base de datos y el timestamp.
+- **CA-01.** Validación exitosa habilita el disparador de `CU004`:
+  - **Given** una secuencia cargada (postcondición de `CU001`) y un formulario configurado con modo, BD, programa y parámetros compatibles (postcondición de `CU002`),
+  - **When** el investigador presiona "Validar búsqueda",
+  - **Then** el sistema chequea alfabeto vs. programa, rangos de parámetros y compatibilidad programa/query/BD, marca la configuración como "válida y lista para ejecutar" y habilita el botón "Ejecutar búsqueda" que dispara `CU004`.
 
-- **CA-02.** Descarga en el formato elegido, sobre resultados filtrados:
-  - **Given** una tabla de resultados con filtros post-búsqueda aplicados (postcondición de `CU002_B`),
-  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
-  - **Then** el sistema entrega un archivo `.csv` que contiene únicamente los hits que superan los filtros vigentes al momento de la descarga, con la fila de encabezados y la sección de metadatos donde figuran también los filtros post-búsqueda aplicados.
+- **CA-02.** Cambio posterior al formulario invalida la marca:
+  - **Given** una configuración ya validada y marcada como ejecutable,
+  - **When** el investigador cambia cualquier campo del formulario (por ejemplo el programa),
+  - **Then** el sistema quita la marca de "válida", deshabilita el botón "Ejecutar búsqueda" y exige que el investigador vuelva a disparar `CU003` para re-validar la nueva combinación.
 
-- **CA-03.** La descarga no modifica el historial:
-  - **Given** una búsqueda ya persistida en D2 (postcondición de `CU001_B2`),
-  - **When** el investigador descarga los resultados (con o sin filtros aplicados),
-  - **Then** la entrada en D2 no se modifica ni se duplica: sigue conteniendo el conjunto crudo de resultados original, con el timestamp de la ejecución (no el de la descarga).
-
----
-
-### HU11_CU003_A1 · Descarga cuando ningún resultado supera los filtros
-
-- **Deriva de:** `CU003`, slice `A1` (camino alternativo dentro del slice `B`)
-- **Realiza:** RF-10
-
-> **Como** investigador/a,
-> **quiero** poder descargar el archivo aunque los filtros post-búsqueda dejen la tabla vacía,
-> **para** tener constancia del intento y de los criterios que apliqué, aun cuando ningún hit los haya superado.
-
-**Criterios de aceptación (Given-When-Then)**
-
-- **CA-01.** Descarga con tabla vacía:
-  - **Given** una tabla de resultados con filtros post-búsqueda que dejan cero hits visibles (por ejemplo identidad ≥ 99% sobre una búsqueda de similitud lejana),
-  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
-  - **Then** el sistema entrega un archivo `.csv` con la fila de encabezados y una sección de metadatos de la búsqueda (parámetros pre-búsqueda, base de datos, timestamp, filtros post-búsqueda aplicados), pero **sin** filas de hits.
-
-- **CA-02.** El historial mantiene los resultados crudos aunque la descarga sea vacía:
-  - **Given** una búsqueda cuya descarga se hizo con filtros que dejaron cero hits visibles,
-  - **When** el sistema termina de entregar el archivo,
-  - **Then** la entrada en D2 permanece igual que antes: contiene el conjunto **completo** de resultados crudos que devolvió BLAST+ (persistido en `CU001_B2`), no la lista vacía que quedó tras el filtro, de forma que el investigador pueda volver más tarde y probar filtros distintos sin re-ejecutar BLAST.
-    
 ---
 
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
