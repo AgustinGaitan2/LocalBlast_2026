@@ -286,8 +286,8 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
   - Una propuesta de la IA de **dejar RF-01 y RF-05 en su lugar y renumerar solo el resto** para "menor disrupción". Optimizar los IDs para que se parezcan a los viejos no aporta valor: el lector nuevo no ve la versión vieja, y el mapeo entre versiones vive en la bitácora.
   - Una propuesta de **agregar sufijos históricos "RF-02 (ex RF-06)"** al lado de cada RF renumerado. Mismo criterio que en la Entrada 12 cuando eliminamos los sufijos `(sint.)/(sem.)`: son ruido que carga el texto sin aportar al lector nuevo.
 - **Errores / imprecisiones detectadas:**
-  - La IA aplicó el sed pero olvidó reordenar la tabla del SRS y las once celdas de "Realiza:" con RFs listados en orden histórico. Es el mismo patrón crónico que anotamos desde la Entrada 6: los cambios puntuales de ID se aplican bien, los agrupamientos y ordenamientos derivados quedan sin reajustar.
-  - En un bullet de convenciones que se refiere al **histórico del propio ID que estamos renumerando**, el sed genérico mintió: donde decía "originalmente eran un mismo RF-06" quedó "originalmente eran un mismo RF-02", lo cual es contradictorio con la historia real (la partición se hizo cuando el RF aún se llamaba RF-06). Pauta general que dejamos anotada: **cuando un texto refiere al histórico del ID que estamos cambiando, el sed va a decir mentira si no se corrige a mano**.
+  - La IA aplicó el ordenamiento pero olvidó reordenar la tabla del SRS y las once celdas de "Realiza:" con RFs listados en orden histórico. Es el mismo patrón crónico que anotamos desde la Entrada 6: los cambios puntuales de ID se aplican bien, los agrupamientos y ordenamientos derivados quedan sin reajustar.
+  - En un bullet de convenciones que se refiere al **histórico del propio ID que estamos renumerando**, el sed genérico mintió: donde decía "originalmente eran un mismo RF-06" quedó "originalmente eran un mismo RF-02", lo cual es contradictorio con la historia real (la partición se hizo cuando el RF aún se llamaba RF-06).
 
 ## Reflexión sobre el uso de IA
 
