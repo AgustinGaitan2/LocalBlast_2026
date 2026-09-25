@@ -98,6 +98,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU04_CU002_A1 · Manejo de base de datos local no disponible
+
+- **Deriva de:** `CU002`, slice `A1` (camino alternativo en el paso 2)
+- **Realiza:** RF-04
+
+> **Como** investigador/a,
+> **quiero** que el sistema me informe claramente cuando la base de datos local que elegí no está en condiciones de ser usada, y me devuelva la lista actualizada para que yo decida,
+> **para** no quedarme trabado ni terminar corriendo contra una base equivocada porque el sistema me la sustituyó por su cuenta.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Base de datos en proceso de actualización:
+  - **Given** modo local seleccionado y una base de datos del catálogo D1 que está en estado "actualizándose" porque P3 la está reconstruyendo en ese momento,
+  - **When** el investigador la selecciona en el paso 2,
+  - **Then** el sistema muestra el mensaje "La base de datos '\<nombre\>' está siendo actualizada y no puede usarse en este momento" y devuelve al investigador al paso 2 con la lista de bases locales actualizada, **sin** proponer un cambio automático a modo remoto.
+
+- **CA-02.** Base de datos con índice en error:
+  - **Given** modo local seleccionado y una base de datos cuyo índice quedó marcado como "con errores" tras un fallo previo de `makeblastdb`,
+  - **When** el investigador la selecciona en el paso 2,
+  - **Then** el sistema muestra un mensaje que explica que el índice está corrupto y sugiere contactar al administrador de bases de datos, y devuelve al investigador al paso 2.
+
+---
+
 ## HU derivadas de CU003 · Descargar los resultados en un formato
 
 ### HU10_CU003_B · Descargar los alineamientos actualmente visibles en un formato
