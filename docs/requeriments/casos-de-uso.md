@@ -34,9 +34,9 @@ Un caso de uso representa **una capacidad discreta que el sistema le brinda al a
 **Cadena de trazabilidad:** `RF → CU → slice → HU`.
 
 - Un **CU** puede realizar uno o varios RF, y a la inversa un RF puede estar realizado por varios slices del mismo CU (por ejemplo la validación previa aparece tanto en el camino feliz como en los slices de excepción).
-- El identificador del **slice básico** es la letra `B` (`CU00X_B`); si además se subdivide, pasa a `B1`, `B2`, … Los **slices alternativos** se numeran `A1`, `A2`, … y los **de excepción** `E1`, `E2`, …
-- La relación **slice ↔ HU es 1:1**. La HU conserva el identificador de trazabilidad del slice: `HU01_CU001_B1` detalla el slice `CU001_B1`; `HU09_CU002_B` detalla el (único) slice básico de `CU002`.
-- Los diez slices identificados en los dos CU tienen **cada uno** su HU detallada en [`historias-usuario.md`](historias-usuario.md), con criterios Given-When-Then. 
+- El identificador del **slice básico** es la letra `B` (`CU00X_B`). Los **slices alternativos** se numeran `A1`, `A2`, … y los **de excepción** `E1`, `E2`, …
+- La relación **slice ↔ HU es 1:1**. La HU conserva el identificador de trazabilidad del slice: `HU01_CU001_B` detalla el slice `CU001_B`; `HU12_CU006_B` detalla el (único) slice básico de `CU006`.
+- Los catorce slices identificados en los siete CU tienen **cada uno** su HU detallada en [`historias-usuario.md`](historias-usuario.md), con criterios Given-When-Then.
 ---
 
 ## CU001 · Cargar la secuencia query
