@@ -146,6 +146,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU06_CU003_E1 · Rechazo de parámetros pre-búsqueda fuera de rango
+
+- **Deriva de:** `CU003`, slice `E1` (terminación abrupta detectada en el paso 2)
+- **Realiza:** RF-06, RF-07
+
+> **Como** investigador/a,
+> **quiero** que el sistema me señale exactamente qué parámetro está fuera de rango y cuál es el rango válido para el programa BLAST que elegí,
+> **para** poder corregirlo sin consultar la documentación de BLAST+ por afuera.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** E-value negativo:
+  - **Given** un formulario completo con el campo "E-value máximo" en `-1`,
+  - **When** el investigador presiona "Validar búsqueda",
+  - **Then** el sistema corta el flujo del CU, no marca la búsqueda como válida y muestra un mensaje que señala el campo "E-value" e indica que debe ser un número positivo (típicamente entre 0 y 10).
+
+- **CA-02.** Tamaño de palabra fuera del rango del programa:
+  - **Given** un formulario con programa `blastn` seleccionado y "Tamaño de palabra" = 3 (por debajo del mínimo válido para `blastn`),
+  - **When** el investigador presiona "Validar búsqueda",
+  - **Then** el sistema corta el flujo del CU, no marca la búsqueda como válida y muestra un mensaje que señala el campo "Tamaño de palabra" e indica el rango válido para el programa `blastn`.
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
