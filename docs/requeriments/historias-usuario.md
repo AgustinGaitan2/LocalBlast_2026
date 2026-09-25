@@ -192,6 +192,31 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+## HU derivadas de CU004 · Ejecutar la búsqueda
+
+### HU08_CU004_B · Ejecutar la búsqueda validada de forma asíncrona
+
+- **Deriva de:** `CU004`, slice `B` (pasos 1-3 del camino feliz)
+- **Realiza:** RF-08
+
+> **Como** investigador/a,
+> **quiero** que el sistema invoque a BLAST+ en segundo plano sobre mi búsqueda validada, con indicador de progreso y opción de cancelar,
+> **para** poder seguir trabajando en la aplicación mientras la búsqueda corre y decidir en cualquier momento si la abandono.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Ejecución asíncrona con indicador de progreso:
+  - **Given** una búsqueda ya configurada y validada (postcondición de `CU003`),
+  - **When** el investigador presiona "Ejecutar búsqueda" y el sistema invoca a BLAST+ en segundo plano,
+  - **Then** la interfaz muestra un indicador de progreso visible y permanece navegable — el investigador puede desplazarse dentro de la aplicación sin que la ejecución se interrumpa.
+
+- **CA-02.** Fin exitoso libera los resultados crudos para `CU005`:
+  - **Given** una búsqueda en ejecución que BLAST+ termina exitosamente,
+  - **When** el sistema recibe el conjunto crudo de alineamientos,
+  - **Then** deja esos resultados disponibles en memoria de la sesión y dispara `CU005` para presentarlos y persistirlos.
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
