@@ -149,13 +149,13 @@ Realizados por `CU006` (refinar con filtros post-búsqueda) y `CU007` (descargar
 
 ## 7. Casos de uso e historias de usuario
 
-Los casos de uso en formato Cockburn (flujo principal detallado y slices secundarios nombrados), todos derivados del proceso profundizado P1, están en:
+Los casos de uso en formato Cockburn (flujo principal detallado y slices secundarios nombrados), derivados de los procesos profundizados P1 (`CU001` a `CU005`) y P2 (`CU006` y `CU007`), están en:
 
-👉 [`docs/requirements/casos-de-uso.md`](casos-de-uso.md)
+👉 [`docs/requeriments/casos-de-uso.md`](casos-de-uso.md)
 
 Las historias de usuario asociadas a cada slice (relación 1:1 slice ↔ HU), con criterios de aceptación en formato **Given-When-Then**, están en:
 
-👉 [`docs/requirements/historias-usuario.md`](historias-usuario.md)
+👉 [`docs/requeriments/historias-usuario.md`](historias-usuario.md)
 
 ## 8. Suposiciones y dependencias
 
