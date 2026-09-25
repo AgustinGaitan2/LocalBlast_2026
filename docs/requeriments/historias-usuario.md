@@ -348,6 +348,28 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU14_CU007_A1 · Descarga cuando ningún resultado supera los filtros
+
+- **Deriva de:** `CU007`, slice `A1` (camino alternativo dentro del slice `B`)
+- **Realiza:** RF-12
+
+> **Como** investigador/a,
+> **quiero** poder descargar el archivo aunque los filtros post-búsqueda dejen la tabla vacía,
+> **para** tener constancia del intento y de los criterios que apliqué, aun cuando ningún hit los haya superado.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Descarga con tabla vacía:
+  - **Given** una tabla de resultados con filtros post-búsqueda que dejan cero hits visibles (por ejemplo identidad ≥ 99% sobre una búsqueda de similitud lejana),
+  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
+  - **Then** el sistema entrega un archivo `.csv` con la fila de encabezados y una sección de metadatos de la búsqueda (parámetros pre-búsqueda, base de datos, timestamp, filtros post-búsqueda aplicados), pero **sin** filas de hits.
+
+- **CA-02.** El historial mantiene los resultados crudos aunque la descarga sea vacía:
+  - **Given** una búsqueda cuya descarga se hizo con filtros que dejaron cero hits visibles,
+  - **When** el sistema termina de entregar el archivo,
+  - **Then** la entrada en D2 permanece igual que antes: contiene el conjunto **completo** de resultados crudos que devolvió BLAST+ (persistido en `CU005_B`), no la lista vacía que quedó tras el filtro, de forma que el investigador pueda volver más tarde y probar filtros distintos sin re-ejecutar BLAST.
+
+---
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
