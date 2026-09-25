@@ -217,6 +217,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU09_CU004_A1 · Cancelación manual de una búsqueda en curso
+
+- **Deriva de:** `CU004`, slice `A1` (camino alternativo durante el paso 2)
+- **Realiza:** RF-08
+
+> **Como** investigador/a,
+> **quiero** poder cancelar una búsqueda que está en ejecución,
+> **para** dejar de esperar y no consumir recursos remotos ni locales cuando me di cuenta que configuré algo mal o el resultado ya dejó de importarme.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Cancelación de una búsqueda local:
+  - **Given** una búsqueda en modo local que BLAST+ está ejecutando en el servidor (indicador de progreso visible),
+  - **When** el investigador presiona "Cancelar",
+  - **Then** el sistema aborta el subproceso local de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero, no dispara `CU005` y no persiste nada en D2.
+
+- **CA-02.** Cancelación de una búsqueda remota:
+  - **Given** una búsqueda en modo remoto que BLAST+ tramita contra NCBI (indicador de progreso visible),
+  - **When** el investigador presiona "Cancelar",
+  - **Then** el sistema cancela la solicitud a través de BLAST+, deja la interfaz lista para configurar otra búsqueda desde cero, no dispara `CU005` y no persiste nada en D2.
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
