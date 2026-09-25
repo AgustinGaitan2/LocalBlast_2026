@@ -45,6 +45,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU02_CU001_E1 · Rechazo de secuencia query con formato inválido
+
+- **Deriva de:** `CU001`, slice `E1` (terminación abrupta detectada en el paso 2)
+- **Realiza:** RF-02
+
+> **Como** investigador/a,
+> **quiero** recibir un mensaje claro cuando la secuencia que subo o pego no es reconocible,
+> **para** poder corregirla de inmediato sin tener que adivinar qué le pasa.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Caracter fuera del alfabeto:
+  - **Given** un texto pegado como query que contiene al menos un carácter fuera del alfabeto de ADN, ARN o proteína (por ejemplo un dígito o un símbolo de puntuación),
+  - **When** el investigador confirma la carga,
+  - **Then** el sistema no marca la secuencia como cargada, no habilita los controles del `CU002` y muestra un mensaje que indica cuál es el carácter inválido y en qué posición aparece.
+
+- **CA-02.** FASTA con encabezado sin cuerpo:
+  - **Given** un archivo FASTA con una línea de encabezado (`>ID`) pero sin ninguna línea de secuencia debajo,
+  - **When** el investigador lo sube,
+  - **Then** el sistema no marca la secuencia como cargada, no habilita los controles del `CU002` y muestra el mensaje "El FASTA contiene un encabezado pero ninguna secuencia asociada".
+
+---
+
 ## HU derivadas de CU002 · Refinar los resultados con filtros post-búsqueda
 
 ### HU09_CU002_B · Refinar la vista con filtros post-búsqueda
