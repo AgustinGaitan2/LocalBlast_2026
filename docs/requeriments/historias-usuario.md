@@ -169,6 +169,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU07_CU003_E2 · Rechazo de combinación programa / query / base de datos incompatible
+
+- **Deriva de:** `CU003`, slice `E2` (terminación abrupta detectada en el paso 2)
+- **Realiza:** RF-05, RF-07
+
+> **Como** investigador/a,
+> **quiero** que el sistema me impida validar una combinación de programa BLAST y tipos de secuencia/base incompatibles, y me sugiera qué combinaciones sí funcionan con lo que ya cargué,
+> **para** no perder tiempo esperando un resultado que no va a existir.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** `blastp` sobre una query de nucleótidos:
+  - **Given** una secuencia query de nucleótidos (ADN o ARN), programa `blastp` seleccionado, y cualquier base de datos,
+  - **When** el investigador presiona "Validar búsqueda",
+  - **Then** el sistema corta el flujo del CU, no marca la búsqueda como válida y muestra el mensaje "El programa `blastp` espera queries de proteína. Para su query de nucleótidos, opciones válidas son: `blastn` (contra base de nucleótidos), `blastx` o `tblastx`".
+
+- **CA-02.** `blastn` contra una base de datos de proteínas:
+  - **Given** una secuencia query de nucleótidos, programa `blastn` seleccionado, y una base de datos de proteínas seleccionada,
+  - **When** el investigador presiona "Validar búsqueda",
+  - **Then** el sistema corta el flujo del CU, no marca la búsqueda como válida y muestra el mensaje "El programa `blastn` requiere base de datos de nucleótidos. Elija otra base de datos, o cambie el programa a `blastx`".
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
