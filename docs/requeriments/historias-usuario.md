@@ -263,6 +263,31 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+## HU derivadas de CU005 - Ver los resultados y persistir la búsqueda en el historial
+
+### HU11_CU005_B · Presentar la tabla de alineamientos y guardar la búsqueda en el historial
+
+- **Deriva de:** `CU005`, slice `B` (pasos 1-2 del camino feliz)
+- **Realiza:** RF-09, RF-10
+
+> **Como** investigador/a,
+> **quiero** ver los alineamientos en una tabla dentro de la misma vista apenas termina la ejecución, y que el sistema guarde automáticamente la búsqueda en el historial,
+> **para** no perder la búsqueda aunque no llegue a descargarla ni refinarla en esta sesión.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Presentación de la tabla al finalizar:
+  - **Given** un conjunto crudo de alineamientos disponible en la sesión, entregado por una ejecución exitosa de `CU004`,
+  - **When** el sistema toma el control tras esa ejecución,
+  - **Then** presenta los resultados en una tabla con al menos las columnas: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura.
+
+- **CA-02.** Persistencia automática en el historial:
+  - **Given** los mismos resultados crudos recién presentados en la tabla,
+  - **When** el sistema termina de mostrarlos,
+  - **Then** queda registrada en el historial (D2) una entrada con los parámetros pre-búsqueda, la base de datos usada, el timestamp y el conjunto **completo** de resultados crudos que devolvió BLAST+ (antes de cualquier filtro post-búsqueda) — sin que el investigador tenga que ejercer `CU006` ni `CU007` para que la persistencia ocurra.
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
