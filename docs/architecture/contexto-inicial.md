@@ -97,10 +97,12 @@ De los tres procesos identificados, el grupo lleva a profundidad **P1 (Ejecutar 
 
 Los casos de uso escritos en `docs/requeriments/casos-de-uso.md` se distribuyen así entre los procesos profundizados:
 
-- `CU001 · Ejecutar una búsqueda BLAST` **deriva de P1**.
-- `CU002 · Refinar los resultados con filtros post-búsqueda` **deriva de P2**.
-- `CU003 · Descargar los resultados en un formato` **deriva de P2**.
+- `CU001 · Cargar la secuencia query` **deriva de P1**.
+- `CU002 · Configurar los parámetros de la búsqueda` **deriva de P1**.
+- `CU003 · Validar la búsqueda` **deriva de P1**.
+- `CU004 · Ejecutar la búsqueda` **deriva de P1**.
+- `CU005 · Ver los resultados y persistir la búsqueda en el historial` **deriva de P1**.
+- `CU006 · Refinar los resultados con filtros post-búsqueda` **deriva de P2**.
+- `CU007 · Descargar los resultados en un formato` **deriva de P2**.
 
 Ver la justificación completa en la sección [Selección de procesos a profundizar](../requeriments/srs.md#5-selección-de-procesos-a-profundizar) del SRS.
-
-Los casos de uso escritos en `docs/requirements/casos-de-uso.md` son **todos** derivados del proceso P1. Ver la justificación completa en la sección [Selección de procesos a profundizar](../requirements/srs.md#5-selección-de-procesos-a-profundizar) del SRS.
