@@ -240,6 +240,29 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+### HU10_CU004_E1 · Manejo de fallo del modo remoto de BLAST+
+
+- **Deriva de:** `CU004`, slice `E1` (terminación abrupta durante el paso 2)
+- **Realiza:** RF-08
+
+> **Como** investigador/a,
+> **quiero** que cuando la búsqueda remota falla el sistema me muestre el error tal como lo devolvió BLAST+ (o NCBI a través de BLAST+),
+> **para** poder distinguir un problema de red temporal de un problema más grave y decidir si vale la pena reintentar más tarde.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Timeout de comunicación con NCBI:
+  - **Given** una búsqueda en modo remoto en ejecución y la API remota de NCBI que no responde dentro del tiempo esperado,
+  - **When** BLAST+ reporta timeout de comunicación,
+  - **Then** el sistema corta el flujo del CU, no dispara `CU005`, no persiste nada en D2 y muestra el mensaje de error de BLAST+, aclarando explícitamente que se trata de un timeout de la conexión remota y no de un problema con los parámetros de la búsqueda.
+
+- **CA-02.** Error explícito devuelto por NCBI:
+  - **Given** una búsqueda en modo remoto que BLAST+ envió a NCBI,
+  - **When** NCBI responde con un error explícito (rate limit, query rejected, u otro) que BLAST+ propaga al sistema,
+  - **Then** el sistema corta el flujo del CU, no dispara `CU005`, no persiste nada en D2 y muestra el error literal que devolvió BLAST+, incluyendo el mensaje original de NCBI, sin traducirlo ni reinterpretarlo.
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
