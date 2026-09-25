@@ -28,7 +28,7 @@ Un caso de uso representa **una capacidad discreta que el sistema le brinda al a
 - **Los CU no obligan a una secuencia rígida.** El investigador puede cargar una secuencia (`CU001`) y luego probar tres configuraciones distintas encadenando `CU002 → CU003 → CU004 → CU005` tres veces, sin volver a cargar la secuencia. Puede parametrizar el formulario (`CU002`) sin llegar a pedir la validación (queda en la interfaz sin ejecutar). Puede validar (`CU003`) y quedarse mirando el "listo para ejecutar" sin lanzar la búsqueda todavía. Puede lanzar la ejecución (`CU004`) y cancelarla antes de ver resultados. Modelar todo esto como un único CU obligaría a que las capacidades ocurrieran juntas cuando en realidad son independientes.
 - **La descarga no siempre se ejerce, y no siempre viene después del filtrado.** A veces el investigador solo quiere mirar los resultados filtrados en pantalla (queda en `CU006`) y no descargarlos. A veces querrá descargar sin haber filtrado (directamente `CU007` sobre los crudos). Y, cuando D2 se profundice como fuente de lectura en una versión futura, el investigador podrá iniciar `CU007` sobre una búsqueda vieja del historial sin volver a ejecutar `CU004`. Ese abanico de combinaciones es lo que justifica tener CU separados por capacidad y no uno solo secuencial.
 - **Cada CU tiene un flujo principal corto.** Al haber partido los antiguos "cargar/configurar/validar" y "ejecutar/ver-resultados" en capacidades independientes, ninguno de los siete CU actuales necesita descomponerse en sub-slices básicos: cada uno tiene un único slice básico `B` de entre 1 y 3 pasos.
-- 
+
 ## Convención de identificadores y trazabilidad
 
 **Cadena de trazabilidad:** `RF → CU → slice → HU`.
