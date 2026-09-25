@@ -318,6 +318,36 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+## HU derivadas de CU007 · Descargar los resultados en un formato
+
+### HU13_CU007_B · Descargar los alineamientos actualmente visibles en un formato
+
+- **Deriva de:** `CU007`, slice `B` (único slice básico; el camino feliz no se subdivide)
+- **Realiza:** RF-12
+
+> **Como** investigador/a,
+> **quiero** descargar los alineamientos que estoy viendo en la tabla —filtrados o no— en el formato que necesite,
+> **para** llevarme el archivo tal cual quedó configurada la vista y seguir procesándolo por fuera del sistema.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Descarga en el formato elegido, sobre resultados sin filtrar:
+  - **Given** una tabla de resultados sin filtros post-búsqueda aplicados (postcondición directa de `CU005_B`),
+  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
+  - **Then** el sistema entrega un archivo `.csv` con la totalidad de los alineamientos crudos, con una fila de encabezados que incluye al menos las columnas mínimas (identificador, score, E-value observado, % identidad, % cobertura), y una sección de metadatos con los parámetros pre-búsqueda, la base de datos y el timestamp.
+
+- **CA-02.** Descarga en el formato elegido, sobre resultados filtrados:
+  - **Given** una tabla de resultados con filtros post-búsqueda aplicados (postcondición de `CU006_B`),
+  - **When** el investigador selecciona formato "CSV" y presiona "Descargar",
+  - **Then** el sistema entrega un archivo `.csv` que contiene únicamente los hits que superan los filtros vigentes al momento de la descarga, con la fila de encabezados y la sección de metadatos donde figuran también los filtros post-búsqueda aplicados.
+
+- **CA-03.** La descarga no modifica el historial:
+  - **Given** una búsqueda ya persistida en D2 (postcondición de `CU005_B`),
+  - **When** el investigador descarga los resultados (con o sin filtros aplicados),
+  - **Then** la entrada en D2 no se modifica ni se duplica: sigue conteniendo el conjunto crudo de resultados original, con el timestamp de la ejecución (no el de la descarga).
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
