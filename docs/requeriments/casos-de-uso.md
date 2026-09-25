@@ -308,16 +308,20 @@ La tabla `RF → CU → slice → HU` (con las HU incluidas) está en [`historia
 
 | RF | CU | Slice(s) que lo realizan |
 |---|---|---|
-| RF-01 | CU001 | CU001_B1 |
-| RF-02 | CU001 | CU001_B1 |
-| RF-03 | CU001 | CU001_B1, CU001_A2 |
-| RF-04 | CU001 | CU001_B1, CU001_E2 |
-| RF-05 | CU001 | CU001_B1, CU001_E3 |
-| RF-06 | CU001 | CU001_B1, CU001_E1, CU001_E2 |
-| RF-07 | CU001 | CU001_B2, CU001_A1, CU001_E4 |
-| RF-08 | CU001 | CU001_B2 |
-| RF-09 | CU002 | CU002_B |
-| RF-10 | CU003 | CU003_B, CU003_A1 |
-| RF-11 | CU001 | CU001_B2 |
+| RF-01 | CU001 | CU001_B |
+| RF-02 | CU001 | CU001_B, CU001_E1 |
+| RF-03 | CU002 | CU002_B |
+| RF-04 | CU002 | CU002_B, CU002_A1 |
+| RF-05 | CU002, CU003 | CU002_B, CU003_B, CU003_E2 |
+| RF-06 | CU002, CU003 | CU002_B, CU003_B, CU003_E1 |
+| RF-07 | CU003 | CU003_B, CU003_E1, CU003_E2 |
+| RF-08 | CU004 | CU004_B, CU004_A1, CU004_E1 |
+| RF-09 | CU005 | CU005_B |
+| RF-10 | CU005 | CU005_B |
+| RF-11 | CU006 | CU006_B |
+| RF-12 | CU007 | CU007_B, CU007_A1 |
 
-Un mismo RF puede aparecer en varios slices del mismo CU — por ejemplo RF-06 (validación pre-ejecución) se realiza en el camino feliz `B1` (cuando la validación pasa) y también en `E1` y `E2` (cuando falla y corta el flujo). Esa dispersión es esperable: los slices de excepción son otra forma en que se cumple el RF de validación.
+Dos RFs cruzan más de un CU:
+
+- **RF-06** (rangos de parámetros) aparece en `CU002` (donde el investigador los elige, con los defaults del programa) y en `CU003` (donde el sistema verifica que estén dentro del rango válido del programa).
+- **RF-05** (compatibilidad programa/query/BD) aparece en `CU002` (donde el investigador elige el programa) y en `CU003` (donde el sistema verifica la coherencia con la query y la BD ya elegidas).
