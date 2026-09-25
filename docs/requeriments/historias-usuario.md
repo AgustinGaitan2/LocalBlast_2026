@@ -288,6 +288,36 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
+## HU derivadas de CU006 · Refinar los resultados con filtros post-búsqueda
+
+### HU12_CU006_B · Refinar la vista con filtros post-búsqueda
+
+- **Deriva de:** `CU006`, slice `B` (único slice básico; el camino feliz no se subdivide)
+- **Realiza:** RF-11
+
+> **Como** investigador/a,
+> **quiero** aplicar filtros post-búsqueda sobre la tabla de resultados y verla refrescada en el momento, sin correr BLAST otra vez,
+> **para** poder explorar interactivamente los alineamientos con distintos criterios y quedarme mirando el subconjunto relevante, aunque no llegue a descargar nada.
+
+**Criterios de aceptación (Given-When-Then)**
+
+- **CA-01.** Filtrado interactivo sin re-ejecución de BLAST:
+  - **Given** una tabla de resultados con al menos 20 alineamientos y filtros post-búsqueda establecidos en identidad ≥ 80% y cobertura ≥ 50%,
+  - **When** el investigador confirma los filtros,
+  - **Then** la tabla se re-filtra en el momento mostrando solo los hits que cumplen ambos umbrales, sin volver a invocar a BLAST+.
+
+- **CA-02.** Ajuste sucesivo de filtros no re-ejecuta BLAST:
+  - **Given** una tabla ya filtrada por identidad ≥ 80%,
+  - **When** el investigador afloja el umbral a identidad ≥ 60% y agrega cobertura ≥ 70%,
+  - **Then** la tabla se re-filtra sobre el conjunto crudo original (no sobre el resultado del filtro anterior) y aparecen los hits que cumplen los nuevos umbrales, sin ninguna invocación adicional a BLAST+.
+
+- **CA-03.** Filtros no modifican el historial:
+  - **Given** una búsqueda ya persistida en D2 al terminar su ejecución (postcondición de `CU005_B`),
+  - **When** el investigador aplica cualquier combinación de filtros post-búsqueda,
+  - **Then** la entrada en D2 no se modifica: sigue conteniendo el conjunto **crudo** completo de resultados, para que en el futuro se pueda volver a esa búsqueda y probar filtros distintos.
+
+---
+
 ## Tabla de trazabilidad completa `RF → CU → slice → HU`
 
 | RF | CU | Slice | HU |
