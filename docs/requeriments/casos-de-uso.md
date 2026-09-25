@@ -17,13 +17,18 @@ Cada caso de uso declara qué requerimientos funcionales realiza. La cadena comp
 
 Un caso de uso representa **una capacidad discreta que el sistema le brinda al actor** , un objetivo alcanzable, no un trazo secuencial de pasos que el actor tiene que recorrer de punta a punta. Dos consecuencias prácticas de esa definición para este TP:
 
-- **De los procesos profundizados salen tres CU, no uno solo largo.** El investigador tiene tres objetivos distintos que el sistema le habilita, y que puede combinar como necesite:
-  - `CU001` (ejecutar una búsqueda, deriva de **P1**) — obtener alineamientos crudos visibles en la interfaz.
-  - `CU002` (refinar con filtros post-búsqueda, deriva de **P2**) — ver los alineamientos con criterios post-búsqueda aplicados, sin volver a correr BLAST.
-  - `CU003` (descargar, deriva de **P2**) — obtener un archivo con los alineamientos actualmente visibles, en un formato.
-- **La descarga no siempre se ejerce.** A veces el investigador solo quiere mirar los resultados filtrados en pantalla (queda en `CU002`) y no descargarlos. A veces querrá descargar sin haber filtrado (directamente `CU003` sobre los crudos). Y, cuando D2 se profundice como fuente de lectura en una versión futura, el investigador podrá iniciar `CU003` sobre una búsqueda vieja del historial sin volver a ejecutar `CU001`. Ese abanico de combinaciones es lo que justifica tener CU separados por capacidad y no uno solo secuencial.
-- **Cuando el camino feliz de un CU queda largo, se descompone en slices.** No los CU en sí, sino su flujo principal. Los slices son módulos que aportan valor por sí mismos hacia el objetivo del CU. En este TP, `CU001` se descompone en dos slices básicos (`B1` y `B2`); `CU002` y `CU003` quedan cada uno con un único slice básico (`B`) porque sus flujos son cortos.
-
+- **De los procesos profundizados salen siete CU, no uno solo largo ni dos medianos.** El investigador tiene siete objetivos distintos que el sistema le habilita, y que puede combinar como necesite:
+  - `CU001` (cargar la secuencia query, deriva de **P1**) — dejar una secuencia disponible en la sesión, con su formato sintáctico chequeado, para usarla en una o varias búsquedas.
+  - `CU002` (configurar los parámetros de la búsqueda, deriva de **P1**) — armar el resto del formulario de la búsqueda (modo, base de datos, programa BLAST, parámetros pre-búsqueda) sobre la secuencia ya cargada.
+  - `CU003` (validar la búsqueda, deriva de **P1**) — pedirle al sistema que verifique semánticamente la configuración (alfabeto compatible con el programa, rangos, combinación programa/query/base de datos), y dejarla marcada como ejecutable.
+  - `CU004` (ejecutar la búsqueda, deriva de **P1**) — correr BLAST+ sobre una configuración ya validada, con progreso y cancelación.
+  - `CU005` (ver los resultados y persistir en el historial, deriva de **P1**) — presentar la tabla de alineamientos que devolvió BLAST+ y dejar la búsqueda registrada en D2 para uso posterior.
+  - `CU006` (refinar con filtros post-búsqueda, deriva de **P2**) — ver los alineamientos con criterios post-búsqueda aplicados, sin volver a correr BLAST.
+  - `CU007` (descargar, deriva de **P2**) — obtener un archivo con los alineamientos actualmente visibles, en un formato.
+- **Los CU no obligan a una secuencia rígida.** El investigador puede cargar una secuencia (`CU001`) y luego probar tres configuraciones distintas encadenando `CU002 → CU003 → CU004 → CU005` tres veces, sin volver a cargar la secuencia. Puede parametrizar el formulario (`CU002`) sin llegar a pedir la validación (queda en la interfaz sin ejecutar). Puede validar (`CU003`) y quedarse mirando el "listo para ejecutar" sin lanzar la búsqueda todavía. Puede lanzar la ejecución (`CU004`) y cancelarla antes de ver resultados. Modelar todo esto como un único CU obligaría a que las capacidades ocurrieran juntas cuando en realidad son independientes.
+- **La descarga no siempre se ejerce, y no siempre viene después del filtrado.** A veces el investigador solo quiere mirar los resultados filtrados en pantalla (queda en `CU006`) y no descargarlos. A veces querrá descargar sin haber filtrado (directamente `CU007` sobre los crudos). Y, cuando D2 se profundice como fuente de lectura en una versión futura, el investigador podrá iniciar `CU007` sobre una búsqueda vieja del historial sin volver a ejecutar `CU004`. Ese abanico de combinaciones es lo que justifica tener CU separados por capacidad y no uno solo secuencial.
+- **Cada CU tiene un flujo principal corto.** Al haber partido los antiguos "cargar/configurar/validar" y "ejecutar/ver-resultados" en capacidades independientes, ninguno de los siete CU actuales necesita descomponerse en sub-slices básicos: cada uno tiene un único slice básico `B` de entre 1 y 3 pasos.
+- 
 ## Convención de identificadores y trazabilidad
 
 **Cadena de trazabilidad:** `RF → CU → slice → HU`.
