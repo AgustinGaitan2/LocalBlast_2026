@@ -68,33 +68,33 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
 
 ---
 
-## HU derivadas de CU002 · Refinar los resultados con filtros post-búsqueda
+## HU derivadas de CU002 · Configurar los parámetros de la búsqueda
 
-### HU09_CU002_B · Refinar la vista con filtros post-búsqueda
+### HU03_CU002_B · Configurar modo, base de datos, programa y parámetros pre-búsqueda
 
-- **Deriva de:** `CU002`, slice `B` (único slice básico; el camino feliz no se subdivide)
-- **Realiza:** RF-09
+- **Deriva de:** `CU002`, slice `B` (pasos 1-4 del camino feliz)
+- **Realiza:** RF-03, RF-04, RF-05, RF-06
 
 > **Como** investigador/a,
-> **quiero** aplicar filtros post-búsqueda sobre la tabla de resultados y verla refrescada en el momento, sin correr BLAST otra vez,
-> **para** poder explorar interactivamente los alineamientos con distintos criterios y quedarme mirando el subconjunto relevante, aunque no llegue a descargar nada.
+> **quiero** elegir el modo (local o remoto), la base de datos, el programa BLAST y los parámetros pre-búsqueda sobre la secuencia que ya cargué,
+> **para** dejar el formulario listo para pedirle al sistema que lo valide.
 
 **Criterios de aceptación (Given-When-Then)**
 
-- **CA-01.** Filtrado interactivo sin re-ejecución de BLAST:
-  - **Given** una tabla de resultados con al menos 20 alineamientos y filtros post-búsqueda establecidos en identidad ≥ 80% y cobertura ≥ 50%,
-  - **When** el investigador confirma los filtros,
-  - **Then** la tabla se re-filtra en el momento mostrando solo los hits que cumplen ambos umbrales, sin volver a invocar a BLAST+.
+- **CA-01.** Configuración completa en modo remoto:
+  - **Given** una secuencia de proteína ya cargada en la sesión (postcondición de `CU001`),
+  - **When** el investigador elige modo remoto, base de datos `nr`, programa `blastp` y deja los parámetros en su valor por defecto,
+  - **Then** el formulario queda completo y el sistema habilita el botón "Validar búsqueda" que dispara `CU003`.
 
-- **CA-02.** Ajuste sucesivo de filtros no re-ejecuta BLAST:
-  - **Given** una tabla ya filtrada por identidad ≥ 80%,
-  - **When** el investigador afloja el umbral a identidad ≥ 60% y agrega cobertura ≥ 70%,
-  - **Then** la tabla se re-filtra sobre el conjunto crudo original (no sobre el resultado del filtro anterior) y aparecen los hits que cumplen los nuevos umbrales, sin ninguna invocación adicional a BLAST+.
+- **CA-02.** Valores por defecto sensatos según el programa:
+  - **Given** un formulario donde el investigador acaba de seleccionar el programa `blastp`,
+  - **When** la interfaz carga los parámetros pre-búsqueda,
+  - **Then** los campos de E-value máximo, matriz de sustitución, tamaño de palabra y penalización de gaps aparecen prellenados con los valores por defecto correspondientes al programa `blastp` (no los mismos que para `blastn`).
 
-- **CA-03.** Filtros no modifican el historial:
-  - **Given** una búsqueda ya persistida en D2 al terminar su ejecución (postcondición de `CU001_B2`),
-  - **When** el investigador aplica cualquier combinación de filtros post-búsqueda,
-  - **Then** la entrada en D2 no se modifica: sigue conteniendo el conjunto **crudo** completo de resultados, para que en el futuro se pueda volver a esa búsqueda y probar filtros distintos.
+- **CA-03.** Base de datos coherente con el modo elegido:
+  - **Given** el investigador cambia el modo de "remoto" a "local",
+  - **When** el sistema recarga la lista de bases de datos disponibles,
+  - **Then** la lista muestra únicamente las bases de datos del catálogo local (leídas de D1), sin las bases estándar de NCBI que aparecían en modo remoto.
 
 ---
 
