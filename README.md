@@ -83,6 +83,9 @@ Los perfiles de usuario, escenarios de uso y flujos de navegación que guían el
 El maquetado HTML del flujo de navegación (primer ciclo de generación con IA, un archivo por pantalla con sus HU en el nombre) está en:
 👉 [`docs/ui/mockups/`](docs/ui/mockups/)
 
+La evaluación heurística de usabilidad, con los prompts enviados a la IA, su respuesta completa heurística por heurística, la revisión crítica del grupo sobre cada hallazgo y los ciclos de ajuste que terminaron en los `_final.html`, está en:
+👉 [`docs/ui/heuristic-review/`](docs/ui/heuristic-review/)
+
 ---
 
 ## 3. Modelo de Ciclo de Vida Específico
