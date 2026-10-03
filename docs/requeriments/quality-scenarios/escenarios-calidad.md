@@ -289,3 +289,18 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 
 *Criticidad:* el enfoque incremental compromete al equipo a sumar capacidades sin romper las existentes. Si incorporar un formato nuevo exige retocar los demás, cada incremento se vuelve una regresión potencial. Este escenario mide la propiedad arquitectónica (bajo acoplamiento del módulo de descarga) de la que depende todo el modelo de ciclo de vida.
 
+**Escenario 2 — significativo por incorporación del rol administrador**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Equipo de desarrollo, en una iteración futura |
+| Estímulo | Debe incorporar el rol de **administrador de bases de datos locales** (actualmente documentado en los diagramas pero fuera del alcance del TP1), que le permitirá a un administrador dar de alta, actualizar y dar de baja bases de datos BLAST locales desde la propia aplicación, invocando internamente a `makeblastdb` |
+| Entorno | Significativo — evolución planeada que suma un **tipo de usuario nuevo** con un proceso propio (el proceso de administración del catálogo del DFD Nivel 1, hasta ahora no implementado) |
+| Artefacto | Capa de autenticación y autorización del sistema, módulo nuevo de administración del catálogo de bases de datos, almacén del catálogo (ya existente y usado hoy en modo lectura) y vistas asociadas al nuevo rol |
+| Respuesta | El equipo introduce el nuevo rol sin modificar el flujo ni la interfaz del rol investigador: la autenticación/autorización se extiende para distinguir dos roles, el nuevo módulo de administración del catálogo se incorpora como componente separado que lee y escribe el almacén del catálogo existente, y la lógica actual de ejecución de búsquedas (que hoy lee el catálogo) no se modifica — sigue leyendo del mismo almacén, que ahora también se escribe desde el módulo nuevo |
+| Medida de la respuesta | La incorporación del rol administrador no requiere modificar los módulos existentes de ejecución de búsqueda, filtrado posterior a la búsqueda ni descarga de resultados; los tests automatizados de las funcionalidades del rol investigador siguen pasando sin cambios; los cambios en la capa de autorización se limitan a extender el esquema de roles sin alterar la lógica de autorización existente para el rol investigador |
+
+*Criticidad:* el rol administrador es la pieza más ambiciosa de las que están fuera del alcance del TP1. Si el diseño actual no permite incorporarlo sin tocar el flujo del investigador, la decisión de haberlo dejado "para después" se vuelve una deuda estructural costosa. Este escenario mide si la arquitectura del sistema soporta la separación por actor y por proceso que el DFD ya anticipa.
+
+---
+
