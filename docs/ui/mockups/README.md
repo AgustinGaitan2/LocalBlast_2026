@@ -47,3 +47,27 @@ Antes de redactar el prompt, el grupo acordó los siguientes criterios para evit
 - **Trazabilidad explícita HU ↔ pantalla.** El nombre de archivo debe incluir el identificador de la pantalla y las HUs cubiertas (ej.: `pantalla-01-carga-secuencia_HU01-HU02.html`), para que la correspondencia con el catálogo de HU sea verificable a simple vista.
 
 ---
+
+## 2. Prompt utilizado
+
+El prompt se le pasó a la IA junto con el repositorio actual (todos los archivos de `docs/`, principalmente el SRS, `historias-usuario.md` y el perfil del Investigador/a):
+
+> **Prompt:**
+>
+> Les paso el repositorio actual del proyecto LocalBlast (TP de Ingeniería de Software). El perfil de usuario ya está definido y validado en `docs/ui/user-profiles/investigador.md` — ahí están el escenario de uso de referencia y el flujo de navegación con las pantallas y las HUs que respaldan a cada una. El catálogo completo de 14 HUs está en `docs/requeriments/historias-usuario.md`, con sus criterios Given-When-Then; los RF-01 a RF-12 están en `docs/requeriments/srs.md` 6.
+>
+> Necesitamos el **maquetado HTML del flujo de navegación** correspondiente a las pantallas que lista `investigador.md` 3. Pedimos un archivo `.html` por pantalla, no un prototipo navegable: el objetivo de este primer ciclo es la maqueta visual.
+>
+> **Reglas que acordamos antes y queremos que respetes:**
+>
+> 1. **Una pantalla, un archivo HTML.** Nombres de archivo con el formato `pantalla-NN-<slug>_HU<X>-HU<Y>.html`, donde los HU listados son todos los que la pantalla cubre. Ejemplo del formato que pidió la cátedra: `pantalla-01-carga-secuencia_HU01-HU02.html`.
+> 2. **No maquetar la pantalla de autenticación.** No tiene HU asociada y el principio de diseño del proyecto es *"si una pantalla no está respaldada por alguna HU, no se maqueta"*. El flujo arranca en "Nueva búsqueda — Secuencia query" asumiendo sesión ya iniciada; podés poner un chip de usuario en el header para dejarlo visible.
+> 3. **HTML + CSS puro, sin framework, sin JS.** Cada archivo autocontenido, con el CSS en `<style>` embebido. Que se pueda abrir con doble-click sin servidor local ni build-step.
+> 4. **Pensado para desktop/laptop.** No priorizar mobile; podés dejar que degrade razonablemente pero el ancho objetivo es desktop.
+> 5. **Cada pantalla debe mostrar el estado primario (camino feliz) y los estados alternativos / de excepción** de las HUs que cubre, apilados en el mismo archivo, con una etiqueta visible por sección que diga a qué HU y a qué criterio de aceptación (CA-01, CA-02, …) corresponde cada estado. Esto nos permite revisar visualmente la cobertura sin tener que interactuar.
+> 6. **Lenguaje y defaults del dominio.** Los parámetros pre-búsqueda (E-value, matriz, tamaño de palabra, gaps) tienen que verse *"recalculados según el programa BLAST elegido"* como pide RF-06: el default de `blastp` no es el de `blastn`. En la pantalla de configuración, mostrar la vista con `blastp` por defecto y dejar explícito que los números corresponden a ese programa.
+> 7. **Pantalla de ejecución asíncrona.** Dejar visualmente evidente que el usuario puede seguir navegando mientras BLAST+ corre (barra lateral con el resto de la aplicación disponible y un chip de "corriendo", por ejemplo). Botón "Cancelar búsqueda" bien visible.
+> 8. **Pantalla de resultados.** Tabla con las columnas mínimas que exige `HU11_CU005_B` CA-01 (hit ID, score, E-value observado, % identidad, % cobertura). Panel de filtros a un costado con identidad, cobertura, E-value y taxonomía; que se vea que son filtros post-búsqueda (no re-ejecutan BLAST). Selector de formato de descarga (CSV, JSON, FASTA, BLAST XML, tabular `-outfmt 6`) y botón Descargar que diga cuántos hits visibles descarga. Chip "Guardado en el historial" para la persistencia automática de `HU11`. Mostrar también el estado alternativo de `HU14_CU007_A1` (tabla vacía por filtros, descarga válida solo con metadatos).
+> **Dejanos todos los archivos en `docs/ui/mockups/`** y agregá un `README.md` ahí mismo con el índice, los criterios que te pasamos acá, el prompt y un resumen de la respuesta.
+
+---
