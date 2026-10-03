@@ -85,3 +85,24 @@ Pantallas que atraviesa el Investigador durante el escenario principal, con las 
 **Nota sobre la pantalla de autenticación.** La autenticación básica está dentro del alcance del sistema ([SRS 1.3](../../requeriments/srs.md#13-dentro-del-alcance)) pero no se detalló como historia de usuario propia (ningún `HU0X_CU00Y_*` cubre el login). El grupo evaluará si corresponde maquetarla en esta iteración; en caso contrario, el flujo se maqueta a partir de la pantalla #2 asumiendo sesión ya iniciada.
 
 **Nota sobre la pantalla #5.** Las HUs `HU11_CU005_B`, `HU12_CU006_B` y `HU13_CU007_B` conviven en la misma vista: la propia `HU11_CU005_B` describe la tabla *"en la misma vista apenas termina la ejecución"*, y las HUs de filtro y descarga operan sobre esa misma tabla sin cambiar de contexto (los filtros no re-ejecutan BLAST y la descarga toma lo visible). Por eso se maqueta como una pantalla única con zonas específicas para cada HU, no como tres pantallas separadas. Esto es consistente con el escenario de calidad de **Operabilidad** del catálogo de escenarios de calidad del proyecto, que exige fluidez al refinar resultados sin cambiar de contexto.
+
+## 4. Resumen de HUs cubiertas por el flujo
+
+El escenario, incluidas sus variantes realistas, cubre las **14 HUs del catálogo** (directa o como variante):
+
+| HU | Rol en el flujo |
+|---|---|
+| `HU01_CU001_B` | Carga de la secuencia desde archivo FASTA o texto plano. |
+| `HU02_CU001_E1` | Variante de excepción: rechazo de secuencia con formato inválido. |
+| `HU03_CU002_B` | Configuración completa en modo local o remoto, con defaults sensatos. |
+| `HU04_CU002_A1` | Variante alternativa: base local en estado no utilizable. |
+| `HU05_CU003_B` | Validación semántica que habilita *Ejecutar búsqueda*. |
+| `HU06_CU003_E1` | Variante de excepción: parámetros pre-búsqueda fuera de rango. |
+| `HU07_CU003_E2` | Variante de excepción: combinación programa/query/base incompatible. |
+| `HU08_CU004_B` | Ejecución asíncrona con indicador de progreso. |
+| `HU09_CU004_A1` | Variante alternativa: cancelación manual de la búsqueda. |
+| `HU10_CU004_E1` | Variante de excepción: fallo del modo remoto, mensaje literal. |
+| `HU11_CU005_B` | Tabla de resultados y persistencia automática en historial. |
+| `HU12_CU006_B` | Filtros post-búsqueda interactivos sin re-ejecutar BLAST. |
+| `HU13_CU007_B` | Descarga del subconjunto visible en el formato elegido. |
+| `HU14_CU007_A1` | Variante alternativa: descarga con tabla vacía por filtros. |
