@@ -6,6 +6,21 @@ Este documento contiene la selección, priorización y especificación de los at
 
 ---
 
+## Índice
+
+1. [Metodología](#1-metodología)
+2. [Filtrado inicial de atributos](#2-filtrado-inicial-de-atributos)
+3. [Matriz de priorización](#3-matriz-de-priorización)
+4. [Resultados y atributos seleccionados](#4-resultados-y-atributos-seleccionados)
+5. [Escenarios de calidad](#5-escenarios-de-calidad)
+   - 5.1 [Interoperabilidad](#51-interoperabilidad)
+   - 5.2 [Operabilidad](#52-operabilidad)
+   - 5.3 [Confidencialidad](#53-confidencialidad)
+   - 5.4 [Tolerancia a fallos](#54-tolerancia-a-fallos)
+   - 5.5 [Modularidad](#55-modularidad)
+
+---
+
 ## 1. Metodología
 
 Aplicamos el método de priorización por matriz comparativa visto en clase, con los siguientes pasos:
