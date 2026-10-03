@@ -80,7 +80,7 @@ Los escenarios de atributo de calidad (TP2 — Parte A), con su proceso de prior
 Los perfiles de usuario, escenarios de uso y flujos de navegación que guían el maquetado de la interfaz están en:
 👉 [`docs/ui/user-profiles/`](docs/ui/user-profiles/)
 
-El maquetado HTML del flujo de navegación (primer ciclo de generación con IA, un archivo por pantalla con sus HU en el nombre) está en:
+El maquetado HTML del flujo de navegación (un archivo por pantalla con sus HU en el nombre, en dos versiones por pantalla: `_inicial.html` del primer ciclo de generación con IA, y `_final.html` tras aplicar los hallazgos aceptados de la evaluación heurística) está en:
 👉 [`docs/ui/mockups/`](docs/ui/mockups/)
 
 La evaluación heurística de usabilidad, con los prompts enviados a la IA, su respuesta completa heurística por heurística, la revisión crítica del grupo sobre cada hallazgo y los ciclos de ajuste que terminaron en los `_final.html`, está en:
