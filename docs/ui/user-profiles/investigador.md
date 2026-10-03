@@ -69,3 +69,19 @@ El Investigador se encuentra, de forma recurrente, con dos clases de situaciones
 
 - **Secuencia con formato inválido (`HU02_CU001_E1`).** Al pegar una secuencia con un carácter fuera del alfabeto ,típicamente un número de posición o un símbolo que quedó al copiar, el sistema no la marca como cargada y muestra un mensaje claro que indica cuál es el carácter inválido y en qué posición aparece. El Investigador corrige y continúa.
 - **Base local no disponible (`HU04_CU002_A1`).** Al elegir una base local que está actualizándose, el sistema lo informa explícitamente (*"la base '\<nombre\>' está siendo actualizada y no puede usarse"*) y lo devuelve al paso de selección con la lista refrescada, **sin** sustituir en silencio por otra ni pasar a modo remoto por su cuenta. El Investigador decide si espera o elige otra base.
+
+## 3. Flujo de navegación
+
+Pantallas que atraviesa el Investigador durante el escenario principal, con las HUs que respaldan cada una. **Si una pantalla no está respaldada por alguna HU, no se maqueta** — este es el principio de diseño que mantiene el maquetado alineado al catálogo de historias de usuario.
+
+| # | Pantalla | HUs que la respaldan | Qué pasa en esta pantalla |
+|---|---|---|---|
+| 1 | **Autenticación** | (ninguna HU — ver nota) | Ingresa usuario y contraseña. |
+| 2 | **Nueva búsqueda** · sección *Secuencia query* | `HU01_CU001_B`, `HU02_CU001_E1` | Sube el archivo FASTA o pega el texto. El sistema infiere el alfabeto y la deja disponible, o rechaza con mensaje diagnóstico. |
+| 3 | **Nueva búsqueda** · sección *Configuración + validación* | `HU03_CU002_B`, `HU04_CU002_A1`, `HU05_CU003_B`, `HU06_CU003_E1`, `HU07_CU003_E2` | Elige modo, base de datos, programa y parámetros pre-búsqueda, y pide la validación semántica. Los defaults son sensatos según el programa. Si la configuración es inválida, el sistema señala el campo exacto. |
+| 4 | **Ejecución en progreso** | `HU08_CU004_B`, `HU09_CU004_A1`, `HU10_CU004_E1` | Ve el indicador de progreso de BLAST+, puede cancelar la búsqueda, y recibe el mensaje literal de BLAST+ / NCBI si la ejecución falla en modo remoto. |
+| 5 | **Resultados** con *filtros post-búsqueda* y *descarga* | `HU11_CU005_B`, `HU12_CU006_B`, `HU13_CU007_B`, `HU14_CU007_A1` | Ve la tabla con las columnas mínimas, aplica y ajusta filtros interactivamente sin re-ejecutar BLAST, y descarga el subconjunto visible en el formato elegido. Confirmación de persistencia automática en el historial. |
+
+**Nota sobre la pantalla de autenticación.** La autenticación básica está dentro del alcance del sistema ([SRS 1.3](../../requeriments/srs.md#13-dentro-del-alcance)) pero no se detalló como historia de usuario propia (ningún `HU0X_CU00Y_*` cubre el login). El grupo evaluará si corresponde maquetarla en esta iteración; en caso contrario, el flujo se maqueta a partir de la pantalla #2 asumiendo sesión ya iniciada.
+
+**Nota sobre la pantalla #5.** Las HUs `HU11_CU005_B`, `HU12_CU006_B` y `HU13_CU007_B` conviven en la misma vista: la propia `HU11_CU005_B` describe la tabla *"en la misma vista apenas termina la ejecución"*, y las HUs de filtro y descarga operan sobre esa misma tabla sin cambiar de contexto (los filtros no re-ejecutan BLAST y la descarga toma lo visible). Por eso se maqueta como una pantalla única con zonas específicas para cada HU, no como tres pantallas separadas. Esto es consistente con el escenario de calidad de **Operabilidad** del catálogo de escenarios de calidad del proyecto, que exige fluidez al refinar resultados sin cambiar de contexto.
