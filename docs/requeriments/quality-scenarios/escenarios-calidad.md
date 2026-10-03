@@ -221,3 +221,17 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 
 *Criticidad:* una secuencia de ADN humano publicada o filtrada identifica indirectamente a la persona de la que proviene y, en combinación con otras bases de datos, puede re-identificarla. La protección en tránsito y en almacenamiento transitorio no es "nice to have": es la línea mínima para que el laboratorio pueda usar LocalBlast con muestras humanas.
 
+**Escenario 2 — degradado por intento de acceso cruzado al historial de otro investigador**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Un investigador autenticado en el sistema, perteneciente al mismo laboratorio que la víctima |
+| Estímulo | Intenta acceder al historial de búsquedas de otro investigador (que incluye las secuencias query usadas, los parámetros y los resultados crudos), ya sea manipulando parámetros de URL, forjando un identificador de sesión o cualquier otra variante |
+| Entorno | Degradado — usuario legítimamente autenticado en el sistema, pero intentando acceder a datos que no le pertenecen |
+| Artefacto | Mecanismo de autorización que gobierna el acceso al historial persistido del sistema |
+| Respuesta | El sistema rechaza el acceso con una respuesta de "no autorizado" (código HTTP 403 o equivalente), no devuelve siquiera metadatos de las búsquedas ajenas (ni títulos, ni timestamps, ni confirmación sobre si existen o no), y registra el intento en el log de auditoría del servidor con el identificador del investigador que lo intentó y el recurso al que intentó acceder |
+| Medida de la respuesta | El 100% de los intentos de acceso al historial ajeno son rechazados sin revelar información alguna sobre su existencia (ni siquiera distinguir entre "existe pero no tenés permiso" y "no existe"); el 100% de los intentos quedan registrados en el log de auditoría con el investigador que los realizó y el recurso solicitado |
+
+*Criticidad:* en un laboratorio con varios investigadores que comparten infraestructura, la autenticación por sí sola no basta: hace falta aislamiento entre historiales. Un investigador no debe poder ver qué secuencias está analizando otro (podrían corresponder a un paciente, a un proyecto en curso no publicado, o a datos sometidos a acuerdos de confidencialidad). El escenario también exige que el sistema no filtre información por "canales laterales" (confirmar la existencia de recursos ajenos aunque no se devuelva su contenido).
+
+---
