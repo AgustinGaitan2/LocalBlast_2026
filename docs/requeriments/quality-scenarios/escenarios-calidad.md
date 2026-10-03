@@ -41,3 +41,24 @@ La ISO/IEC 25010:2023 define ocho características con sus subcaracterísticas (
 | **Modificabilidad** (Mantenibilidad) | Queda subsumida por *Modularidad*: la capacidad de modificar sin romper se materializa, en nuestro caso, a través de la separación en módulos independientes. |
 | **Adaptabilidad / Instalabilidad / Reemplazabilidad** (Flexibilidad) | El entorno de despliegue está definido (servidor del laboratorio, BLAST+ instalado por el administrador de sistemas). No hay requerimiento de portabilidad entre entornos ni de reemplazo. |
 | **Escalabilidad** (Flexibilidad) | El dimensionamiento es conocido (una decena de investigadores). Crecimientos mayores están fuera del horizonte del proyecto. |
+
+### 2.2 Atributos candidatos para la matriz de priorización
+
+Quedan diez atributos para comparar entre sí:
+
+| # | Subcaracterística | Característica (ISO 25010:2023) |
+|---|---|---|
+| 1 | Comportamiento temporal | Eficiencia de desempeño |
+| 2 | Disponibilidad | Fiabilidad |
+| 3 | Tolerancia a fallos | Fiabilidad |
+| 4 | Capacidad de recuperación | Fiabilidad |
+| 5 | Confidencialidad | Seguridad |
+| 6 | Autenticidad | Seguridad |
+| 7 | Operabilidad | Capacidad de interacción |
+| 8 | Protección frente a errores del usuario | Capacidad de interacción |
+| 9 | Interoperabilidad | Compatibilidad |
+| 10 | Modularidad | Mantenibilidad |
+
+La numeración de este listado se mantiene como índice de referencia para la matriz comparativa de la sección siguiente, en la que las columnas se referencian por su número para que la tabla no quede excesivamente ancha.
+
+---
