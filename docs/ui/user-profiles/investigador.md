@@ -31,4 +31,13 @@ Qué parte del objetivo pesa más depende del contexto concreto del Investigador
 - **Urgencia.** Variable según el contexto del Investigador: desde media-alta cuando el trabajo responde a una fecha de entrega (informe, deadline académico) hasta baja cuando el trabajo es exploratorio y sostenido. **Supuesto del grupo:** el SRS habla de *"alineamientos rápidos"* como necesidad en 2.1 pero no fija niveles concretos de urgencia.
 - **Frecuencia de uso.** También variable: desde uso por rachas durante entregas académicas puntuales hasta uso cotidiano durante proyectos de investigación activos (**Supuesto del grupo.**)
 
+### Nivel de conocimiento técnico
+
+El SRS caracteriza al Investigador con un **rango** de conocimiento técnico, no con un valor único:
+
+- **Dominio (biología molecular / bioinformática).** De básico-intermedio a alto. En el extremo inferior, un estudiante entiende qué es una secuencia FASTA y la idea general de BLAST pero puede dudar frente a elegir programa (`blastn` vs. `blastx`) o fijar un E-value. En el extremo superior, un investigador sénior distingue perfectamente los programas, elige matriz de sustitución, interpreta E-values de memoria y tiene criterios formados sobre umbrales razonables. Rastreo: SRS 1.1 ubica a *"usuarios sin perfil puramente bioinformático o técnico"* como un extremo del público objetivo, y SRS 2.1 ubica a *"Investigadores y Docentes de Bioinformática / Biología Molecular"* como el otro.
+- **Herramientas.** Todos los Investigadores manejan el navegador y los archivos de su computadora con soltura. La familiaridad con la terminal, con la instalación de BLAST+, con los nombres de flags y con el parseo de la salida varía fuertemente, desde nula (estudiante) hasta cómoda pero fastidiosa (sénior que la usó y prefiere evitarla). Rastreo: SRS 1.1 (fricción de la Interfaz de Línea de Comandos).
+- **Lectura de documentación técnica.** Todos pueden leerla si no les queda otra, pero todos prefieren evitarla, nadie quiere revisar la documentación de BLAST+ para cada búsqueda. Rastreo: README 1 — *"recordar comandos complejos, sintaxis rigurosa y navegar por documentación extensa"*.
+
+**Implicancia para el maquetado.** La interfaz debe ser accesible para el extremo inferior del rango (defaults sensatos, mensajes de error claros, nada que exija conocer flags) sin sacarle control al extremo superior (poder ajustar parámetros manualmente, poder usar bases locales del grupo, poder descargar en formatos como XML o tabular BLAST que un script existente ya sabe leer). Esta tensión se resuelve al definir las pantallas concretas.
 
