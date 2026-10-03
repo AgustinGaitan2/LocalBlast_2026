@@ -152,3 +152,18 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 | Medida de la respuesta | Cero cruces de resultados entre búsquedas concurrentes con hasta cinco búsquedas simultáneas |
 
 *Criticidad:* un cruce de resultados entre investigadores sería un error silencioso: el investigador vería alineamientos ajenos como si fueran los suyos y los interpretaría en el contexto equivocado. Es el escenario típico de un laboratorio al final de la jornada, cuando varios investigadores lanzan búsquedas al mismo tiempo.
+
+**Escenario 2 — degradado por cambio menor de versión de BLAST+**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | BLAST+ como sistema externo |
+| Estímulo | Devuelve una salida con cambios menores respecto a la versión soportada por el sistema: una columna adicional en la salida tabular, o un campo nuevo en la salida XML, tras una actualización menor del binario BLAST+ realizada por el administrador de sistemas sin coordinarla con el equipo de desarrollo |
+| Entorno | Degradado — versión de BLAST+ posterior a la validada por el equipo de LocalBlast |
+| Artefacto | Parser de la salida de BLAST+ dentro del módulo de ejecución, responsable de convertir el texto devuelto por el binario en la tabla de alineamientos que el investigador ve |
+| Respuesta | El parser reconoce los campos conocidos y los extrae correctamente, detecta la presencia de campos adicionales no mapeados y los ignora sin corromper los campos conocidos, no aborta la ejecución, no bloquea la presentación de los resultados al investigador y registra una advertencia en el log del sistema para que el equipo de desarrollo pueda incorporar el nuevo campo en una iteración futura |
+| Medida de la respuesta | El 100% de las búsquedas con salida de formato "casi conocido" (columnas adicionales no esperadas o campos XML nuevos) completan la presentación de resultados con los campos obligatorios (identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura) intactos; el 100% de esos casos quedan registrados en el log con la advertencia correspondiente |
+
+*Criticidad:* BLAST+ es externo y lo actualiza el administrador de sistemas del laboratorio por decisiones ajenas al equipo de desarrollo de LocalBlast. Una actualización menor del motor no debería romper nuestro sistema. Es un escenario realista y recurrente en productos que envuelven herramientas que no controlan.
+
+---
