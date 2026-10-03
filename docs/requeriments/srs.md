@@ -14,8 +14,9 @@ Este documento es la línea base del proyecto **LocalBlast** al cierre del TP1. 
 5. [Selección de procesos a profundizar](#5-selección-de-procesos-a-profundizar)
 6. [Requerimientos funcionales](#6-requerimientos-funcionales)
 7. [Casos de uso e historias de usuario](#7-casos-de-uso-e-historias-de-usuario)
-8. [Suposiciones y dependencias](#8-suposiciones-y-dependencias)
-9. [Glosario](#9-glosario)
+8. [Atributos de calidad (requerimientos no funcionales)](#8-atributos-de-calidad-requerimientos-no-funcionales)
+9. [Suposiciones y dependencias](#9-suposiciones-y-dependencias)
+10. [Glosario](#10-glosario)
 
 ---
 
