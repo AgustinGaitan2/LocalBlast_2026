@@ -43,3 +43,18 @@ El prompt usado para la generación del HTML y el resumen de la respuesta de la 
 - H9: incluir mini-ejemplo en el banner de error de "FASTA sin cuerpo".
 
 ---
+
+## 3. Revisión del grupo
+
+| Hallazgo | Decisión | Por qué |
+|---|---|---|
+| H1 — feedback de upload | **rechazado** | Las queries típicas son chicas (decenas de KB). Para 10 MB sí haría falta pero no es el caso de las HU del TP1. Backlog. |
+| H3 — confirmar "Reemplazar secuencia" | **aceptado** | Reemplazar invalida la config vinculada (HU01 CA-03). Entra al ajuste. |
+| H5 — validar on-blur | **rechazado** | Requiere JS y el maquetado se acordó sin JS. Lo anotamos para la implementación. |
+| H6 + H10 — ayuda FASTA visible | **aceptado** (fusionados) | Los dos piden lo mismo: ejemplo visible que no desaparezca. Entra al ajuste. |
+| H7 — reutilización + atajos | **rechazado** | No hay HU que lo respalde. Backlog. |
+| H9 — ejemplo en banner de error | **aceptado** | Coherente con lo que decidimos en H6+H10, aplicado al error. Entra al ajuste. |
+
+**Cambios que entran al ciclo adicional:** confirmación de "Reemplazar", popover con ejemplo FASTA, mini-ejemplo en el banner CA-02.
+
+---
