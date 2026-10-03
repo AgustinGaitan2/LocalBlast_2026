@@ -241,3 +241,17 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 **Característica / Subcaracterística:** Fiabilidad / Tolerancia a fallos.
 
 **Justificación de criticidad del atributo.** LocalBlast depende de dos sistemas externos sobre los que no tiene control: **BLAST+** y, a través de BLAST+ cuando se usa el modo remoto, **NCBI**. Los fallos remotos (timeouts, rate limits, errores explícitos devueltos por NCBI) son frecuentes y previsibles en el día a día del laboratorio. La tolerancia a fallos es lo que protege el trabajo del investigador cuando el entorno externo se degrada.
+
+**Escenario 1 — sobrecarga por rate limit de NCBI**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | NCBI, el proveedor del servicio BLAST remoto, a través de BLAST+ |
+| Estímulo | Devuelve un error de rate limit después de que varios investigadores del laboratorio lanzaron búsquedas remotas en rápida sucesión, excediendo las políticas de uso aceptable de NCBI |
+| Entorno | Sobrecarga — múltiples investigadores usan el modo remoto simultáneamente desde la misma red del laboratorio (NCBI identifica como "mismo origen" al conjunto) |
+| Artefacto | Módulo de ejecución asíncrona del sistema y canal de manejo de errores proveniente de BLAST+ |
+| Respuesta | Para las búsquedas que NCBI rechaza: el sistema corta su flujo, no genera un registro de resultados en el historial, muestra al investigador afectado el mensaje literal de error de BLAST+ (incluyendo el texto original devuelto por NCBI, para que el investigador pueda distinguir entre un rechazo por rate limit, por rechazo del query, o por otro motivo). Para las búsquedas de otros investigadores que están en curso en ese momento: no se ven afectadas y siguen su ejecución normal sin interrupciones |
+| Medida de la respuesta | El 100% de los errores de rate limit se muestran al investigador correspondiente dentro de los **3 segundos** de ser recibidos por el sistema; cero búsquedas de otros investigadores interrumpidas o alteradas como consecuencia del error ajeno |
+
+*Criticidad:* los rate limits de NCBI son uno de los modos de fallo más comunes del modo remoto de BLAST. Protege dos cosas a la vez: honestidad hacia el investigador afectado (mostrar el motivo real, no un error genérico) y aislamiento entre sesiones concurrentes (el error de uno no se propaga a los demás).
+
