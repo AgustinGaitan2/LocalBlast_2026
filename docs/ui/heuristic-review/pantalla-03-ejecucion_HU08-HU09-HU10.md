@@ -52,3 +52,28 @@ Prompt y resumen de la generación: ver [`../mockups/README.md`](../mockups/READ
 **Cambios que entran al ciclo adicional:** chip "aún no persistida en el historial" durante la ejecución; bloque de confirmación antes de cancelar.
 
 ---
+
+## 4. Ciclo adicional (ajuste del HTML)
+
+### 4.1 Prompt del ajuste
+
+> Sobre `_inicial.html`, aplicá dos cambios y devolvemelo como `_final.html`, con la regla "sin JS":
+>
+> 1. Al lado del porcentaje de progreso, agregá un chip ámbar "aún no persistida en el historial", para dejar visible desde el principio que la persistencia ocurre al final (HU11 CA-02).
+> 2. Antes del botón "Cancelar búsqueda" original, agregá un bloque de confirmación que simule el click: texto "¿Cancelar la búsqueda en curso? Se abortará la invocación a BLAST+. La búsqueda **no** se va a guardar en el historial", más dos botones: "No, seguir corriendo" y "Sí, cancelar" (rojo firme, no `btn-danger` suave).
+
+### 4.2 Qué quedó en el `_final.html`
+
+- Chip "aún no persistida en el historial" al lado del porcentaje.
+- Bloque de confirmación con dos botones antes del botón original "Cancelar búsqueda".
+- Nota del maquetado al pie, reescrita.
+
+### 4.3 Qué cambiamos nosotros sobre lo que devolvió la IA
+
+- La IA puso el chip en una línea aparte. Lo movimos a la misma línea del porcentaje para que se lea "62% + aún no persistida" como una sola unidad.
+- La IA dejó el botón "Sí, cancelar" con el mismo `btn-danger` suave que el botón original. Lo cambiamos a rojo oscuro firme para que haya diferencia visual entre "muestro la intención" y "confirmo"; si no, el modal pierde propósito.
+- Descartamos una propuesta de la IA de agregar cuenta regresiva al botón de confirmación ("Sí, cancelar (5)"). El perfil no describe comportamientos impulsivos y la cuenta regresiva molesta al caso legítimo (ya sé que me equivoqué, quiero cancelar ya).
+
+### 4.4 Resultado
+
+El `_final.html` tiene los dos cambios aceptados. El `_inicial.html` queda para poder comparar.
