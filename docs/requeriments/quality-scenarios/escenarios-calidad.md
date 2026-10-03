@@ -95,3 +95,35 @@ Las filas llevan el nombre completo del atributo; las columnas se identifican co
 
 
 ---
+
+
+### 4.1 Ranking
+
+Umbral elegido: **5 victorias**. Quedan los cinco atributos que superan ese umbral.
+
+| Posición | Atributo (subcaracterística) | Puntaje | ¿Seleccionado? |
+|:---:|---|:---:|:---:|
+| 1 | Interoperabilidad | 9 | ✅ |
+| 2 | Operabilidad | 8 | ✅ |
+| 3 | Confidencialidad | 7 | ✅ |
+| 4 | Tolerancia a fallos | 6 | ✅ |
+| 5 | Modularidad | 5 | ✅ |
+| 6 | Protección frente a errores del usuario | 4 | ❌ |
+| 7 | Comportamiento temporal | 3 | ❌ |
+| 8 | Disponibilidad | 2 | ❌ |
+| 9 | Capacidad de recuperación | 1 | ❌ |
+| 10 | Autenticidad | 0 | ❌ |
+
+### 4.2 Síntesis de por qué estos cinco y no los otros
+
+Los cinco atributos seleccionados cubren cuatro dimensiones distintas del sistema, todas críticas para LocalBlast:
+
+- **Interoperabilidad** cubre la relación con el actor externo del que depende todo el sistema (BLAST+ y, a través suyo, NCBI). Sin ella no hay producto.
+- **Operabilidad** cubre la relación con el actor humano principal (el investigador) y materializa la propuesta de valor frente a la línea de comandos.
+- **Confidencialidad** cubre la protección de los datos sensibles que atraviesan el sistema. Las secuencias que un investigador puede cargar incluyen material biológico de origen humano, lo que las convierte en datos sensibles; la exposición de red (navegador ↔ servidor), el almacenamiento del historial y el acceso entre investigadores del mismo laboratorio son los tres frentes donde esta protección se juega.
+- **Tolerancia a fallos** cubre la robustez ante los fallos externos previsibles (timeouts, rate limits, errores de NCBI reportados a través de BLAST+), que son frecuentes en el modo remoto.
+- **Modularidad** cubre la evolución del sistema. El proyecto declara explícitamente un modelo de ciclo de vida incremental y deja fuera del alcance de este cuatrimestre el rol administrador, formatos adicionales y filtros adicionales, con la intención explícita de incorporarlos iterativamente. Un diseño no modular convierte esa intención en reescrituras.
+
+Los que quedaron afuera no son irrelevantes, pero son de **menor prioridad relativa**: *Protección frente a errores del usuario* ya está ampliamente cubierta por los requerimientos funcionales de validación (sintáctica de la secuencia y semántica de la configuración); *Comportamiento temporal* importa pero queda subordinada a Operabilidad, que la contiene en términos de experiencia percibida; *Disponibilidad* y *Capacidad de recuperación* son moderadas en un lab que no exige 24/7 y tolera reintentos; y *Autenticidad* se materializa como mecanismo que apoya a Confidencialidad, no como atributo con exigencia propia independiente.
+
+---
