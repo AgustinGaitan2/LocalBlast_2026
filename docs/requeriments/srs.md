@@ -158,7 +158,27 @@ Las historias de usuario asociadas a cada slice (relación 1:1 slice ↔ HU), co
 
 👉 [`docs/requeriments/historias-usuario.md`](historias-usuario.md)
 
-## 8. Suposiciones y dependencias
+## 8. Atributos de calidad (requerimientos no funcionales)
+
+Los atributos de calidad críticos para LocalBlast, el proceso de filtrado y priorización aplicado para seleccionarlos (matriz comparativa por pares), y los escenarios de calidad en los seis componentes de la plantilla ISO (fuente del estímulo, estímulo, artefacto, entorno, respuesta, medida de respuesta) están en:
+
+👉 [`docs/requeriments/quality-scenarios/escenarios-calidad.md`](quality-scenarios/escenarios-calidad.md)
+
+Los cinco atributos seleccionados —ordenados por el puntaje obtenido en la matriz comparativa— son:
+
+| # | Atributo (subcaracterística ISO 25010:2023) | Característica |
+|---|---|---|
+| 1 | Interoperabilidad | Compatibilidad |
+| 2 | Operabilidad | Capacidad de interacción |
+| 3 | Confidencialidad | Seguridad |
+| 4 | Tolerancia a fallos | Fiabilidad |
+| 5 | Modularidad | Mantenibilidad |
+
+Cada atributo cuenta con dos escenarios de calidad, redactados en entornos de sobrecarga, degradados o significativos (sin escenarios en condición normal), siguiendo la indicación de la guía del TP2.
+
+---
+
+## 9. Suposiciones y dependencias
 
 - El binario **BLAST+** (versión 2.14 o posterior) está disponible en el servidor donde corre el sistema. Es una dependencia externa: LocalBlast **usa** BLAST+, no lo empaqueta.
 - La API remota de NCBI (`https://blast.ncbi.nlm.nih.gov/Blast.cgi`) está disponible desde la red del servidor cuando el usuario elige modo remoto — **BLAST+ es quien la contacta**, no directamente nuestra GUI. Las políticas de uso responsable de NCBI (frecuencia de polling, límite de queries por unidad de tiempo) las respeta BLAST+, no nuestro código.
