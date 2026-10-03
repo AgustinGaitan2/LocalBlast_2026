@@ -304,3 +304,11 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 
 ---
 
+## Referencias
+
+- [`srs.md`](../srs.md) — Especificación de Requerimientos de Software (TP1).
+- [`casos-de-uso.md`](../casos-de-uso.md) — Casos de uso en formato Cockburn.
+- [`historias-usuario.md`](../historias-usuario.md) — Historias de usuario con criterios Given-When-Then.
+- [`../../uso-ia.md`](../../uso-ia.md) — Bitácora de uso de IA, con las entradas correspondientes al TP2 Parte A.
+- Anexo A de la guía de cátedra del TP2 (taxonomía de atributos de calidad ISO/IEC 25010:2023).
+
