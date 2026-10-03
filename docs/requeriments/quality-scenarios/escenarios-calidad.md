@@ -235,3 +235,9 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 *Criticidad:* en un laboratorio con varios investigadores que comparten infraestructura, la autenticación por sí sola no basta: hace falta aislamiento entre historiales. Un investigador no debe poder ver qué secuencias está analizando otro (podrían corresponder a un paciente, a un proyecto en curso no publicado, o a datos sometidos a acuerdos de confidencialidad). El escenario también exige que el sistema no filtre información por "canales laterales" (confirmar la existencia de recursos ajenos aunque no se devuelva su contenido).
 
 ---
+
+### 5.4 Tolerancia a fallos
+
+**Característica / Subcaracterística:** Fiabilidad / Tolerancia a fallos.
+
+**Justificación de criticidad del atributo.** LocalBlast depende de dos sistemas externos sobre los que no tiene control: **BLAST+** y, a través de BLAST+ cuando se usa el modo remoto, **NCBI**. Los fallos remotos (timeouts, rate limits, errores explícitos devueltos por NCBI) son frecuentes y previsibles en el día a día del laboratorio. La tolerancia a fallos es lo que protege el trabajo del investigador cuando el entorno externo se degrada.
