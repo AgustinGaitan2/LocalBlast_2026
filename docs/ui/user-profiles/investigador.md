@@ -41,3 +41,8 @@ El SRS caracteriza al Investigador con un **rango** de conocimiento técnico, no
 
 **Implicancia para el maquetado.** La interfaz debe ser accesible para el extremo inferior del rango (defaults sensatos, mensajes de error claros, nada que exija conocer flags) sin sacarle control al extremo superior (poder ajustar parámetros manualmente, poder usar bases locales del grupo, poder descargar en formatos como XML o tabular BLAST que un script existente ya sabe leer). Esta tensión se resuelve al definir las pantallas concretas.
 
+### Limitaciones y frustraciones que condicionan su uso
+
+- **Riesgo de errores en la configuración.** El extremo menos técnico puede elegir un programa BLAST incompatible con su query (p. ej. `blastp` sobre ADN) o poner un parámetro fuera de rango sin darse cuenta; necesita mensajes de error diagnósticos, no genéricos. Rastreo: existencia explícita de `HU02_CU001_E1` (secuencia inválida), `HU06_CU003_E1` (parámetros fuera de rango), `HU07_CU003_E2` (combinación incompatible).
+- **BLAST+ y NCBI fallan seguido en la práctica.** Timeouts, rate limits, errores remotos. El Investigador necesita que, cuando algo falla, la interfaz le muestre el mensaje literal, para distinguir un problema de red temporal de uno más grave. Rastreo: `HU10_CU004_E1`.
+- **Base local en estado inconsistente.** Si la base del laboratorio que planea usar está actualizándose o con índices corruptos, no quiere que el sistema le sustituya en silencio por otra ni que lo pase a modo remoto solo. Rastreo: `HU04_CU002_A1`.
