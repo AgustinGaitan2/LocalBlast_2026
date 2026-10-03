@@ -58,3 +58,30 @@ El prompt usado para la generación del HTML y el resumen de la respuesta de la 
 **Cambios que entran al ciclo adicional:** confirmación de "Reemplazar", popover con ejemplo FASTA, mini-ejemplo en el banner CA-02.
 
 ---
+
+## 4. Ciclo adicional (ajuste del HTML)
+
+### 4.1 Prompt del ajuste
+
+> Sobre el mismo `_inicial.html`, aplicá tres cambios y devolvemelo como `_final.html`, manteniendo todo lo demás y la regla "sin JS":
+>
+> 1. Popover inline "¿Qué es un FASTA?" junto al título "Secuencia query" del panel, con un recuadro mono-espaciado que muestre un FASTA mínimo bien formado (encabezado + un par de líneas de secuencia proteína). Visible siempre, no solo al hover.
+> 2. Debajo de la tarjeta "✓ Secuencia cargada correctamente", agregá un bloque de confirmación con "Mantener la actual" y "Sí, reemplazar" para simular el click en "Reemplazar secuencia".
+> 3. En el banner de la excepción "FASTA sin cuerpo" (HU02 CA-02), agregá el mismo recuadro con el FASTA mínimo como ejemplo.
+
+### 4.2 Qué quedó en el `_final.html`
+
+- Popover de ayuda con ejemplo de FASTA al lado del título del panel.
+- Bloque de confirmación de "Reemplazar secuencia" con dos botones (mantener / confirmar).
+- Mini-ejemplo del FASTA correcto debajo del mensaje de error CA-02.
+- Nota del maquetado al pie, reescrita, apuntando a este documento.
+
+### 4.3 Qué cambiamos nosotros sobre lo que devolvió la IA
+
+- Alargamos el ejemplo del FASTA de 2 a 3 líneas, para que se vea el caso típico de secuencia larga.
+- Cambiamos el color del botón "Sí, reemplazar" de azul (primario) a ámbar (warning), porque reemplazar borra la configuración vinculada.
+
+### 4.4 Resultado
+
+El `_final.html` tiene los tres cambios aceptados. El `_inicial.html` queda para poder comparar.
+
