@@ -1,2 +1,9 @@
 # Evaluación heurística — Segundo ciclo del maquetado asistido por IA
 
+Esta carpeta contiene la evaluación heurística de usabilidad de las pantallas del flujo de navegación del Investigador/a, siguiendo el **segundo ciclo** del proceso de maquetado asistido por IA definido en la guía del TP2 (sección 4.4) y los ciclos subsiguientes de revisión crítica del grupo (4.5) y de ajuste de la interfaz (4.6).
+
+El punto de partida son los mockups HTML generados en el primer ciclo (`docs/ui/mockups/pantalla-NN-..._inicial.html`). Para cada pantalla, el ciclo de evaluación consistió en:
+
+1. **Evaluación por IA.** Se le entregó el HTML de la pantalla a la IA en una nueva interacción (sin arrastrar el contexto del ciclo de generación) y se le pidió que asumiera el rol de especialista en interfaz de usuario y evaluara la pantalla **heurística por heurística** según las diez heurísticas de usabilidad de Nielsen, teniendo en cuenta el **perfil del Investigador/a** (`docs/ui/user-profiles/investigador.md`) y el **escenario de uso de referencia** definidos, y no un usuario genérico. Para cada heurística, la IA debía indicar si se cumple, si se cumple parcialmente o si se incumple, y por qué.
+2. **Revisión crítica del grupo.** El grupo revisó cada hallazgo devuelto por la IA y, para cada uno, decidió aceptarlo o rechazarlo, documentando el motivo de la decisión. Esta revisión es el núcleo pedagógico de la actividad: la IA identifica posibles problemas, pero el criterio sobre su validez y aplicabilidad al Investigador/a y al proyecto concretos es responsabilidad del grupo.
+3. **Ciclo adicional de ajuste.** Para los hallazgos aceptados, el grupo pidió a la IA una variante ajustada del HTML con las mejoras aplicadas. El resultado es el archivo `pantalla-NN-..._final.html` de la carpeta de mockups.
