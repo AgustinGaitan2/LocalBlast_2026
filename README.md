@@ -19,7 +19,9 @@ LocalBlast_2026/
     │   ├── casos-de-uso.md
     │   ├── historias-usuario.md
     │   ├── modelo-dominio.md
-    │   └── srs.md
+    │   ├── srs.md
+    │   └── quality-scenarios/
+    │       └── escenarios-calidad.md
     └── uso-ia.md
 ````
 
