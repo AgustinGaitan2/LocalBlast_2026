@@ -25,10 +25,20 @@ LocalBlast_2026/
     ├── ui/
     │   ├── mockups/
     │   │   ├── README.md
-    │   │   ├── pantalla-01-carga-secuencia_HU01-HU02.html
-    │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07.html
-    │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10.html
-    │   │   └── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14.html
+    │   │   ├── pantalla-01-carga-secuencia_HU01-HU02_inicial.html
+    │   │   ├── pantalla-01-carga-secuencia_HU01-HU02_final.html
+    │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_inicial.html
+    │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_final.html
+    │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10_inicial.html
+    │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10_final.html
+    │   │   ├── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_inicial.html
+    │   │   └── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_final.html
+    │   ├── heuristic-review/
+    │   │   ├── README.md
+    │   │   ├── pantalla-01-carga-secuencia_HU01-HU02.md
+    │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07.md
+    │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10.md
+    │   │   └── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14.md
     │   └── user-profiles/
     │       ├── README.md
     │       └── investigador.md
