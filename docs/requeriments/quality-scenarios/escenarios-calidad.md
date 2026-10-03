@@ -255,3 +255,17 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 
 *Criticidad:* los rate limits de NCBI son uno de los modos de fallo más comunes del modo remoto de BLAST. Protege dos cosas a la vez: honestidad hacia el investigador afectado (mostrar el motivo real, no un error genérico) y aislamiento entre sesiones concurrentes (el error de uno no se propaga a los demás).
 
+**Escenario 2 — degradado por timeout de NCBI durante una búsqueda en curso**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Red o infraestructura externa entre BLAST+ (que corre en el servidor del laboratorio) y los servidores de NCBI |
+| Estímulo | Se produce un timeout de comunicación con NCBI durante una búsqueda remota que llevaba varios minutos de ejecución |
+| Entorno | Degradado — fallo intermitente de conectividad; BLAST+ reporta el timeout tras no recibir respuesta de NCBI dentro del plazo esperado |
+| Artefacto | Módulo de ejecución asíncrona del sistema y su manejo de errores de BLAST+ |
+| Respuesta | El sistema detecta el timeout reportado por BLAST+, corta el flujo de ejecución, no genera un registro de resultados en el historial, muestra un mensaje que distingue explícitamente un timeout de conexión remota de un problema de parámetros de la búsqueda (para que el investigador no reconfigure lo que no estaba mal), y deja la interfaz en el estado "configuración ejecutable" preservando los valores del formulario, para que el investigador pueda relanzar la misma búsqueda sin tener que reconfigurar nada |
+| Medida de la respuesta | El 100% de los timeouts remotos se identifican y comunican como tales dentro de los **60 segundos** del evento (no como "error de configuración" ni como "error genérico"); en el 100% de los casos la configuración validada se preserva íntegramente en la interfaz |
+
+*Criticidad:* la peor experiencia posible es que una búsqueda remota tarde diez minutos, falle por red y obligue al investigador a cargar de nuevo la secuencia y configurar todo desde cero. Preservar la configuración y comunicar bien el motivo del fallo es lo que diferencia una herramienta profesional de una frágil.
+
+---
