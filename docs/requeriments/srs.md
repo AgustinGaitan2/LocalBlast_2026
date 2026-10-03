@@ -187,7 +187,7 @@ Cada atributo cuenta con dos escenarios de calidad, redactados en entornos de so
 
 ---
 
-## 9. Glosario
+## 10. Glosario
 
 | Término | Significado |
 |---|---|
