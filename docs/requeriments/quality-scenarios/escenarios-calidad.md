@@ -269,3 +269,9 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 *Criticidad:* la peor experiencia posible es que una búsqueda remota tarde diez minutos, falle por red y obligue al investigador a cargar de nuevo la secuencia y configurar todo desde cero. Preservar la configuración y comunicar bien el motivo del fallo es lo que diferencia una herramienta profesional de una frágil.
 
 ---
+
+### 5.5 Modularidad
+
+**Característica / Subcaracterística:** Mantenibilidad / Modularidad.
+
+**Justificación de criticidad del atributo.** El proyecto tiene un modelo de ciclo de vida explícitamente **incremental con prácticas ágiles** (ver README, sección "Modelo de Ciclo de Vida"). El TP1 declara explícitamente **fuera de alcance** para este cuatrimestre varias capacidades que están previstas para iteraciones futuras: el rol administrador de bases de datos locales (con alta, actualización y baja desde la propia aplicación), búsquedas en lote con múltiples queries simultáneas, y la posibilidad de añadir nuevos formatos de descarga y nuevos filtros posteriores a la búsqueda. Si el diseño no soporta esta evolución planeada sin reescribir módulos existentes, el enfoque incremental se vuelve impracticable: cada incorporación requeriría rehacer lo que ya funciona.
