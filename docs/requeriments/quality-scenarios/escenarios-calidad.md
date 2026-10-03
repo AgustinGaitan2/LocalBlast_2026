@@ -62,3 +62,36 @@ Quedan diez atributos para comparar entre sí:
 La numeración de este listado se mantiene como índice de referencia para la matriz comparativa de la sección siguiente, en la que las columnas se referencian por su número para que la tabla no quede excesivamente ancha.
 
 ---
+
+## 3. Matriz de priorización
+
+**Convención.** En cada celda `(fila, columna)` se compara el atributo de la fila contra el atributo de la columna:
+
+- `^` indica que **el atributo de la columna es más crítico** para LocalBlast.
+- `<` indica que **el atributo de la fila es más crítico** para LocalBlast.
+- La diagonal queda vacía (no se compara un atributo consigo mismo).
+- Solo se completa el **triángulo superior** (la matriz es antisimétrica).
+
+El puntaje final de cada atributo es la cantidad de comparaciones en que resultó ganador: se cuentan los `<` de su fila más los `^` de su columna (en las filas que están por encima de la diagonal).
+
+### 3.1 Grilla comparativa 10×10
+
+Las filas llevan el nombre completo del atributo; las columnas se identifican con el número de orden del listado de la sección 2.2.
+
+| | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | **Puntaje** |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1. Comportamiento temporal                         | — | `<` | `^` | `<` | `^` | `<` | `^` | `^` | `^` | `^` | **3** |
+| 2. Disponibilidad                                  |   | — | `^` | `<` | `^` | `<` | `^` | `^` | `^` | `^` | **2** |
+| 3. Tolerancia a fallos                             |   |   | — | `<` | `^` | `<` | `^` | `<` | `^` | `<` | **6** |
+| 4. Capacidad de recuperación                       |   |   |   | — | `^` | `<` | `^` | `^` | `^` | `^` | **1** |
+| 5. Confidencialidad                                |   |   |   |   | — | `<` | `^` | `<` | `^` | `<` | **7** |
+| 6. Autenticidad                                    |   |   |   |   |   | — | `^` | `^` | `^` | `^` | **0** |
+| 7. Operabilidad                                    |   |   |   |   |   |   | — | `<` | `^` | `<` | **8** |
+| 8. Protección frente a errores del usuario         |   |   |   |   |   |   |   | — | `^` | `^` | **4** |
+| 9. Interoperabilidad                               |   |   |   |   |   |   |   |   | — | `<` | **9** |
+| 10. Modularidad                                    |   |   |   |   |   |   |   |   |   | — | **5** |
+
+**Verificación.** Suma total de puntajes = 3 + 2 + 6 + 1 + 7 + 0 + 8 + 4 + 9 + 5 = **45**, que coincide con la cantidad total de comparaciones C(10,2) = 10·9/2 = 45. ✓
+
+
+---
