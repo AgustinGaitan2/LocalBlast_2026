@@ -380,7 +380,29 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
   - **Default definicional en los tooltips.** Los primeros textos de ayuda los redactó como definiciones de diccionario ("E-value: expectation value..."). Los reescribimos para que orienten una decisión, no para que definan el concepto.
   - **Veredictos "parciales" forzados.** En la pantalla 3 marcó H10 "parcial" apoyándose en algo que es una ampliación de HU08, no una debilidad. Quedó la impresión de que la IA evita decir "cumple" demasiadas veces seguidas.
 
+## Entrada 19 — Ciclos adicionales de ajuste del maquetado (TP2, sección 4.6)
 
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** después de la revisión crítica (Entrada 18), pedirle a la IA una versión ajustada del HTML con los cambios aceptados aplicados. Una conversación nueva por pantalla con los cambios listados puntualmente. La salida se guardó como `pantalla-NN-..._final.html` al lado del `_inicial.html`.
+- **Qué generó la IA:**
+  - Pantalla 1 → popover "¿Qué es un FASTA?", confirmación de "Reemplazar secuencia", mini-ejemplo en el banner CA-02.
+  - Pantalla 2 → tooltips en parámetros pre-búsqueda, confirmación de "Restaurar defaults", pista de por qué "Validar" está deshabilitado en HU04.
+  - Pantalla 3 → chip "aún no persistida en el historial" junto al progreso, bloque de confirmación antes de cancelar.
+  - Pantalla 4 → tooltips en columnas y formatos, "Limpiar filtros" como botón real, chips de sugerencia en el estado vacío.
+- **Qué aceptamos:** los cambios acordados, aplicados tal como se los pedimos. La IA respetó "sin JS" (tooltips con CSS `::after + attr`, confirmaciones como estados apilados). También decidimos **conservar los `_inicial.html`** sin tocar, para que la comparación antes/después sea verificable (que es lo que la sección 4.5 llama "núcleo pedagógico"). Lo aclaramos en el README de mockups.
+- **Qué modificamos:**
+  - **Textos de tooltips.** Mismo problema que la Entrada 18: venían como definiciones. Los dejamos orientados a decidir.
+  - **Color de los botones de confirmación.** La IA puso "Sí, reemplazar" en azul y "Sí, cancelar" en rojo suave. Los pasamos a ámbar y rojo firme: la confirmación tiene que verse distinta del botón que la disparó.
+  - **Posición del chip "aún no persistida".** La IA lo puso debajo del progreso; lo movimos a la misma línea del porcentaje para que se lea como una sola unidad.
+  - **Peso visual del `?` en encabezados de tabla (pantalla 4).** Lo dejó en el mismo azul que el resto y competía con el nombre de columna. Regla CSS extra para que en `<th>` se vea en gris claro.
+  - **Un chip de sugerencia (pantalla 4).** "Aflojar E-value a ≤ 0.001" lo cambiamos a `1e-10` para que fuera coherente con el valor del input de ese estado (`1e-50`).
+- **Qué descartamos:**
+  - **Cuenta regresiva en el botón de cancelación (pantalla 3).** El perfil no describe comportamientos impulsivos; la cuenta regresiva molesta al caso legítimo.
+  - **Botón "Ver todos los 54 hits sin filtros" (pantalla 4).** "Limpiar todos los filtros" ya hacía eso.
+- **Errores / imprecisiones detectadas:**
+  - **Cambio aplicado en un solo lugar.** En la pantalla 4, "Limpiar filtros" aparecía en los dos estados apilados y la IA solo lo cambió en el primero. Mismo patrón de siempre: cambios transversales se aplican a la primera instancia y se olvidan de las demás.
+  - **Nota del maquetado desactualizada (pantalla 2).** La IA aplicó los tres cambios al cuerpo pero dejó la nota al pie como estaba. Patrón recurrente: cuerpos sí, resúmenes no.
+  
 ## Reflexión sobre el uso de IA
 
 La bitácora deja ver un patrón claro: la IA nos sirvió como acelerador de redacción y como espejo para nuestras propias inconsistencias, pero nunca como fuente de verdad sobre el dominio. Los errores que fuimos detectando como proponer descargar SwissProt automáticamente, sugerir un E-value por defecto que no distinguía por programa, plantear un fallback automático de bases locales a remotas cuando esas equivalencias no existen, arrastrar la persistencia en D2 al lugar equivocado, o dejar la salvedad rebuscada de "las capacidades de P2 se profundizan pero P2 como proceso no", no eran errores de forma sino de entendimiento del dominio. Solo las pudimos atrapar porque el grupo discutió el modelo antes de aceptar el texto, y porque cuando algo nos hacía ruido lo cuestionamos en vez de pasarlo por alto. También apareció, con mucha regularidad, un patrón operativo: cuando un cambio conceptual tocaba varios archivos, la IA lo aplicaba bien al cuerpo del documento y se olvidaba de las introducciones, resúmenes, tablas de trazabilidad o diagramas, hasta el punto de que ya lo esperábamos y lo chequeábamos antes de commitear. La lección que nos llevamos para los próximos TPs es que la IA acelera lo que ya entendemos, no reemplaza el entendimiento: es útil para escribir más rápido, para aplicar cambios transversales de forma consistente y para que un integrante le explique algo a otro por escrito con menos fricción, pero el trabajo real, discutir el modelo, decidir qué se profundiza, cerrar una definición de dominio, sigue siendo del grupo. Como grupo mantuvimos, en cada iteración, la última palabra sobre qué entraba al repo; y eso es lo que hizo que la IA fuera una herramienta y no un delegado.
