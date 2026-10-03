@@ -187,3 +187,18 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 
 *Criticidad:* el filtrado interactivo posterior a la búsqueda es una de las dos capacidades que diferencian a LocalBlast de la interfaz web oficial de NCBI. Si no responde ágilmente en escenarios con muchos hits —que son los más interesantes desde el punto de vista biológico— el investigador vuelve a parsear la salida tabular a mano y pierde la ventaja del producto.
 
+**Escenario 2 — degradado por modificación posterior a la validación de la configuración**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Investigador |
+| Estímulo | Modifica un campo del formulario (por ejemplo, cambia el programa BLAST de `blastp` a `blastx`, o cambia la base de datos seleccionada) **después** de que ya le había pedido al sistema que validara su configuración y había recibido el visto bueno explícito "configuración válida, lista para ejecutar" |
+| Entorno | Degradado — el usuario altera una configuración ya marcada como ejecutable; si el sistema no reacciona, podría disparar la búsqueda sobre una combinación inconsistente con lo que se había validado |
+| Artefacto | Formulario de configuración de la búsqueda y mecanismo que rastrea el estado "validada / no validada" de la configuración |
+| Respuesta | El sistema invalida inmediatamente la marca "válida, lista para ejecutar", deshabilita visualmente el botón de ejecución de la búsqueda, señala en la interfaz que el cambio invalidó la validación previa (sin exigirle al investigador que lea un mensaje de texto para percibirlo), y preserva todos los demás valores del formulario para que el investigador no tenga que volver a cargarlos |
+| Medida de la respuesta | El 100% de los cambios posteriores a la validación sobre campos relevantes del formulario (modo local/remoto, base de datos, programa, parámetros previos a la búsqueda) disparan la invalidación visual y la deshabilitación del botón en menos de **500 ms**; en el 0% de los casos puede dispararse una búsqueda sobre una configuración modificada después de la validación sin volver a pasar por el paso de validación |
+
+*Criticidad:* evita que el investigador, por inercia visual, lance una búsqueda con una configuración que ya no coincide con lo que había validado. Es una protección activa de la operabilidad que no requiere intervención consciente del usuario: el sistema le ahorra el error antes de que lo cometa.
+
+---
+
