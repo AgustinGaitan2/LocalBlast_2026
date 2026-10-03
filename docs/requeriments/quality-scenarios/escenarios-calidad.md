@@ -133,3 +133,9 @@ Los que quedaron afuera no son irrelevantes, pero son de **menor prioridad relat
 Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**, ambos en entornos de sobrecarga, degradados o significativos, con los seis componentes de la plantilla ISO. Siguiendo la indicación de la guía del TP2, no se incluyen escenarios en condición normal: los escenarios buscan capturar las situaciones en las que el atributo realmente se pone en juego.
 
 ---
+
+### 5.1 Interoperabilidad
+
+**Característica / Subcaracterística:** Compatibilidad / Interoperabilidad.
+
+**Justificación de criticidad del atributo.** LocalBlast *es*, por definición, una interfaz gráfica para BLAST+. Toda ejecución —local o remota— termina siendo una invocación al binario de BLAST+ con los argumentos adecuados y un parseo de su salida. La interoperabilidad con este sistema externo es condición de existencia del producto, y es el atributo con más victorias en la matriz comparativa (9 sobre 9).
