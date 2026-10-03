@@ -22,6 +22,10 @@ LocalBlast_2026/
     │   ├── srs.md
     │   └── quality-scenarios/
     │       └── escenarios-calidad.md
+    ├── ui/
+    │   └── user-profiles/
+    │       ├── README.md
+    │       └── investigador.md
     └── uso-ia.md
 ````
 
