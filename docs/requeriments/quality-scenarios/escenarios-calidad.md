@@ -202,3 +202,8 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 
 ---
 
+### 5.3 Confidencialidad
+
+**Característica / Subcaracterística:** Seguridad / Confidencialidad.
+
+**Justificación de criticidad del atributo.** Las secuencias biológicas que un investigador carga en LocalBlast pueden provenir de muestras de origen humano (ADN de pacientes, por ejemplo) y, en ese caso, califican como **datos sensibles** desde el punto de vista bioético y de protección de datos personales. La confidencialidad se juega en tres frentes concretos: la transmisión por red entre el navegador del investigador y el servidor, el almacenamiento del historial de búsquedas en el servidor, y el aislamiento entre los historiales de los distintos investigadores del laboratorio. Que ninguno de esos tres frentes se pierda es responsabilidad del sistema; una fuga en cualquiera de ellos es un incidente irreversible.
