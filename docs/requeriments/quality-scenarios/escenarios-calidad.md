@@ -167,3 +167,9 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 *Criticidad:* BLAST+ es externo y lo actualiza el administrador de sistemas del laboratorio por decisiones ajenas al equipo de desarrollo de LocalBlast. Una actualización menor del motor no debería romper nuestro sistema. Es un escenario realista y recurrente en productos que envuelven herramientas que no controlan.
 
 ---
+
+### 5.2 Operabilidad
+
+**Característica / Subcaracterística:** Capacidad de interacción / Operabilidad.
+
+**Justificación de criticidad del atributo.** La propuesta de valor explícita de LocalBlast frente a la línea de comandos de BLAST+ y frente a la interfaz web oficial de NCBI es ser *"ágil e intuitiva"* (ver canvas de descubrimiento en el README). Si la operabilidad falla, el investigador vuelve a la terminal y el producto pierde su razón de ser. Es el segundo atributo con más victorias en la matriz comparativa.
