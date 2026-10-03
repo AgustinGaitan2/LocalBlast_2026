@@ -207,3 +207,17 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 **Característica / Subcaracterística:** Seguridad / Confidencialidad.
 
 **Justificación de criticidad del atributo.** Las secuencias biológicas que un investigador carga en LocalBlast pueden provenir de muestras de origen humano (ADN de pacientes, por ejemplo) y, en ese caso, califican como **datos sensibles** desde el punto de vista bioético y de protección de datos personales. La confidencialidad se juega en tres frentes concretos: la transmisión por red entre el navegador del investigador y el servidor, el almacenamiento del historial de búsquedas en el servidor, y el aislamiento entre los historiales de los distintos investigadores del laboratorio. Que ninguno de esos tres frentes se pierda es responsabilidad del sistema; una fuga en cualquiera de ellos es un incidente irreversible.
+
+**Escenario 1 — degradado por intercepción pasiva del tráfico de red**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Un tercero con capacidad de observar el tráfico de la red interna del laboratorio (por ejemplo, un nodo intermedio comprometido o un sniffer en la red Wi-Fi del laboratorio) |
+| Estímulo | Captura los paquetes de red que viajan entre el navegador del investigador y el servidor donde corren LocalBlast y BLAST+, durante una búsqueda cuyo query es una secuencia potencialmente sensible (ADN proveniente de una muestra humana) |
+| Entorno | Degradado — red del laboratorio en la que no se puede asumir que todos los nodos intermedios sean confiables; el sistema debe comportarse como si la red estuviera siendo observada |
+| Artefacto | Canal de comunicación entre el navegador del investigador y el servidor del sistema, y archivos temporales que el sistema pueda generar en disco para pasar la secuencia al subproceso de BLAST+ |
+| Respuesta | Toda la comunicación entre el navegador y el servidor viaja cifrada mediante TLS; la secuencia query nunca se transmite por canales en texto plano; en el servidor, los archivos temporales que el sistema necesite para pasar la secuencia al subproceso de BLAST+ existen únicamente durante la ejecución y se eliminan al finalizar la búsqueda, con permisos restringidos al usuario del sistema mientras existen |
+| Medida de la respuesta | Cero paquetes capturados contienen la secuencia query en texto plano (verificable con una captura de tráfico de referencia); cero archivos temporales con la secuencia query permanecen en el disco del servidor más allá de **1 minuto** después de que la búsqueda finaliza (verificable con una inspección del directorio temporal del sistema) |
+
+*Criticidad:* una secuencia de ADN humano publicada o filtrada identifica indirectamente a la persona de la que proviene y, en combinación con otras bases de datos, puede re-identificarla. La protección en tránsito y en almacenamiento transitorio no es "nice to have": es la línea mínima para que el laboratorio pueda usar LocalBlast con muestras humanas.
+
