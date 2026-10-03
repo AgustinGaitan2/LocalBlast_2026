@@ -23,6 +23,12 @@ LocalBlast_2026/
     │   └── quality-scenarios/
     │       └── escenarios-calidad.md
     ├── ui/
+    │   ├── mockups/
+    │   │   ├── README.md
+    │   │   ├── pantalla-01-carga-secuencia_HU01-HU02.html
+    │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07.html
+    │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10.html
+    │   │   └── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14.html
     │   └── user-profiles/
     │       ├── README.md
     │       └── investigador.md
