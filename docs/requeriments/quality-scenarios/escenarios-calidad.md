@@ -139,3 +139,16 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 **Característica / Subcaracterística:** Compatibilidad / Interoperabilidad.
 
 **Justificación de criticidad del atributo.** LocalBlast *es*, por definición, una interfaz gráfica para BLAST+. Toda ejecución —local o remota— termina siendo una invocación al binario de BLAST+ con los argumentos adecuados y un parseo de su salida. La interoperabilidad con este sistema externo es condición de existencia del producto, y es el atributo con más victorias en la matriz comparativa (9 sobre 9).
+
+**Escenario 1 — sobrecarga por concurrencia de invocaciones**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Varios investigadores del mismo laboratorio, trabajando simultáneamente |
+| Estímulo | Lanzan hasta cinco búsquedas concurrentes contra el sistema, mezclando búsquedas locales (contra el catálogo del laboratorio) y remotas (contra NCBI a través de BLAST+) |
+| Entorno | Sobrecarga — cinco invocaciones concurrentes a BLAST+ sobre el mismo servidor, cada una con parámetros, bases de datos y resultados distintos |
+| Artefacto | Módulo de ejecución asíncrona del sistema, responsable de invocar BLAST+ como subproceso y de mantener la correspondencia entre cada subproceso y la sesión del investigador que lo originó |
+| Respuesta | El sistema lanza cada búsqueda como un subproceso independiente de BLAST+, con su propio contexto de ejecución y su propio identificador; mantiene la asociación entre cada subproceso y la sesión del investigador correspondiente, y al terminar entrega los resultados exclusivamente a esa sesión, sin cruzarlos con los de otras búsquedas en curso |
+| Medida de la respuesta | Cero cruces de resultados entre búsquedas concurrentes con hasta cinco búsquedas simultáneas |
+
+*Criticidad:* un cruce de resultados entre investigadores sería un error silencioso: el investigador vería alineamientos ajenos como si fueran los suyos y los interpretaría en el contexto equivocado. Es el escenario típico de un laboratorio al final de la jornada, cuando varios investigadores lanzan búsquedas al mismo tiempo.
