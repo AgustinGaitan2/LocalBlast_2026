@@ -23,3 +23,12 @@ Qué parte del objetivo pesa más depende del contexto concreto del Investigador
 
 - Para un uso académico puntual (p. ej. identificar una secuencia para un trabajo puntual), el valor se cierra con *"ver un resultado útil en pantalla"* — HUs del P1.
 - Para un uso de investigación sostenida, el valor se cierra con *"explorar con filtros y descargar el subconjunto relevante"* — HUs del P1 más las HUs del P2.
+
+### Contexto de uso
+
+- **Lugar.** Entornos académicos o de laboratorio: aula de la facultad, sala de cómputos, box del grupo de investigación, laboratorio del grupo, o incluso la propia casa durante el estudio o trabajo remoto. **Supuesto del grupo:** el SRS no fija ubicación concreta, se infiere de las menciones a *"cursada"* y *"laboratorio"* en SRS 2.1.
+- **Dispositivo.** Laptop o PC de escritorio con un navegador moderno. **Supuesto del grupo:** el SRS fija *"Interfaz web"* en el alcance ([SRS §1.3](../../requeriments/srs.md#13-dentro-del-alcance)) pero no describe el dispositivo concreto. El sistema no está pensado para uso cómodo en celular.
+- **Urgencia.** Variable según el contexto del Investigador: desde media-alta cuando el trabajo responde a una fecha de entrega (informe, deadline académico) hasta baja cuando el trabajo es exploratorio y sostenido. **Supuesto del grupo:** el SRS habla de *"alineamientos rápidos"* como necesidad en 2.1 pero no fija niveles concretos de urgencia.
+- **Frecuencia de uso.** También variable: desde uso por rachas durante entregas académicas puntuales hasta uso cotidiano durante proyectos de investigación activos (**Supuesto del grupo.**)
+
+
