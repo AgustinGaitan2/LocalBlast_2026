@@ -127,3 +127,9 @@ Los cinco atributos seleccionados cubren cuatro dimensiones distintas del sistem
 Los que quedaron afuera no son irrelevantes, pero son de **menor prioridad relativa**: *Protección frente a errores del usuario* ya está ampliamente cubierta por los requerimientos funcionales de validación (sintáctica de la secuencia y semántica de la configuración); *Comportamiento temporal* importa pero queda subordinada a Operabilidad, que la contiene en términos de experiencia percibida; *Disponibilidad* y *Capacidad de recuperación* son moderadas en un lab que no exige 24/7 y tolera reintentos; y *Autenticidad* se materializa como mecanismo que apoya a Confidencialidad, no como atributo con exigencia propia independiente.
 
 ---
+
+## 5. Escenarios de calidad
+
+Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**, ambos en entornos de sobrecarga, degradados o significativos, con los seis componentes de la plantilla ISO. Siguiendo la indicación de la guía del TP2, no se incluyen escenarios en condición normal: los escenarios buscan capturar las situaciones en las que el atributo realmente se pone en juego.
+
+---
