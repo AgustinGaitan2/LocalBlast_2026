@@ -16,3 +16,17 @@ Las **14 HUs del catálogo** del TP1 que requieren interfaz quedan cubiertas por
 Cada archivo HTML muestra apilados el **estado primario** (camino feliz) y los **estados alternativos y de excepción** cubiertos por sus HUs, cada uno con una etiqueta visible que indica a qué HU y a qué criterio de aceptación corresponde. Esta decisión se tomó para que la evaluación visual pueda recorrer todos los estados sin necesidad de interactuar. En la implementación final solo un estado será visible al mismo tiempo.
 
 ---
+
+## 1. Criterios definidos por el grupo antes de pedir a la IA
+
+Antes de redactar el prompt, el grupo acordó los siguientes criterios para evitar que la IA eligiera por su cuenta decisiones que son de dominio del proyecto:
+
+### 1.1 Tipo de sistema
+
+- **Aplicación web** (SRS 1.3 fija *"Interfaz web"* en el alcance), específicamente una GUI para BLAST+.
+- **Pensada para desktop/laptop** con navegador moderno; el perfil del Investigador/a lo marca explícitamente (*"el sistema no está pensado para uso cómodo en celular"* — [`investigador.md`](../user-profiles/investigador.md) 1.3). El maquetado se diseña para anchos típicos de desktop.
+
+### 1.2 Lenguaje y framework del maquetado
+
+- **HTML + CSS puro**, sin framework. Un archivo `.html` autocontenido por pantalla, con el CSS en una etiqueta `<style>` embebida, para que cada archivo se abra en cualquier navegador sin build-step.
+- **Sin JavaScript** (ni interactividad real): el objetivo del primer ciclo es la maqueta de interfaz, no el prototipo funcional. Los distintos estados por HU se renderizan apilados en el mismo archivo con etiquetas visibles, en vez de intercambiarse por script.
