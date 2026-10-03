@@ -55,3 +55,30 @@ Prompt y resumen de la generación: ver [`../mockups/README.md`](../mockups/READ
 **Cambios que entran al ciclo adicional:** confirmación de "Restaurar defaults", pista de por qué "Validar" está deshabilitado, tooltips sobre los parámetros pre-búsqueda.
 
 ---
+
+## 4. Ciclo adicional (ajuste del HTML)
+
+### 4.1 Prompt del ajuste
+
+> Sobre `_inicial.html`, aplicá tres cambios y devolvemelo como `_final.html`, con la regla "sin JS":
+>
+> 1. Agregá un ícono `?` tipo tooltip (CSS puro con `::after` + `attr(data-tip)`) al lado de cada etiqueta de parámetro pre-búsqueda (E-value, matriz, tamaño de palabra, gaps). Que al menos uno quede expandido por default (clase `show-tip`) para la revisión en papel.
+> 2. Debajo del botón "Restaurar defaults", agregá un bloque de confirmación con "Mantener mis valores" y "Sí, restaurar defaults".
+> 3. En el estado alternativo de HU04 (BD local no disponible), agregá cerca del botón "Validar" deshabilitado una pista: "Validar está deshabilitado porque falta elegir una base de datos utilizable. Elegí una marcada como *lista*".
+
+### 4.2 Qué quedó en el `_final.html`
+
+- Cuatro íconos `?` con tooltips en los parámetros pre-búsqueda (el de E-value expandido por default).
+- Bloque de confirmación de "Restaurar defaults".
+- Pista explícita de por qué "Validar" está deshabilitado en el estado de BD no disponible.
+- Nota del maquetado al pie, reescrita.
+
+### 4.3 Qué cambiamos nosotros sobre lo que devolvió la IA
+
+- Reescribimos los textos de los tooltips: la IA los había puesto como definiciones de diccionario ("E-value: expectation value, a parameter in sequence alignment"). Los dejamos orientados a decidir: default de `blastp`, cuándo bajarlo, en qué casos usar PAM30 vs BLOSUM62.
+- La IA, en una variante intermedia, propuso tooltips también en los dropdowns de "Modo" y "Programa BLAST". No los aceptamos: esos campos ya son autoexplicativos (cada opción tiene su descripción al lado). Más tooltips era ruido.
+
+### 4.4 Resultado
+
+El `_final.html` tiene los tres cambios aceptados. El `_inicial.html` queda para poder comparar.
+
