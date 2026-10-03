@@ -55,3 +55,32 @@ Prompt y resumen de la generación: ver [`../mockups/README.md`](../mockups/READ
 **Cambios que entran al ciclo adicional:** tooltips en encabezados de tabla y formatos de descarga, "Limpiar filtros" como botón de ancho completo, chips de sugerencia en el estado vacío.
 
 ---
+
+## 4. Ciclo adicional (ajuste del HTML)
+
+### 4.1 Prompt del ajuste
+
+> Sobre `_inicial.html`, aplicá tres cambios y devolvemelo como `_final.html`, con la regla "sin JS":
+>
+> 1. Tooltips CSS (`?` con `::after` + `attr(data-tip)`, mismo patrón que la pantalla 2) en los cinco encabezados de columna (Hit ID, Score, E-value obs., % Identidad, % Cobertura) y en los cinco formatos de descarga (CSV, JSON, FASTA, BLAST XML, Tabular). Para columnas: definición breve. Para formatos: "cuándo usarlo". Dejá expandido por default el de E-value obs.
+> 2. Reemplazá el link "Limpiar filtros" por un botón real de ancho completo al final del panel de filtros. Aplicá el cambio en los dos estados apilados.
+> 3. En el estado de tabla vacía (HU14), debajo del banner, agregá una fila con tres chips de sugerencia accionables: "Bajar identidad a ≥ 80%", "Aflojar E-value a ≤ 1e-10", "↺ Limpiar todos los filtros".
+
+### 4.2 Qué quedó en el `_final.html`
+
+- 10 tooltips `?` en total (5 columnas + 5 formatos). El de E-value obs. expandido por default.
+- "Limpiar filtros" como botón de ancho completo en los dos estados.
+- Tres chips de sugerencia accionables en el banner de tabla vacía.
+- Nota del maquetado al pie, reescrita.
+
+### 4.3 Qué cambiamos nosotros sobre lo que devolvió la IA
+
+- La IA escribió los primeros tooltips como definiciones de diccionario. Los reescribimos con lenguaje funcional (qué valor típico, cuándo bajarlo, cuándo usar cada formato).
+- El ícono `?` en los encabezados de tabla salía en azul brillante y competía con el nombre de la columna. Le pusimos una regla CSS específica para `th .help-icon` que lo pasa a gris claro.
+- En el chip "Aflojar E-value", la IA había puesto `≤ 0.001`. Lo cambiamos a `1e-10` para que fuera coherente con el valor del input de ese estado (`1e-50`): "aflojar" tiene que ser menos estricto pero no abrir del todo.
+- La IA, en una variante intermedia, propuso agregar al banner un botón "Ver todos los 54 hits sin filtros". Lo descartamos porque "Limpiar todos los filtros" ya hace eso y era redundante.
+- La IA en la primera pasada reemplazó el link por el botón solo en el estado primario, se olvidó del estado alternativo HU14. Lo detectamos al abrir el `_final.html` y le pedimos la segunda pasada.
+
+### 4.4 Resultado
+
+El `_final.html` tiene los tres cambios aceptados. El `_inicial.html` queda para poder comparar.
