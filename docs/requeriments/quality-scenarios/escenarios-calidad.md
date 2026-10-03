@@ -173,3 +173,17 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 **Característica / Subcaracterística:** Capacidad de interacción / Operabilidad.
 
 **Justificación de criticidad del atributo.** La propuesta de valor explícita de LocalBlast frente a la línea de comandos de BLAST+ y frente a la interfaz web oficial de NCBI es ser *"ágil e intuitiva"* (ver canvas de descubrimiento en el README). Si la operabilidad falla, el investigador vuelve a la terminal y el producto pierde su razón de ser. Es el segundo atributo con más victorias en la matriz comparativa.
+
+**Escenario 1 — sobrecarga por filtrado interactivo sobre muchos resultados**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Investigador trabajando con una búsqueda que devolvió un conjunto grande de alineamientos |
+| Estímulo | Aplica sucesivamente cuatro filtros sobre la tabla de resultados (umbral de identidad, umbral de cobertura, umbral de E-value y filtro por taxonomía), modificando los umbrales varias veces por minuto para explorar interactivamente el conjunto |
+| Entorno | Sobrecarga — tabla con más de 500 hits y ritmo rápido de ajuste de filtros |
+| Artefacto | Módulo de filtrado posterior a la búsqueda y la interfaz de la tabla de resultados en el navegador |
+| Respuesta | Cada cambio de filtro refresca la tabla en el momento sobre el conjunto crudo original (nunca sobre un resultado filtrado previo), los filtros aplicados quedan siempre visibles y editables, y el investigador puede combinarlos, aflojarlos, endurecerlos o quitarlos en cualquier orden sin tener que reiniciar nada y sin esperas significativas entre cambios |
+| Medida de la respuesta | Cada actualización de la tabla ante un cambio de filtro se refleja en menos de **1 segundo** con tablas de hasta 500 hits; el estado de los filtros aplicados permanece visible y editable durante toda la sesión |
+
+*Criticidad:* el filtrado interactivo posterior a la búsqueda es una de las dos capacidades que diferencian a LocalBlast de la interfaz web oficial de NCBI. Si no responde ágilmente en escenarios con muchos hits —que son los más interesantes desde el punto de vista biológico— el investigador vuelve a parsear la salida tabular a mano y pierde la ventaja del producto.
+
