@@ -111,6 +111,7 @@ Las filas llevan el nombre completo del atributo; las columnas se identifican co
 
 ---
 
+## 4. Resultados y atributos seleccionados
 
 ### 4.1 Ranking
 
