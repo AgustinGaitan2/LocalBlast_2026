@@ -41,3 +41,17 @@ Prompt y resumen de la generación: ver [`../mockups/README.md`](../mockups/READ
 - H9: botones de sugerencia accionables en el estado vacío.
 
 ---
+
+## 3. Revisión del grupo
+
+| Hallazgo | Decisión | Por qué |
+|---|---|---|
+| H3 — "Limpiar filtros" como botón real | **aceptado** | El investigador afloja y aprieta filtros con fluidez; "volver a cero" tiene que ser tan visible como aplicar. Entra al ajuste. |
+| H5 — validación del input de E-value | **rechazado** | Requiere JS. Backlog para la implementación. |
+| H6 + H10 — tooltips en columnas y formatos | **aceptado** (fusionados) | Igual criterio que en pantalla 2. Hacemos tooltips CSS puros. Entra al ajuste. |
+| H8 — mini-barras cargadas | **rechazado** | La propia IA aclara que en pantalla ayudan. Las dejamos. |
+| H9 — sugerencias accionables en tabla vacía | **aceptado** | Un click para salir del estado vacío, en vez de mover tres sliders a mano. Entra al ajuste. |
+
+**Cambios que entran al ciclo adicional:** tooltips en encabezados de tabla y formatos de descarga, "Limpiar filtros" como botón de ancho completo, chips de sugerencia en el estado vacío.
+
+---
