@@ -70,6 +70,9 @@ Los escenarios de atributo de calidad (TP2 — Parte A), con su proceso de prior
 Los perfiles de usuario, escenarios de uso y flujos de navegación que guían el maquetado de la interfaz están en:
 👉 [`docs/ui/user-profiles/`](docs/ui/user-profiles/)
 
+El maquetado HTML del flujo de navegación (primer ciclo de generación con IA, un archivo por pantalla con sus HU en el nombre) está en:
+👉 [`docs/ui/mockups/`](docs/ui/mockups/)
+
 ---
 
 ## 3. Modelo de Ciclo de Vida Específico
