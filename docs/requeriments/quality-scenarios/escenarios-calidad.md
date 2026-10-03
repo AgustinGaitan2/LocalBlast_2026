@@ -275,3 +275,17 @@ Para cada uno de los cinco atributos seleccionados se definen **dos escenarios**
 **Característica / Subcaracterística:** Mantenibilidad / Modularidad.
 
 **Justificación de criticidad del atributo.** El proyecto tiene un modelo de ciclo de vida explícitamente **incremental con prácticas ágiles** (ver README, sección "Modelo de Ciclo de Vida"). El TP1 declara explícitamente **fuera de alcance** para este cuatrimestre varias capacidades que están previstas para iteraciones futuras: el rol administrador de bases de datos locales (con alta, actualización y baja desde la propia aplicación), búsquedas en lote con múltiples queries simultáneas, y la posibilidad de añadir nuevos formatos de descarga y nuevos filtros posteriores a la búsqueda. Si el diseño no soporta esta evolución planeada sin reescribir módulos existentes, el enfoque incremental se vuelve impracticable: cada incorporación requeriría rehacer lo que ya funciona.
+
+**Escenario 1 — significativo por incorporación de un nuevo formato de descarga**
+
+| Campo | Contenido |
+|---|---|
+| Fuente del estímulo | Equipo de desarrollo, en una iteración futura |
+| Estímulo | Debe incorporar un nuevo formato de descarga de resultados (por ejemplo, Parquet, o un formato propio del laboratorio) al conjunto de formatos ya soportados (CSV, JSON, FASTA, tabular BLAST y XML) |
+| Entorno | Significativo — evolución planeada del sistema dentro del modelo de ciclo de vida incremental declarado para el proyecto |
+| Artefacto | Módulo de descarga de resultados, su registro de formatos disponibles, y la interfaz de usuario que lista las opciones de descarga |
+| Respuesta | El equipo agrega el soporte del nuevo formato implementando la interfaz definida para "formato de descarga" (serializar un conjunto de alineamientos + metadatos de la búsqueda) y registrándolo en el único punto previsto para ello; no modifica la lógica de los formatos preexistentes, ni la interfaz de usuario que lista los formatos (la lista se arma dinámicamente desde el registro), ni el módulo de filtrado previo a la descarga |
+| Medida de la respuesta | La incorporación del nuevo formato afecta exclusivamente a archivos nuevos (la implementación del nuevo formato) y a un único punto de registro en el módulo de descarga; los tests automatizados de los formatos preexistentes siguen pasando sin modificación; el tiempo de incorporación del nuevo formato (desde que empieza el desarrollo hasta que está integrado y testeado) es bajo |
+
+*Criticidad:* el enfoque incremental compromete al equipo a sumar capacidades sin romper las existentes. Si incorporar un formato nuevo exige retocar los demás, cada incremento se vuelve una regresión potencial. Este escenario mide la propiedad arquitectónica (bajo acoplamiento del módulo de descarga) de la que depende todo el modelo de ciclo de vida.
+
