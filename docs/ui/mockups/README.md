@@ -4,16 +4,22 @@ Esta carpeta contiene el maquetado HTML del flujo de navegación del Investigado
 
 ## Archivos
 
-| Archivo | Pantalla del flujo | HUs cubiertas |
-|---|---|---|
-| [`pantalla-01-carga-secuencia_HU01-HU02.html`](pantalla-01-carga-secuencia_HU01-HU02.html) | Nueva búsqueda — Secuencia query | `HU01_CU001_B`, `HU02_CU001_E1` |
-| [`pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07.html`](pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07.html) | Nueva búsqueda — Configuración + validación | `HU03_CU002_B`, `HU04_CU002_A1`, `HU05_CU003_B`, `HU06_CU003_E1`, `HU07_CU003_E2` |
-| [`pantalla-03-ejecucion_HU08-HU09-HU10.html`](pantalla-03-ejecucion_HU08-HU09-HU10.html) | Ejecución en progreso | `HU08_CU004_B`, `HU09_CU004_A1`, `HU10_CU004_E1` |
-| [`pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14.html`](pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14.html) | Resultados · filtros · descarga | `HU11_CU005_B`, `HU12_CU006_B`, `HU13_CU007_B`, `HU14_CU007_A1` |
+Cada pantalla aparece en dos versiones: `_inicial.html` (salida del primer ciclo tal como la devolvió la IA, sin modificaciones) y `_final.html` (versión ajustada tras el segundo ciclo, con los hallazgos de la evaluación heurística que el grupo aceptó aplicados — ver [`../heuristic-review/`](../heuristic-review/)).
 
-Las **14 HUs del catálogo** del TP1 que requieren interfaz quedan cubiertas por estos cuatro archivos. La pantalla de autenticación mencionada en el flujo del perfil **no se maqueta** en esta iteración: no hay HU que la respalde y el principio de diseño del grupo es *"si una pantalla no está respaldada por alguna HU, no se maqueta"*. El resto del flujo asume sesión ya iniciada.
+| Pantalla del flujo | HUs cubiertas | Versión inicial (ciclo 1) | Versión final (ciclo adicional) |
+|---|---|---|---|
+| Nueva búsqueda — Secuencia query | `HU01_CU001_B`, `HU02_CU001_E1` | [`pantalla-01-carga-secuencia_HU01-HU02_inicial.html`](pantalla-01-carga-secuencia_HU01-HU02_inicial.html) | [`pantalla-01-carga-secuencia_HU01-HU02_final.html`](pantalla-01-carga-secuencia_HU01-HU02_final.html) |
+| Nueva búsqueda — Configuración + validación | `HU03_CU002_B`, `HU04_CU002_A1`, `HU05_CU003_B`, `HU06_CU003_E1`, `HU07_CU003_E2` | [`pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_inicial.html`](pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_inicial.html) | [`pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_final.html`](pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_final.html) |
+| Ejecución en progreso | `HU08_CU004_B`, `HU09_CU004_A1`, `HU10_CU004_E1` | [`pantalla-03-ejecucion_HU08-HU09-HU10_inicial.html`](pantalla-03-ejecucion_HU08-HU09-HU10_inicial.html) | [`pantalla-03-ejecucion_HU08-HU09-HU10_final.html`](pantalla-03-ejecucion_HU08-HU09-HU10_final.html) |
+| Resultados · filtros · descarga | `HU11_CU005_B`, `HU12_CU006_B`, `HU13_CU007_B`, `HU14_CU007_A1` | [`pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_inicial.html`](pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_inicial.html) | [`pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_final.html`](pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_final.html) |
+
+Las **14 HUs del catálogo** del TP1 que requieren interfaz quedan cubiertas por estos cuatro pares de archivos. La pantalla de autenticación mencionada en el flujo del perfil **no se maqueta** en esta iteración: no hay HU que la respalde y el principio de diseño del grupo es *"si una pantalla no está respaldada por alguna HU, no se maqueta"*. El resto del flujo asume sesión ya iniciada.
 
 Cada archivo HTML muestra apilados el **estado primario** (camino feliz) y los **estados alternativos y de excepción** cubiertos por sus HUs, cada uno con una etiqueta visible que indica a qué HU y a qué criterio de aceptación corresponde. Esta decisión se tomó para que la evaluación visual pueda recorrer todos los estados sin necesidad de interactuar. En la implementación final solo un estado será visible al mismo tiempo.
+
+### Por qué conservamos ambas versiones
+
+El `_inicial.html` **no es un archivo viejo que haya que borrar**: es la línea base contra la que se verifica la evaluación heurística. Cualquiera que lea el repositorio puede abrir `_inicial.html` y `_final.html` lado a lado y confirmar que las diferencias se corresponden una a una con los hallazgos aceptados en los documentos de [`../heuristic-review/`](../heuristic-review/). Esa trazabilidad explícita es lo que la cátedra pide como núcleo pedagógico del segundo ciclo (TP2 sección 4.5).
 
 ---
 
@@ -71,3 +77,11 @@ El prompt se le pasó a la IA junto con el repositorio actual (todos los archivo
 > **Dejanos todos los archivos en `docs/ui/mockups/`** y agregá un `README.md` ahí mismo con el índice, los criterios que te pasamos acá, el prompt y un resumen de la respuesta.
 
 ---
+
+## 3. Segundo ciclo (evaluación heurística) y ciclos adicionales
+
+El trabajo del segundo ciclo —evaluación heurística con IA sobre cada HTML, revisión crítica del grupo sobre cada hallazgo, y los ciclos adicionales de ajuste que terminaron en los `_final.html`— está documentado en una carpeta dedicada, un documento por pantalla:
+
+👉 [`../heuristic-review/`](../heuristic-review/)
+
+Cada documento de esa carpeta incluye el prompt literal de la evaluación, la respuesta completa de la IA (las 10 heurísticas de Nielsen una por una), la decisión del grupo para cada hallazgo (aceptado/rechazado + justificación), y el prompt + respuesta del ciclo adicional de ajuste cuando lo hubo. La bitácora de IA (`docs/uso-ia.md`) tiene una entrada por cada ciclo (Entradas 18 y 19).
