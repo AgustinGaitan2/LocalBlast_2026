@@ -288,6 +288,22 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
 - **Errores / imprecisiones detectadas:**
   - La IA aplicó el ordenamiento pero olvidó reordenar la tabla del SRS y las once celdas de "Realiza:" con RFs listados en orden histórico. Es el mismo patrón crónico que anotamos desde la Entrada 6: los cambios puntuales de ID se aplican bien, los agrupamientos y ordenamientos derivados quedan sin reajustar.
   - En un bullet de convenciones que se refiere al **histórico del propio ID que estamos renumerando**, el sed genérico mintió: donde decía "originalmente eran un mismo RF-06" quedó "originalmente eran un mismo RF-02", lo cual es contradictorio con la historia real (la partición se hizo cuando el RF aún se llamaba RF-06).
+ 
+---
+
+# TP2
+
+## Entrada 14 — Primera versión de la priorización de atributos de calidad (TP2 Parte A)
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** le pasamos los tres PDFs de teoría de la cátedra sobre atributos de calidad, la guía del TP2 con su Anexo A (taxonomía ISO/IEC 25010:2023) y el repo del TP1, y le pedimos (a) filtrar el catálogo de subcaracterísticas hasta ~10 relevantes para LocalBlast, (b) aplicar el método de matriz comparativa por pares visto en clase, (c) seleccionar los 5 por encima del umbral y (d) redactar 3 escenarios por atributo (normal, sobrecarga y degradado).
+- **Qué generó:** la primera versión de `escenarios-calidad.md` con metodología, filtrado inicial, grilla 10×10, ranking y 15 escenarios. **Top 5 propuesto:** Interoperabilidad, Operabilidad, Tolerancia a fallos, Protección frente a errores del usuario y Comportamiento temporal.
+- **Qué aceptamos:** el criterio del filtrado inicial (coincidía con lo que habríamos descartado como grupo) y la plantilla de seis componentes de los escenarios.
+- **Qué modificamos/descartamos:** la selección completa del top 5 y el formato del documento, tras la revisión interna. Ver Entrada 15 con el detalle de los cambios.
+- **Errores detectados:**
+  - La notación `^` / `<` de la cátedra no es intuitiva: no queda claro si `^` apunta a la columna o a la fila. Hubo que explicitar la convención arriba de la grilla.
+  - Falsa precisión en las medidas de respuesta. Los números que la IA propone son plausibles como orden de magnitud pero no están respaldados por mediciones ni restricciones del laboratorio. En la defensa oral van como metas de diseño, no como mediciones.
+
 
 ## Reflexión sobre el uso de IA
 
