@@ -54,6 +54,7 @@ Para consultar la Especificación de Requisitos de Software (SRS) completa, visi
 
 Los escenarios de atributo de calidad (TP2 — Parte A), con su proceso de priorización y los 15 escenarios en formato ISO 25010, están en:
 👉 [`docs/requeriments/quality-scenarios/escenarios-calidad.md`](docs/requeriments/quality-scenarios/escenarios-calidad.md)
+
 ---
 
 ## 3. Modelo de Ciclo de Vida Específico
