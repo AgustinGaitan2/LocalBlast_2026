@@ -41,3 +41,17 @@ Prompt y resumen de la generación: ver [`../mockups/README.md`](../mockups/READ
 - H7: guardar/cargar presets.
 
 ---
+
+## 3. Revisión del grupo
+
+| Hallazgo | Decisión | Por qué |
+|---|---|---|
+| H3 — confirmar "Restaurar defaults" | **aceptado** | Mismo criterio que en pantalla 1: acción destructiva pide confirmación. Entra al ajuste. |
+| H5 — pista de por qué "Validar" está deshabilitado | **aceptado** | Si no se dice, el flujo queda trabado. Entra al ajuste. |
+| H6 + H10 — tooltips de parámetros | **aceptado** (fusionados) | Los dos piden lo mismo. Hacemos tooltips con CSS puro (sin JS). Entra al ajuste. |
+| H7 — presets | **rechazado** | No hay HU que lo respalde. Backlog. |
+| H8 — densidad excesiva | **rechazado** | Es efecto del maquetado apilado, no de la UI final. La propia IA lo aclara. |
+
+**Cambios que entran al ciclo adicional:** confirmación de "Restaurar defaults", pista de por qué "Validar" está deshabilitado, tooltips sobre los parámetros pre-búsqueda.
+
+---
