@@ -40,3 +40,15 @@ Prompt y resumen de la generación: ver [`../mockups/README.md`](../mockups/READ
 - H10: línea sobre qué pasa si se cierra la ventana.
 
 ---
+
+## 3. Revisión del grupo
+
+| Hallazgo | Decisión | Por qué |
+|---|---|---|
+| H5 — confirmar cancelación | **aceptado** | Mismo criterio que las pantallas anteriores: acción destructiva pide confirmación. Entra al ajuste. |
+| H9 (refuerzo) — "no se guardó" durante la ejecución | **aceptado** | Lo tomamos del comentario de la IA dentro de H9 y lo levantamos como hallazgo propio. HU11 CA-02 dice que la persistencia es al final. Si el investigador no sabe eso, duda en cancelar. Entra al ajuste. |
+| H10 — qué pasa si cierro la pestaña | **rechazado** | El comportamiento concreto depende de la implementación, no está definido en TP1. Prometerlo en el maquetado y después no cumplirlo es peor que no decir nada. |
+
+**Cambios que entran al ciclo adicional:** chip "aún no persistida en el historial" durante la ejecución; bloque de confirmación antes de cancelar.
+
+---
