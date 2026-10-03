@@ -14,3 +14,12 @@ Persona que necesita correr alineamientos BLAST como parte de su labor académic
 Ambos subgrupos acceden a las mismas capacidades del sistema (todas las HU01 a HU14), por lo que son el mismo actor del sistema. Las diferencias entre ellos se reflejan en este perfil como **rangos de variación interna** (en nivel técnico, en frecuencia de uso, en qué subconjunto del flujo ejercen con más intensidad) más que como perfiles separados.
 
 Rastreo: SRS 2.1 y 2.2 sobre los stakeholders que pueden asumir el rol de Investigador/a. La documentación del proyecto no describe ningún otro atributo demográfico del Investigador (edad, carrera específica, institución), por lo que este perfil no afirma nada en esos ejes.
+
+### Objetivo que persigue con el sistema
+
+Correr alineamientos BLAST sobre una secuencia de interés, **sin pelearse con la línea de comandos de BLAST+**, con la posibilidad de usar tanto bases de datos remotas (NCBI) como bases propias del laboratorio, de **explorar los resultados interactivamente** con filtros que la web oficial no ofrece y de **llevarse el resultado** en un formato utilizable fuera del sistema.
+
+Qué parte del objetivo pesa más depende del contexto concreto del Investigador:
+
+- Para un uso académico puntual (p. ej. identificar una secuencia para un trabajo puntual), el valor se cierra con *"ver un resultado útil en pantalla"* — HUs del P1.
+- Para un uso de investigación sostenida, el valor se cierra con *"explorar con filtros y descargar el subconjunto relevante"* — HUs del P1 más las HUs del P2.
