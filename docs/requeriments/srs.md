@@ -148,7 +148,6 @@ Realizados por `CU006` (refinar con filtros post-búsqueda) y `CU007` (descargar
 |---|---|
 | **RF-11** | El sistema debe permitir aplicar filtros post-búsqueda sobre la tabla de resultados (al menos: umbrales de porcentaje de identidad, porcentaje de cobertura, E-value observado y filtro por taxonomía cuando la información esté disponible) sin volver a ejecutar la búsqueda. |
 | **RF-12** | El sistema debe permitir al usuario descargar los resultados actualmente visibles en la tabla (filtrados o sin filtrar) en al menos los formatos: CSV, JSON, FASTA, tabular BLAST (`-outfmt 6`) y XML. |
-| **RF-13** | El sistema debe solicitar una confirmacion explicita cuando el usuario intente accionar la opcion "Reemplazar secuencia", informando que dicha accion sobreescribira la secuencia actual y reiniciara/afectara la configuracion asociada al flujo"| 
 ---
 
 
