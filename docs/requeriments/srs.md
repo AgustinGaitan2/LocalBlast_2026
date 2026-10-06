@@ -138,7 +138,7 @@ error acompañados de un ejemplo del formato correcto esperado para facilitar la
 | **RF-08** | El sistema debe ejecutar la búsqueda de forma asíncrona, mostrando un indicador de progreso, sin bloquear la interfaz de usuario, y debe permitir cancelar una búsqueda en curso. |
 | **RF-09** | El sistema debe mostrar los resultados en una tabla con, como mínimo: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura. |
 | **RF-10** | El sistema debe persistir automáticamente en el historial (D2) cada búsqueda que termine su ejecución exitosamente, incluyendo parámetros pre-búsqueda, base de datos usada, timestamp y el conjunto **crudo** de resultados que devolvió BLAST+ |
-| **RF-11** | El sistema debe solicitar una confirmacion explicita cuando el usuario intente accionar la opcion "Reemplazar secuencia", informando que dicha accion sobreescribira la secuencia actual y reiniciara/afectara la configuracion asociada al flujo"| 
+
 
 ### 6.2 Proceso P2 — Filtrado y entrega de resultados
 
@@ -148,7 +148,7 @@ Realizados por `CU006` (refinar con filtros post-búsqueda) y `CU007` (descargar
 |---|---|
 | **RF-11** | El sistema debe permitir aplicar filtros post-búsqueda sobre la tabla de resultados (al menos: umbrales de porcentaje de identidad, porcentaje de cobertura, E-value observado y filtro por taxonomía cuando la información esté disponible) sin volver a ejecutar la búsqueda. |
 | **RF-12** | El sistema debe permitir al usuario descargar los resultados actualmente visibles en la tabla (filtrados o sin filtrar) en al menos los formatos: CSV, JSON, FASTA, tabular BLAST (`-outfmt 6`) y XML. |
-
+| **RF-13** | El sistema debe solicitar una confirmacion explicita cuando el usuario intente accionar la opcion "Reemplazar secuencia", informando que dicha accion sobreescribira la secuencia actual y reiniciara/afectara la configuracion asociada al flujo"| 
 ---
 
 
