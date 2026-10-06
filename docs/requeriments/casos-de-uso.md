@@ -84,7 +84,7 @@ CU001 · Cargar la secuencia query
 - **Deriva del proceso:** P1 · Ejecutar búsqueda BLAST
 - **Actor principal:** Investigador/a
 - **Objetivo:** Armar el resto de la configuración de una búsqueda BLAST (modo de ejecución, base de datos, programa BLAST y parámetros pre-búsqueda) sobre una secuencia ya cargada, contando con ayuda explicativa y prevencion de errores , dejando el formulario listo para que `CU003` lo valide.
-- **Realiza:** RF-03, RF-04, RF-05, RF-06, RF-13. La verificación de que la elección quedó dentro de rangos válidos (RF-06) y de que la combinación es compatible (RF-05) se completa en `CU003` como parte de RF-07; en `CU002` cae la parte de "elegir".
+- **Realiza:** RF-03, RF-04, RF-05, RF-06. La verificación de que la elección quedó dentro de rangos válidos (RF-06) y de que la combinación es compatible (RF-05) se completa en `CU003` como parte de RF-07; en `CU002` cae la parte de "elegir".
 - **Precondición:** Existe una secuencia query cargada en la sesión (postcondición de `CU001`).
 - **Disparador:** El investigador quiere parametrizar la búsqueda que va a lanzar sobre esa secuencia.
 - **Garantía de éxito:** El formulario de la búsqueda queda armado con modo, base de datos, programa y parámetros pre-búsqueda; la interfaz habilita el botón "Validar búsqueda" que dispara `CU003`.
