@@ -30,7 +30,7 @@
 
 ### 1.3 Audiencia
 
-[Docentes de la cátedra y miembros del equipo de desarrollo.]
+[Este documento arquitectonico esta dirigido a los miembros del desarrollo y a la catedra Ing. de Software.]
 
 ### 1.4 Documentos relacionados
 
@@ -50,7 +50,6 @@
 | EC | Escenario de calidad |
 | HU | Historia de usuario |
 | RF | Requerimiento funcional |
-| [...] | [...] |
 
 ---
 
@@ -75,14 +74,15 @@
 ```mermaid
 C4Context
     title Contexto de LocalBlast
+    
     Person(inv, "Investigador/a", "Ejecuta búsquedas BLAST, refina y descarga resultados")
-    Person(adm, "Administrador/a", "Mantiene el catálogo de bases locales (P3, caja negra)")
     System(lb, "LocalBlast", "Interfaz gráfica web para BLAST+")
     System_Ext(blast, "BLAST+", "Motor de alineamiento local y remoto")
-    Rel(inv, lb, "Envía query y parámetros, y obtiene resultados")
-    Rel(adm, lb, "Administra bases de datos locales")
-    Rel(lb, blast, "Invoca alineamientos y construcción de índices")
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+    
+    Rel_Down(inv, lb, "Envía query y parámetros, y obtiene resultados")
+    Rel_Down(lb, blast, "Invoca alineamientos y construcción de índices")
+    
+    UpdateLayoutConfig($c4ShapeInRow="1")
 ```
 
 **Descripción de elementos:**
