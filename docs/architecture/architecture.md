@@ -142,14 +142,16 @@ C4Context
 
 ### 5.2 Estilo base
 
-- **Estilo elegido:** [por ejemplo, cliente-servidor]
-- **Por qué:** [qué escenarios y restricciones lo justifican]
-- **Qué sacrifica:** [por ejemplo, el servidor es punto único de falla]
+- **Estilo elegido: Cliente-Servidor** 
+- **Por qué: Permite separar claramente la interfaz grafica de la logica de procesamiento, siendo ademas una arquitectura alineada con la experiencia tecnica del equipo y que permite construir en el tiempo disponible una solucion arquitectonica adecuada** 
+- **Qué sacrifica: El servidor de la API se convierte en un punto único de falla (si el backend cae, la aplicación web completa queda inutilizable). Además, concentra toda la carga computacional de los alineamientos locales en un solo lugar** 
 - **Comprobación de restricciones (Tabla 4):**
 
 | Restricción o regla del estilo | ¿Se cumple? | Dónde se ve en el diagrama |
 |---|---|---|
-| [...] | [Sí / No] | [...] |
+| Los clientes (instancias de la aplicación web en los navegadores de los investigadores) no se comunican entre sí | Sí | [...] |
+| La Aplicación Web (cliente) no accede directamente a la base de datos (D2); toda petición de almacenamiento o recuperación pasa obligatoriamente por la API | Sí | [...] |
+| Es el cliente quien siempre inicia la comunicación (al enviar los parámetros de búsqueda o solicitar el historial), y el servidor expone una interfaz definida (API REST) para atender dichas peticiones| Sí | [...] |
 
 ### 5.3 Estilos adicionales por zona
 
@@ -166,25 +168,14 @@ C4Context
 | API | [por ejemplo, capas] | [...] | [...] | [...] |
 | [...] | [...] | [...] | [...] | [...] |
 
-### 5.5 Aspectos transversales
-
-| Aspecto | ¿Adoptado? | Motivo | Dónde se ve |
-|---|---|---|---|
-| Autenticación y autorización | [Sí / No] | [...] | [...] |
-| Auditoría | [Sí / No] | [...] | [...] |
-| Gestión de excepciones | [Sí / No] | [...] | [...] |
-| Instrumentación (monitoreo) | [Sí / No] | [...] | [...] |
-| Interoperabilidad (estándares) | [Sí / No] | [...] | [...] |
-| Notificaciones | [Sí / No] | [...] | [...] |
-
-### 5.6 Tabla de cobertura y sacrificios
+### 5.5 Tabla de cobertura y sacrificios
 
 | Driver | Cómo lo cubre la arquitectura | Qué se sacrifica |
 |---|---|---|
 | `EC-01` | [...] | [...] |
 | `EC-02` | [...] | [...] |
 
-### 5.7 Conflictos entre tácticas
+### 5.6 Conflictos entre tácticas
 
 <!-- Verificar que las tácticas de escenarios distintos no se contradigan. -->
 
