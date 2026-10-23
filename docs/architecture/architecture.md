@@ -34,10 +34,10 @@ Este documento arquitectonico esta dirigido a los miembros del equipo de desarro
 
 ### 1.4 Documentos relacionados
 
-- [SRS](docs/requeriments/srs.md)
-- [Contexto inicial (DFD Nivel 0 y 1)](docs/architecture/contexto-inicial.md)
-- [Escenarios de calidad](docs/requeriments/quality-scenarios/escenarios-calidad.md)
-- [Registro de uso de IA](docs/uso-ia.md)
+- [SRS](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/requeriments/srs.md)
+- [Contexto inicial (DFD Nivel 0 y 1)](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/architecture/contexto-inicial.md)
+- [Escenarios de calidad](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/requeriments/quality-scenarios/escenarios-calidad.md)
+- [Registro de uso de IA](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/uso-ia.md)
 
 ### 1.5 Siglas usadas
 
