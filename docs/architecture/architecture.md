@@ -119,7 +119,7 @@ C4Context
 | `EC-02` | [Confidencialidad] | Un usuario intenta acceder mediante URL directa a los resultados del historial (D2) de otro investigador. Respuesta: El sistema deniega el acceso | 100% de los intentos no autorizados bloqueados | Si  | Condiciona la estructura al exigir la implementacion de un aspecto transversal de autenticacion/autorizacion en la capa de Controladores de la API |
 | `EC-03` | [Interoperabilidad] | El usuario selecciona el modo "remoto". Respuesta: El sistema invoca el motor delegando la comunicacion a la API de NCBI mediante la flag -remote | El comando se arma y ejecuta exitosamente usando el formato estandar | Sí | Obliga a definir un componente especifico (Gestor de Ejecucion) que abstraiga y adapte la llamada al sistema externo (BLAST+) aislando el nucleo de dominio |
 | `EC-04` | [Operabilidad] | El usuario ingresa un archivo con formato FASTA sintacticamente invalido. Respuesta: El sistema bloquea el envio y muestra un mensaje de ayuda contextual | Error visible inmediatamente antes de hacer la peticion al servidor | No | Se resuelve con validaciones estandar en el componente de la interfaz de usuario (frontend) sin afectar la arquitectura global ni requerir nuevos contenedores |
-| `EC-05`| [MOdularidad] | Se requiere agregar un nuevo formato de descarga a los resultados existentes. Respuesta: Se añade el serializador sin modificar la logica principal de la busqueda | El cambio afecta a un unico modulo sin efectos colaterales | Sí | Fundamenta la eleccion de un patron de capas, separando estrictamente la capa de dominio (busqueda) de la capa de presentacion/controladores (formateo de salida). |
+| `EC-05`| [Modularidad] | Se requiere agregar un nuevo formato de descarga a los resultados existentes. Respuesta: Se añade el serializador sin modificar la logica principal de la busqueda | El cambio afecta a un unico modulo sin efectos colaterales | Sí | Fundamenta la eleccion de un patron de capas, separando estrictamente la capa de dominio (busqueda) de la capa de presentacion/controladores (formateo de salida). |
 
 ---
 
@@ -130,10 +130,15 @@ C4Context
 <!-- Una táctica es una decisión de diseño, no una tecnología. Usar los nombres de la Tabla 2 del enunciado.
      Si se propone una táctica que no está en la tabla, aclararlo. -->
 
-| Driver | Atributo del libro | Tácticas elegidas y cómo contribuyen | Tácticas descartadas y por qué |
+<!-- Una táctica es una decisión de diseño, no una tecnología. Usar los nombres de la Tabla 2 del enunciado.
+     Si se propone una táctica que no está en la tabla, aclararlo. -->
+
+| Driver | Atributo | Táctica elegida | Táctica descartada |
 |---|---|---|---|
-| `EC-01` | [...] | [...] | [...] |
-| `EC-02` | [...] | [...] | [...] |
+| `EC-01` | Tolerancia a fallos | **Manejo de excepciones:** Se define qué hacer (abortar y notificar al usuario) cuando el subproceso BLAST+ falla inesperadamente. | **Redundancia activa:** Descartada por las restricciones de recursos del servidor; no se levantarán múltiples instancias del motor BLAST+. |
+| `EC-02` | Confidencialidad | **Identificar, autenticar y autorizar actores:** Se verifica la sesión del investigador para asegurar que solo acceda a su propio historial (D2). | **Registro de auditoría:** Descartada por el tiempo de desarrollo acotado; no se guardará un log exhaustivo de cada intento de acceso denegado. |
+| `EC-03` | Interoperabilidad | **Adaptar la interfaz:** El componente Gestor de Ejecución traduce los parámetros de la interfaz web al comando CLI específico que espera BLAST+. | **Descubrir servicios:** Descartada porque la ruta al binario BLAST+ y a los servidores de NCBI es fija, no requiere descubrimiento dinámico en tiempo de ejecución. |
+| `EC-05` | Modularidad | **Dividir módulos / Encapsular:** Se separa la lógica de búsqueda de la de presentación, permitiendo agregar el formato XML sin tocar el núcleo de dominio. | **Diferir el enlace (Plug-ins):** Descartada por sobreingeniería; la cantidad de formatos a soportar es finita y manejable mediante módulos fijos sin necesidad de plug-ins dinámicos. |
 
 ### 5.2 Estilo base
 
