@@ -20,7 +20,7 @@
 
 ### 1.1 Propósito
 
-[Este documento describe la arquitectura de LocalBlast, una interfaz gráfica web para BLAST+. Tiene la funcion de registrar y justificar las decisiones de diseño estructural de un sistema de software, especificando como se organiza el sistema a gran escala y por qué se eligió esa estructura frente a otras alternativas. ]
+Este documento describe la arquitectura de LocalBlast, una interfaz gráfica web para BLAST+. Tiene la funcion de registrar y justificar las decisiones de diseño estructural de un sistema de software, especificando como se organiza el sistema a gran escala y por qué se eligió esa estructura frente a otras alternativas. 
 
 ### 1.2 Alcance
 
@@ -30,14 +30,14 @@
 
 ### 1.3 Audiencia
 
-[Este documento arquitectonico esta dirigido a los miembros del desarrollo y a la catedra Ing. de Software.]
+Este documento arquitectonico esta dirigido a los miembros del equipo de desarrollo y a la catedra Ing. de Software.
 
 ### 1.4 Documentos relacionados
 
-- [SRS](../requirements/srs.md)
-- [Contexto inicial (DFD Nivel 0 y 1)](contexto-inicial.md)
-- [Escenarios de calidad](../requirements/quality-scenarios/escenarios-calidad.md)
-- [Registro de uso de IA](../uso-ia.md)
+- [SRS](docs/requeriments/srs.md)
+- [Contexto inicial (DFD Nivel 0 y 1)](docs/architecture/contexto-inicial.md)
+- [Escenarios de calidad](docs/requeriments/quality-scenarios/escenarios-calidad.md)
+- [Registro de uso de IA](docs/uso-ia.md)
 
 ### 1.5 Siglas usadas
 
