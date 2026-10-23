@@ -115,11 +115,11 @@ C4Context
 
 | ID | Atributo | Resumen del escenario (estímulo → respuesta) | Medida de respuesta | ¿Es driver? | Por qué condiciona (o no) la estructura |
 |---|---|---|---|---|---|
-| `EC-01` | [...] | [...] | [...] | [Sí / No] | [...] |
-| `EC-02` | [...] | [...] | [...] | [Sí / No] | [...] |
-| `EC-03` | [...] | [...] | [...] | [Sí / No] | [...] |
-| `EC-04` | [...] | [...] | [...] | [Sí / No] | [...] |
-| [...] | [...] | [...] | [...] | [...] | [...] |
+| `EC-01` | [Tolerancia a fallos] | BLAST+ sufre un error o caida durante un alineamiento pesado. Respuesta: El sistema detecta la falla, aborta la tarea y notifica al usuario sin colgar la interfaz | Se recupera el control y se muestra el error en menos de 5 segundos | Sí | Esto implica separar la ejecucion de la busqueda en un proceso aparte, requiere una gestion de excepciones en el backend. |
+| `EC-02` | [Confidencialidad] | Un usuario intenta acceder mediante URL directa a los resultados del historial (D2) de otro investigador. Respuesta: El sistema deniega el acceso | 100% de los intentos no autorizados bloqueados | Si  | Condiciona la estructura al exigir la implementacion de un aspecto transversal de autenticacion/autorizacion en la capa de Controladores de la API |
+| `EC-03` | [Interoperabilidad] | El usuario selecciona el modo "remoto". Respuesta: El sistema invoca el motor delegando la comunicacion a la API de NCBI mediante la flag -remote | El comando se arma y ejecuta exitosamente usando el formato estandar | Sí | Obliga a definir un componente especifico (Gestor de Ejecucion) que abstraiga y adapte la llamada al sistema externo (BLAST+) aislando el nucleo de dominio |
+| `EC-04` | [Operabilidad] | El usuario ingresa un archivo con formato FASTA sintacticamente invalido. Respuesta: El sistema bloquea el envio y muestra un mensaje de ayuda contextual | Error visible inmediatamente antes de hacer la peticion al servidor | No | Se resuelve con validaciones estandar en el componente de la interfaz de usuario (frontend) sin afectar la arquitectura global ni requerir nuevos contenedores |
+| `EC-05`| [MOdularidad] | Se requiere agregar un nuevo formato de descarga a los resultados existentes. Respuesta: Se añade el serializador sin modificar la logica principal de la busqueda | El cambio afecta a un unico modulo sin efectos colaterales | Sí | Fundamenta la eleccion de un patron de capas, separando estrictamente la capa de dominio (busqueda) de la capa de presentacion/controladores (formateo de salida). |
 
 ---
 
