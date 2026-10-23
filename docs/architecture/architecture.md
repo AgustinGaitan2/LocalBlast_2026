@@ -57,13 +57,13 @@ Este documento arquitectonico esta dirigido a los miembros del equipo de desarro
 
 | Tipo | Restricción | Cómo condiciona la arquitectura |
 |---|---|---|
-| Técnica | BLAST+ (versión 2.14 o posterior) está instalado en el servidor; LocalBlast lo usa, no lo empaqueta ni lo reimplementa | [BLAST+ es un sistema externo que se invoca, no un contenedor propio] |
-| Técnica | En modo remoto es BLAST+ quien contacta a NCBI (flag `-remote`); LocalBlast no dialoga con NCBI | [No hay relación directa entre LocalBlast y NCBI en los diagramas] |
-| Técnica | El catálogo de bases locales (D1) se puebla por fuera del sistema (P3 fuera de alcance) | [El catálogo se lee, no se escribe desde la aplicación] |
+| Técnica | BLAST+ (versión 2.14 o posterior) está instalado en el servidor; LocalBlast lo usa, no lo empaqueta ni lo reimplementa | BLAST+ es un sistema externo que se invoca, no un contenedor propio |
+| Técnica | En modo remoto es BLAST+ quien contacta a NCBI (flag `-remote`); LocalBlast no dialoga con NCBI | No hay relación directa entre LocalBlast y NCBI en los diagramas |
+| Técnica | El catálogo de bases locales (D1) se puebla por fuera del sistema (P3 fuera de alcance) | El catálogo se lee, no se escribe desde la aplicación |
 | Técnica | Los usuarios se dan de alta por fuera del sistema; solo hay autenticación básica | [...] |
-| Equipo | [Cantidad de integrantes y roles] | [...] |
-| Tiempo | [Duración disponible: un cuatrimestre] | [...] |
-| Tecnológica | [Lenguajes y frameworks que el equipo ya domina] | [...] |
+| Equipo | El equipo se compone por 3 estudiantes | No se adoptan arquitecturas de alta complejidad operativa |
+| Tiempo | Duración disponible: un cuatrimestre | Se acota el alcance arquitectonico a los procesos criticos (P1 y P2) |
+| Tecnológica | Lenguajes y frameworks que el equipo ya domina | El equipo domina lenguajes como Python y bases de datos relacionales, pero tiene tiempo limitado para aprender tecnologias o lenguajes completamente nuevos |
 
 ---
 
@@ -73,13 +73,11 @@ Este documento arquitectonico esta dirigido a los miembros del equipo de desarro
 
 ```mermaid
 C4Context
-    title Contexto de LocalBlast
-    
     Person(inv, "Investigador/a", "Ejecuta búsquedas BLAST, refina y descarga resultados")
     System(lb, "LocalBlast", "Interfaz gráfica web para BLAST+")
     System_Ext(blast, "BLAST+", "Motor de alineamiento local y remoto")
     
-    Rel_Down(inv, lb, "Envía query y parámetros, y obtiene resultados")
+    Rel_Down(inv, lb, "Envía query y parámetros, luego , obtiene resultados")
     Rel_Down(lb, blast, "Invoca alineamientos y construcción de índices")
     
     UpdateLayoutConfig($c4ShapeInRow="1")
@@ -89,10 +87,9 @@ C4Context
 
 | Elemento | Tipo | Responsabilidad |
 |---|---|---|
-| Investigador/a | Persona | [...] |
-| Administrador/a | Persona | [...] |
-| LocalBlast | Sistema | [...] |
-| BLAST+ | Sistema externo | [...] |
+| Investigador/a | Persona | Actor que hace uso del sistema |
+| LocalBlast | Sistema | Sistema principal que permite la comunicacion con la API |
+| BLAST+ | Sistema externo | Sistema encargado de ejecutar los alineamientos locales |
 
 ---
 
