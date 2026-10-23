@@ -1,9 +1,5 @@
 # Documento de Especificación de Arquitectura — LocalBlast
 
-> Documento del TP3. Sigue la estructura del Anexo A del enunciado.
-> Los textos entre `[corchetes]` son campos a completar por el grupo.
-> Los comentarios `<!-- ... -->` son guías: no se ven en GitHub y se pueden borrar al terminar.
-
 ## Índice
 
 1. [Introducción](#1-introducción)
@@ -24,13 +20,13 @@
 
 ### 1.1 Propósito
 
-[Una o dos frases: este documento describe la arquitectura de LocalBlast, una interfaz gráfica web para BLAST+, y justifica las decisiones que la sustentan.]
+[Este documento describe la arquitectura de LocalBlast, una interfaz gráfica web para BLAST+. Tiene la funcion de registrar y justificar las decisiones de diseño estructural de un sistema de software, especificando como se organiza el sistema a gran escala y por qué se eligió esa estructura frente a otras alternativas. ]
 
 ### 1.2 Alcance
 
 - **Procesos con arquitectura detallada:** P1 (Ejecutar búsqueda BLAST) y P2 (Filtrar y entregar resultados), tal como se eligieron en el SRS (sección 5).
 - **Caja negra:** P3 (Administrar bases de datos). Se representa como parte del contexto y no se detalla internamente.
-- **Fuera de este TP:** vistas de clases y de código, y diagramas de despliegue.
+- **Fuera de este TP:** Vistas de clases y de código.
 
 ### 1.3 Audiencia
 
