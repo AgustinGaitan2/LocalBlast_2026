@@ -204,18 +204,23 @@ C4Context
 ```mermaid
 C4Container
     title Contenedores de LocalBlast
+    
     Person(inv, "Investigador/a", "Ejecuta búsquedas, refina y descarga resultados")
+    
     System_Boundary(lb, "LocalBlast") {
         Container(web, "Aplicación web", "Por definir", "Interfaz de carga, configuración, resultados y filtros")
         Container(api, "API", "Por definir", "Valida, ejecuta búsquedas, filtra y exporta resultados")
         ContainerDb(bd, "Base de datos", "Por definir", "Usuarios, catálogo de bases e historial de búsquedas")
     }
+    
     System_Ext(blast, "BLAST+", "Motor de alineamiento local y remoto")
-    Rel(inv, web, "Usa", "HTTPS")
-    Rel(web, api, "Solicita operaciones", "JSON/HTTPS")
-    Rel(api, bd, "Lee y escribe", "SQL")
-    Rel(api, blast, "Invoca alineamientos", "Línea de comandos")
-    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+    
+    Rel_Down(inv, web, "Usa", "HTTPS")
+    Rel_Down(web, api, "Solicita operaciones", "JSON/HTTPS")
+    Rel_Down(api, bd, "Lee y escribe", "SQL")
+    Rel_Right(api, blast, "Invoca alineamientos", "Línea de comandos")
+    
+    UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="1")
 ```
 
 <!-- Variante candidata si un driver (por ejemplo, tolerancia a fallos o ejecución asíncrona con cancelación)
