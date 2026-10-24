@@ -14,6 +14,7 @@ LocalBlast_2026/
 ├── README.md
 └── docs/
     ├── architecture/
+    │   ├── arquitectura.md
     │   └── contexto-inicial.md
     ├── requeriments/
     │   ├── casos-de-uso.md
