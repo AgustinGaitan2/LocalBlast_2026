@@ -138,66 +138,113 @@ Dos restricciones de la [sección 2](#2-restricciones) influyen directamente en 
 
 ## 5. Estrategia de solución
 
-### 5.1 Tácticas por driver
+Esta sección recorre, en orden de abstracción decreciente, las decisiones de la arquitectura: tácticas → estilo → patrón → cobertura de los drivers.
 
-<!-- Una táctica es una decisión de diseño, no una tecnología. Usar los nombres de la Tabla 2 del enunciado.
-     Si se propone una táctica que no está en la tabla, aclararlo. -->
+### 5.1 Tácticas elegidas y descartadas
 
-<!-- Una táctica es una decisión de diseño, no una tecnología. Usar los nombres de la Tabla 2 del enunciado.
-     Si se propone una táctica que no está en la tabla, aclararlo. -->
+Para los dos drivers del punto anterior, las tácticas seleccionadas y descartadas del catálogo de interoperabilidad son:
 
-| Driver | Atributo | Táctica elegida | Táctica descartada |
+| Táctica | Decisión | Por qué |
+|---|---|---|
+| **Adaptar la interfaz** | ✅ Seleccionada | Es la táctica central para EC-02. Un componente dedicado traduce entre la salida real de BLAST+ (texto tabular, XML, código de salida) y la estructura interna del sistema. Si BLAST+ cambia, cambia solo ese componente. |
+| **Respetar estándares de comunicación** | ✅ Seleccionada | Entre el navegador y el servidor usamos HTTPS con JSON (web estándar); con BLAST+ usamos la interfaz de línea de comandos estándar documentada en el manual oficial del motor. Nada propietario entre contenedores. |
+| **Descubrir servicios** | ❌ Descartada | BLAST+ corre en el mismo servidor que el API, con ruta configurada. No hay universo de servicios por descubrir en tiempo de ejecución. |
+| **Orquestar** | ❌ Descartada | No hay varios servicios que orquestar: hay un único sistema externo (BLAST+) invocado por una sola operación por búsqueda. |
+
+**Tácticas de otros atributos adoptadas en apoyo a los drivers de interoperabilidad.** Dos tácticas que pertenecen a otros atributos sostienen el cumplimiento de los drivers:
+
+| Táctica | Atributo origen | Por qué la adoptamos para interoperabilidad |
+|---|---|---|
+| **Introducir concurrencia** | Desempeño | Es la táctica que atiende el "cero cruces con cinco concurrentes" de EC-01. Lanzar cada búsqueda como subproceso independiente del binario BLAST+, con su propio contexto, es lo que garantiza el aislamiento. |
+| **Encapsular** | Modificabilidad | Convierte al adaptador en el único punto de contacto con BLAST+. Es el mecanismo del patrón Capas (ver [sección 5.3](#53-patrón-arquitectónico-capas)) que materializa la táctica "adaptar la interfaz" dentro del contenedor API. |
+
+### 5.2 Estilo arquitectónico base: Cliente-Servidor
+
+**Decisión.** Adoptamos **Cliente-Servidor** como estilo arquitectónico base para todo el sistema (ver [DA-01](#da-01--estilo-base-cliente-servidor)).
+
+**Por qué este estilo:**
+
+- **BLAST+ corre del lado servidor por obligación.** El binario está instalado en el servidor del laboratorio, no en el navegador del investigador. Una vez aceptado que hace falta un servidor, cliente-servidor es la estructura más chica que lo acompaña: un cliente que presenta, un servidor que ejecuta BLAST+ y persiste. Cualquier otro estilo multiplica piezas sin agregar nada que resuelva mejor nuestros drivers.
+- **Los dos drivers viven dentro de un único proceso servidor.** EC-01 se resuelve con subprocesos lanzados por el mismo API; EC-02 con un componente del mismo API. Ninguno exige estado distribuido, bus de eventos ni coordinación entre servicios. Un estilo que ofrezca esas capacidades sería un costo operativo pagado por algo que no necesitamos.
+- **REST + JSON es el contrato estándar entre cliente y servidor.** Materializa la táctica "respetar estándares de comunicación" en el borde más visible del sistema y mantiene abierta la puerta a un segundo cliente —por ejemplo un script de automatización que un investigador quiera correr— sin tocar el servidor.
+- **Permite evolucionar sin rehacer.** Si en el futuro aparece un escenario de procesamiento asincrónico pesado (lotes de 100 búsquedas, por ejemplo), se puede sumar una cola entre el servidor y un ejecutor dedicado sin romper el estilo base: cliente-servidor convive con esa evolución, mientras que elegir hoy un estilo más complejo nos obligaría a sostener su costo *desde el principio*.
+
+**Restricciones del estilo que la arquitectura respeta:**
+
+| Restricción del estilo cliente-servidor | Cómo se respeta en LocalBlast |
+|---|---|
+| Los clientes no se comunican entre sí | Solo hay un cliente (Aplicación Web); no hay comunicación cliente-cliente. |
+| El cliente no accede directamente a la base de datos | La Aplicación Web nunca habla SQL. Todo acceso a datos pasa por el API. |
+| El servidor no inicia la comunicación con el cliente | El API responde a las solicitudes del cliente; no empuja mensajes al navegador por iniciativa propia (el progreso de la búsqueda se consulta desde el cliente). |
+| El cliente inicia siempre la comunicación | Todas las flechas entre contenedores salen del cliente o del API hacia abajo (BD, BLAST+); ninguna sale de la BD o de BLAST+ hacia el cliente. |
+
+Esto se verifica directamente en la vista de contenedores de la [sección 6](#6-vista-de-contenedores).
+
+**Alternativas consideradas y descartadas:**
+
+| Alternativa | Por qué se descartó |
+|---|---|
+| **Microservicios** | Exigen complejidad operativa (varios despliegues, red interna, consistencia entre bases) que un equipo de tres personas con dedicación parcial no sostiene. No hay en LocalBlast partes con ritmos de cambio o de escala tan distintos como para justificar el costo. |
+| **Orientada a eventos** | Resuelve picos y tareas lentas con desacople asincrónico. Con cinco búsquedas concurrentes y usuarios de un laboratorio chico, el acople síncrono alcanza. Sumar una cola es un contenedor más que operar sin beneficio para los drivers actuales. Queda como opción para una iteración futura si los escenarios cambian. |
+| **SOA con bus** | Pensada para integrar sistemas existentes. En LocalBlast hay un único sistema externo (BLAST+) sin ningún bus de por medio y sin otros sistemas con los que integrarse. |
+
+### 5.3 Patrón arquitectónico: Capas
+
+**Decisión.** Adoptamos el **patrón de Capas** dentro de los dos contenedores que alojan lógica propia: la Aplicación Web y el API. El estilo cliente-servidor organiza el sistema entero; el patrón de Capas organiza la lógica interna de cada uno de esos contenedores (ver [DA-02](#da-02--patrón-capas-en-los-contenedores-con-lógica-propia)).
+
+**Por qué este patrón:**
+
+- **Materializa la táctica "adaptar la interfaz" de forma mínima y suficiente.** En el API, pone al adaptador de BLAST+ en la capa de datos, aislado detrás de una interfaz interna estable. Las capas superiores (dominio, presentación) no saben cómo es la salida real del binario; invocan al adaptador por sus métodos. Un cambio en la salida de BLAST+ se absorbe en el adaptador y no se propaga.
+- **Cumple con las restricciones del equipo.** Capas es más chico que Hexagonal (puertos y adaptadores) y es el que un equipo de tres personas puede sostener sin sobreingeniería. Hexagonal también funcionaría —y queda como opción si el proyecto crece— pero introduce más piezas (puertos explícitos, inversión de dependencias) que no son necesarias para los drivers actuales.
+- **Permite replicar la misma mentalidad en el cliente.** La Aplicación Web también tiene lógica interna (validaciones, orquestación del formulario, llamadas al servidor); organizarla por capas la hace evolucionar al mismo ritmo que el servidor, con un modelo mental consistente.
+- **Satisface tácticas de modificabilidad por diseño.** Separar en capas con dependencias hacia abajo mejora modularidad y capacidad de prueba.
+
+**Las tres capas, aplicadas en cada contenedor:**
+
+| Capa | En la Aplicación Web | En el API |
+|---|---|---|
+| **Presentación** | Pantallas que ve el investigador (carga, configuración, resultados, descarga). Componente: **Pantallas**. | Borde HTTP del servidor: recibe solicitudes, valida sintácticamente las entradas, serializa respuestas, devuelve códigos de estado. Componente: **Controladores**. |
+| **Dominio** | Lógica de aplicación del cliente: valida formato de secuencia, rangos de parámetros y compatibilidad programa-query-base **antes** de pedir el envío al servidor. Componente: **Validación y envío**. | Lógica del dominio del servidor. Tres componentes para las fases del ciclo de la búsqueda —antes de BLAST+, durante y después— más un componente para la identidad del investigador, que es parte del dominio porque el historial se corresponde a cada uno. Componentes: **Autenticación y sesión**, **Preparación de búsqueda**, **Ejecución y persistencia**, **Entrega de resultados**. |
+| **Datos** | Acceso al mundo exterior del cliente (que para el cliente es el API). Componente: **Cliente del API**. | Acceso al mundo exterior del servidor: la base de datos y el binario BLAST+. Componentes: **Acceso a datos**, **Adaptador BLAST+**. |
+
+**Validación en el cliente, además de en el servidor.** La capa de dominio de la Aplicación Web aloja la validación del formulario antes de enviar la configuración al servidor. Esta decisión se documenta aparte en [DA-05](#da-05--validación-en-la-aplicación-web-además-de-en-el-servidor): el cliente valida para que el investigador reciba feedback inmediato y para reducir solicitudes al servidor por configuraciones mal armadas; el servidor **repite** la validación completa sobre todo lo que recibe, porque la validación del cliente puede ser salteada por un actor malicioso y, por lo tanto, no es un control de seguridad.
+
+**Restricciones del patrón que la arquitectura respeta en ambos contenedores:**
+
+| Restricción del patrón de Capas | Cómo se respeta |
+|---|---|
+| Una capa no depende de las superiores | En el API, ningún componente de dominio llama a los Controladores; ningún componente de datos llama a los de dominio ni a los Controladores. En la Aplicación Web, el Cliente del API no llama a Validación y envío, y Validación y envío no llama a Pantallas. |
+| Cada capa usa solo a la inmediatamente inferior | En el API: Controladores → componentes de dominio → Acceso a datos / Adaptador BLAST+. En la Aplicación Web: Pantallas → Validación y envío → Cliente del API. |
+| Cada capa tiene una responsabilidad clara | Ver la tabla de capas más arriba. Ninguna capa mezcla responsabilidades que correspondan a otra. |
+
+Esto se verifica directamente en las vistas de componentes de la [sección 7](#7-vistas-de-componentes): todas las flechas entre capas van en la misma dirección.
+
+**Alternativas consideradas y descartadas:**
+
+| Alternativa | Por qué se descartó |
+|---|---|
+| **Hexagonal (puertos y adaptadores)** | Aísla más estrictamente, pero con un único sistema externo (BLAST+) las piezas extra (puertos explícitos, inversión de dependencias) son sobreingeniería para un equipo de 3 personas. Capas cubre nuestras necesidades con menos piezas. |
+| **MVC** | Está pensado para separar presentación, lógica de interacción y modelo en una interfaz. Capas es más general y permite aplicar la misma mentalidad tanto en el cliente como en el servidor, cosa que MVC no cubre con la misma naturalidad. |
+| **Broker** | Resuelve desacoplar emisores y receptores con un intermediario de mensajes. En LocalBlast, el API y el adaptador de BLAST+ viven en el mismo proceso: una cola de mensajes sería un contenedor más que operar sin beneficio. |
+
+### 5.4 Aspectos transversales
+
+Los aspectos transversales habituales en una arquitectura de este estilo —auditoría, gestión de excepciones, instrumentación— **no forman parte de esta entrega del documento de arquitectura**. Se incorporarán en una iteración posterior, cuando el sistema entre en una etapa en la que esas responsabilidades se vuelvan parte del alcance de desarrollo.
+
+**La autenticación y gestión de sesión sí se modela, pero no como aspecto transversal**: se la trata como un componente de dominio propio en el API (**Autenticación y sesión**, visible en la [sección 7.1](#71-vista-de-componentes-del-api)). La razón es que en LocalBlast la identidad del investigador no es solo un chequeo invisible al código: el historial de búsquedas se corresponde a cada investigador y esa correspondencia es parte del dominio del sistema, no un detalle de infraestructura. Modelarla como componente la vuelve explícita y permite trazar cómo cada efecto sobre la base de datos queda asociado al investigador correcto.
+
+### 5.5 Tabla de cobertura
+
+Cómo la arquitectura cubre cada driver y qué sacrifica a cambio.
+
+| Driver | Táctica(s) | Dónde se materializa en la arquitectura | Qué se sacrifica |
 |---|---|---|---|
-| `EC-01` | Tolerancia a fallos | **Manejo de excepciones:** Se define qué hacer (abortar y notificar al usuario) cuando el subproceso BLAST+ falla inesperadamente. | **Redundancia activa:** Descartada por las restricciones de recursos del servidor; no se levantarán múltiples instancias del motor BLAST+. |
-| `EC-02` | Confidencialidad | **Identificar, autenticar y autorizar actores:** Se verifica la sesión del investigador para asegurar que solo acceda a su propio historial (D2). | **Registro de auditoría:** Descartada por el tiempo de desarrollo acotado; no se guardará un log exhaustivo de cada intento de acceso denegado. |
-| `EC-03` | Interoperabilidad | **Adaptar la interfaz:** El componente Gestor de Ejecución traduce los parámetros de la interfaz web al comando CLI específico que espera BLAST+. | **Descubrir servicios:** Descartada porque la ruta al binario BLAST+ y a los servidores de NCBI es fija, no requiere descubrimiento dinámico en tiempo de ejecución. |
-| `EC-05` | Modularidad | **Dividir módulos / Encapsular:** Se separa la lógica de búsqueda de la de presentación, permitiendo agregar el formato XML sin tocar el núcleo de dominio. | **Diferir el enlace (Plug-ins):** Descartada por sobreingeniería; la cantidad de formatos a soportar es finita y manejable mediante módulos fijos sin necesidad de plug-ins dinámicos. |
+| **EC-01** · Hasta cinco invocaciones concurrentes a BLAST+ sin cruce de resultados | Introducir concurrencia + encapsular | Componente **Adaptador BLAST+** del API: cada invocación corre como subproceso independiente, con identificador propio y referencia a la sesión que la lanzó (ver [DA-04](#da-04--ejecutar-cada-búsqueda-como-subproceso-independiente-de-blast)). | Mayor consumo de CPU y memoria durante los picos de concurrencia (un proceso de BLAST+ por búsqueda). Aceptable en un laboratorio chico. |
+| **EC-02** · Cambios menores de versión de BLAST+ sin romper el parseo de la salida | Adaptar la interfaz + encapsular | Componente **Adaptador BLAST+** del API: su parser reconoce los campos conocidos por nombre, ignora los no mapeados y descarta sin corromper los conocidos. El resto del sistema no cambia (ver [DA-03](#da-03--adaptador-blast-como-componente-dedicado-en-la-capa-de-datos)). | El equipo debe sostener el mapeo "campo de BLAST+ → entidad del dominio" al día en el adaptador cuando el motor evoluciona. Es un costo operativo bajo. |
 
-### 5.2 Estilo base
-
-- **Estilo elegido: Cliente-Servidor** 
-- **Por qué: Permite separar claramente la interfaz grafica de la logica de procesamiento, siendo ademas una arquitectura alineada con la experiencia tecnica del equipo y que permite construir en el tiempo disponible una solucion arquitectonica adecuada** 
-- **Qué sacrifica: El servidor de la API se convierte en un punto único de falla (si el backend cae, la aplicación web completa queda inutilizable). Además, concentra toda la carga computacional de los alineamientos locales en un solo lugar** 
-- **Comprobación de restricciones (Tabla 4):**
-
-| Restricción o regla del estilo | ¿Se cumple? | Dónde se ve en el diagrama |
-|---|---|---|
-| Los clientes (instancias de la aplicación web en los navegadores de los investigadores) no se comunican entre sí | Sí | [...] |
-| La Aplicación Web (cliente) no accede directamente a la base de datos (D2); toda petición de almacenamiento o recuperación pasa obligatoriamente por la API | Sí | [...] |
-| Es el cliente quien siempre inicia la comunicación (al enviar los parámetros de búsqueda o solicitar el historial), y el servidor expone una interfaz definida (API REST) para atender dichas peticiones| Sí | [...] |
-
-### 5.3 Estilos adicionales por zona
-
-<!-- Solo si un escenario lo exige. Indicar qué zona del sistema y por qué. Si no hay, escribir "No se adoptan". -->
-
-| Estilo | Zona donde aplica | Escenario que lo exige | Qué sacrifica |
-|---|---|---|---|
-| [...] | [...] | `EC-xx` | [...] |
-
-### 5.4 Patrones por contenedor
-
-| Contenedor | Patrón | Problema que resuelve | Qué sacrifica | Comprobación de restricciones (Tabla 6) |
-|---|---|---|---|---|
-| API | [por ejemplo, capas] | [...] | [...] | [...] |
-| [...] | [...] | [...] | [...] | [...] |
-
-### 5.5 Tabla de cobertura y sacrificios
-
-| Driver | Cómo lo cubre la arquitectura | Qué se sacrifica |
-|---|---|---|
-| `EC-01` | [...] | [...] |
-| `EC-02` | [...] | [...] |
-
-### 5.6 Conflictos entre tácticas
-
-<!-- Verificar que las tácticas de escenarios distintos no se contradigan. -->
-
-| Tácticas en tensión | Escenarios | Cómo se resolvió |
-|---|---|---|
-| [...] | `EC-xx` / `EC-yy` | [...] |
+**Conflictos entre tácticas: verificación.** Ninguna de las tácticas que adoptamos entra en conflicto con las demás. Encapsular el acceso a BLAST+ mejora modularidad y, al mismo tiempo, es lo que permite el aislamiento de concurrencia (cada subproceso lo lanza el mismo componente, con su propia correspondencia a la sesión). Respetar estándares de comunicación con el cliente (REST + JSON) no interfiere con el canal CLI hacia BLAST+ (son dos interfaces distintas, una por cada relación entre contenedores).
 
 ---
-
 ## 6. Vista de contenedores
 
 <!-- Reglas (secc. 4.4 del enunciado):
