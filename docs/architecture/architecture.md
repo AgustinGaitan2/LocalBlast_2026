@@ -469,28 +469,87 @@ Esta sección recorre, sobre las vistas, el *Given-When-Then* de tres historias 
 
 ## 9. Decisiones de arquitectura
 
-<!-- Una entrada por decisión significativa. Cada driver debe tener al menos una decisión.
-     Copiar la plantilla para cada nueva decisión. -->
+### DA-01 · Estilo base cliente-servidor
 
-### DA-01 — [Título corto de la decisión]
-
-- **Escenario que la motiva:** [EC-xx y breve descripción]
-- **Contexto:** [Qué problema o tensión hay que resolver y qué restricciones existen]
+- **Escenario que la motiva:** EC-01 y EC-02 (ambos de interoperabilidad). El sistema entero necesita un estilo que permita alojar un servidor con BLAST+ invocado del lado del servidor, mientras el investigador usa una interfaz web del lado del cliente.
+- **Contexto:** LocalBlast es una interfaz gráfica para BLAST+. El equipo tiene 3 integrantes con dedicación parcial y domina Python; para el frontend adopta React. Hasta diez investigadores concurrentes.
 - **Decisión:**
-  - Tácticas: [nombre y atributo, según la Tabla 2]
-  - Estilo: [estilo base, o estilo aplicado a una parte del sistema, indicando cuál]
-  - Patrón: [patrón aplicado y en qué contenedor, si corresponde]
+  - **Tácticas:** respetar estándares de comunicación (JSON sobre HTTPS entre cliente y servidor); encapsular el acceso a BLAST+ del lado del servidor.
+  - **Estilo:** Cliente-Servidor como estilo base, aplicado a todo el sistema.
+  - **Patrón:** se decide en DA-02.
 - **Alternativas consideradas:**
-  - [Alternativa 1] — descartada porque [motivo].
-  - [Alternativa 2] — descartada porque [motivo].
+  - **Microservicios** — descartado: alta complejidad operativa para el presupuesto del equipo; sin partes con ritmos de cambio distintos que lo justifiquen.
+  - **Orientada a eventos** — descartado: con cinco búsquedas concurrentes el acople síncrono alcanza; una cola sería un contenedor más que operar sin beneficio para los drivers actuales.
+  - **SOA** — descartado: no hay varios sistemas que integrar.
 - **Consecuencias:**
-  - A favor: [atributos que mejoran]
-  - En contra: [atributos que se sacrifican, costos, riesgos]
-- **Elementos afectados:** [contenedores o componentes que crea o modifica]
+  - **A favor:** modelo simple y familiar; comunicación entre cliente y servidor estándar y bien soportada por los frameworks; pocas piezas que desplegar.
+  - **En contra:** el servidor es punto único de falla; si el servidor cae, el sistema deja de responder. Aceptable para un laboratorio pequeño sin exigencia de 24/7.
+- **Elementos afectados:** contenedores "Aplicación Web", "API" y "Base de datos".
 
-### DA-02 — [Título corto de la decisión]
+### DA-02 · Patrón Capas en los contenedores con lógica propia
 
-[Misma plantilla.]
+- **Escenario que la motiva:** EC-02 principalmente, y secundariamente EC-01. El API necesita aislar el acceso a BLAST+ (que puede cambiar) del resto del código. La Aplicación Web necesita separar las pantallas de la lógica de validación y de las llamadas al servidor, para que una modificación en la interfaz no obligue a tocar la lógica, y viceversa.
+- **Contexto:** Se eligió cliente-servidor como estilo base (DA-01). Tanto el API como la Aplicación Web alojan varias responsabilidades que conviene separar.
+- **Decisión:**
+  - **Tácticas:** encapsular (del atributo modificabilidad) y adaptar la interfaz (de interoperabilidad).
+  - **Patrón:** Capas, con tres capas (Presentación, Dominio, Datos), aplicado dentro de los dos contenedores con lógica propia:
+    - **API:** Controladores (presentación) → Autenticación y sesión, Preparación de búsqueda, Ejecución y persistencia, Entrega de resultados (dominio) → Acceso a datos, Adaptador BLAST+ (datos).
+    - **Aplicación Web:** Pantallas (presentación) → Validación y envío (dominio) → Cliente del API (datos).
+- **Alternativas consideradas:**
+  - **Hexagonal** — descartado: aisla más estrictamente, pero con un único sistema externo (BLAST+) las piezas extra son sobreingeniería.
+  - **MVC** — descartado: útil para la UI, pero Capas permite aplicar la misma mentalidad en el cliente y en el servidor con un vocabulario único.
+  - **Broker** — descartado: resuelve desacoplar emisores y receptores en procesos distintos; API y Adaptador BLAST+ viven en el mismo proceso.
+- **Consecuencias:**
+  - **A favor:** modificabilidad (un cambio en BLAST+ no se propaga más allá del Adaptador; un cambio en la UI no afecta a la validación); capacidad de prueba (cada capa se prueba por separado); claridad del código (cada módulo tiene una responsabilidad por capa).
+  - **En contra:** cierta indirección (una acción del usuario atraviesa tres capas antes de llegar al servidor); algo de rendimiento (despreciable en el régimen de uso de LocalBlast).
+- **Elementos afectados:** todos los componentes de los contenedores API y Aplicación Web (sección 7).
+
+### DA-03 · Adaptador BLAST+ como componente dedicado en la capa de datos
+
+- **Escenario que la motiva:** EC-02 (cambio menor de versión de BLAST+ sin romper el parseo).
+- **Contexto:** BLAST+ es externo, lo mantiene el administrador de sistemas del laboratorio con sus propios criterios, y su salida puede evolucionar (campos nuevos en formato tabular, atributos nuevos en XML).
+- **Decisión:**
+  - **Tácticas:** adaptar la interfaz; encapsular.
+  - **Estilo:** respeta el cliente-servidor base (vive dentro del servidor).
+  - **Patrón:** aplicado dentro del patrón Capas (DA-02), en la capa de datos del API.
+- **Alternativas consideradas:**
+  - **Parsear BLAST+ directamente en los Servicios** — descartado: cada cambio de BLAST+ obligaría a tocar varios servicios; viola la táctica de encapsular.
+  - **Un microservicio aparte "Executor"** — descartado por los mismos motivos que microservicios en DA-01.
+- **Consecuencias:**
+  - **A favor:** cambios de versión de BLAST+ se absorben en un único componente; el resto del API no sabe cómo es la salida real del binario y es inmune a sus cambios menores; EC-02 se cumple como propiedad arquitectónica.
+  - **En contra:** una capa de indirección entre Ejecución y persistencia y BLAST+; obligación de mantener el mapeo "campo de BLAST+ → entidad del dominio" al día en el Adaptador.
+- **Elementos afectados:** componente "Adaptador BLAST+" del API.
+
+### DA-04 · Ejecutar cada búsqueda como subproceso independiente de BLAST+
+
+- **Escenario que la motiva:** EC-01 (cinco búsquedas concurrentes sin cruce de resultados).
+- **Contexto:** BLAST+ es un binario de línea de comandos. Cada invocación es un proceso del sistema operativo con su propia memoria y su propio stdout/stderr. Lanzar varias en paralelo requiere decidir dónde se guarda la correspondencia entre proceso y sesión del investigador.
+- **Decisión:**
+  - **Tácticas:** introducir concurrencia (del atributo desempeño, aplicada acá al escenario de interoperabilidad).
+  - **Estilo:** respeta el cliente-servidor base.
+  - **Patrón:** la correspondencia proceso↔sesión vive dentro del Adaptador BLAST+ (DA-03), no en los Controladores ni en los componentes de dominio.
+- **Alternativas consideradas:**
+  - **Un único proceso BLAST+ en el que se encolan las búsquedas** — descartado: serializa las invocaciones y el escenario pedía cinco concurrentes; además, BLAST+ no está pensado para recibir "jobs" por una API persistente.
+  - **Una cola de mensajes externa y un pool de workers** — descartado: suma un contenedor (broker) que no es necesario para la escala actual (ver DA-01).
+- **Consecuencias:**
+  - **A favor:** aislamiento natural entre búsquedas (cada subproceso tiene su propia memoria); si BLAST+ falla en una invocación, las otras no se ven afectadas; cumple EC-01 por diseño.
+  - **En contra:** consumo de CPU y memoria crece linealmente con la concurrencia; cada subproceso implica el overhead de cargar BLAST+ en memoria. Aceptable para el régimen de uso previsto.
+- **Elementos afectados:** componente "Adaptador BLAST+" (en el API).
+
+### DA-05 · Validación en la Aplicación Web, además de en el servidor
+
+- **Escenario que la motiva:** la operabilidad del formulario de configuración de la búsqueda. La configuración es compleja (compatibilidad programa-query-base, rangos de parámetros, formato de la secuencia): si el investigador recibe el feedback de "esta configuración no es válida" después de un round-trip al servidor por cada campo que ajusta, la experiencia se degrada rápido. Secundariamente, cada round-trip evitado es una solicitud menos que el servidor atiende.
+- **Contexto:** La Aplicación Web ya tiene su propia capa de dominio (ver DA-02). La validación del formulario es la lógica del cliente más visible y más repetida en la interacción.
+- **Decisión:**
+  - **Táctica:** mantener modelos de tarea y de usuario del lado del cliente (del grupo de usabilidad): el cliente conoce las reglas de validación y las aplica localmente para asistir al investigador antes de pedirle nada al servidor.
+  - **Estilo:** respeta cliente-servidor. **El cliente propone, el servidor dispone**: la validación del cliente mejora la experiencia pero no reemplaza a la del servidor.
+  - **Patrón:** vive en la capa de dominio de la Aplicación Web (componente **Validación y envío**).
+- **Alternativas consideradas:**
+  - **Validar solo en el servidor** — descartada: cada error en el formulario exigiría un round-trip, con una experiencia frustrante y una carga innecesaria al servidor por configuraciones que el cliente podría descartar antes.
+- **Consecuencias:**
+  - **A favor:** feedback inmediato al investigador; menos carga en el servidor; descartes temprano de configuraciones mal armadas.
+  - **En contra:** la lógica de validación queda duplicada entre cliente y servidor y debe mantenerse coherente. **La validación del cliente no es un control de seguridad**: un actor malicioso puede saltearla hablando directamente con el API. Por eso el servidor **repite** su propia validación completa sobre todo lo que recibe, independientemente de lo que haya hecho el cliente.
+- **Elementos afectados:** componente "Validación y envío" de la Aplicación Web; también el componente "Preparación de búsqueda" del API, que mantiene las validaciones completas (sintácticas de la secuencia, semánticas de la configuración) aun cuando el cliente ya haya validado.
 
 ---
 
