@@ -402,6 +402,31 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
 - **Errores / imprecisiones detectadas:**
   - **Cambio aplicado en un solo lugar.** En la pantalla 4, "Limpiar filtros" aparecía en los dos estados apilados y la IA solo lo cambió en el primero. Mismo patrón de siempre: cambios transversales se aplican a la primera instancia y se olvidan de las demás.
   - **Nota del maquetado desactualizada (pantalla 2).** La IA aplicó los tres cambios al cuerpo pero dejó la nota al pie como estaba. Patrón recurrente: cuerpos sí, resúmenes no.
+
+## Entrada 20 — Elección del driver y derivación de táctica, estilo y patrón
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** pasar al modelo el SRS, las HU, los escenarios de calidad y la consigna del TP3 para armar el documento de arquitectura. El equipo venía con dos decisiones de clase y habiendo consultado previamente modelos de IA (cliente-servidor como estilo, capas como patrón) y necesitaba confirmar que tenían sentido con un atributo único como driver.
+- **Qué generó:** justificación de **interoperabilidad** como driver único (es condición de existencia del producto), análisis de tácticas adoptadas (adaptar la interfaz, respetar estándares) y descartadas (descubrir servicios, orquestar); dos tácticas prestadas de otros atributos con justificación (introducir concurrencia para EC-01, encapsular para EC-02); cinco decisiones de arquitectura con alternativas y consecuencias.
+- **Qué aceptamos:** el argumento de "atributo como condición de existencia" para elegir interoperabilidad, los descartes de otros estilos (microservicios, orientada a eventos, SOA) y de otros patrones (hexagonal, MVC, broker) por costo operativo para un equipo de 3.
+- **Qué modificamos:** reencuadramos los otros 4 atributos como "se cubren" y no "se descartan". Explicitamos que estábamos tomando tácticas de atributos que no eran el driver (la IA no lo decía abierto al principio), decidimos aplicar capas también en la Aplicación Web (no solo en el API) para separar validación cliente, pantallas y llamadas HTTP, y agregamos DA-05 para la validación client-side.
+- **Qué descartamos:** hexagonal como patrón adicional al API (sobreingeniería para un único sistema externo con un equipo chico), broker como contenedor adicional (una cola es un contenedor más que operar sin beneficio para los drivers actuales).
+- **Errores / imprecisiones detectadas:** la IA insistió inicialmente con *broker* como patrón citando la tabla de candidatos para interoperabilidad, sin leer el contexto de aplicación del patrón (broker resuelve desacoplar procesos distintos, el adaptador vive en el mismo proceso que el API), un primer borrador incluía al Administrador/a en el contexto cuando P3 está fuera de alcance, confusión repetida entre contenedores de C4 y procesos del DFD (en algunos párrafos la IA llamaba al API "proceso P1").
+
+## Entrada 21 — Vistas C4 e iteración de componentes
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** armar las vistas de contenedores y de componentes (una por cada contenedor con lógica propia: API y Aplicación Web), con sus catálogos y la trazabilidad escenario → táctica → estilo/patrón → decisión → elemento C4.
+- **Qué generó:** vista de contenedores (Investigador + Aplicación Web + API + Base de datos + BLAST+ externo), vista de componentes del API con 3 capas y 7 componentes, vista de componentes de la Aplicación Web con las mismas 3 capas aplicadas al cliente; catálogos de componentes y relaciones, comprobación por tabla de las restricciones del estilo y del patrón.
+- **Qué aceptamos:** no profundizar la Base de datos (es almacén sin lógica), modelar la autenticación y gestión de sesión como componente propio del dominio del API y no como aspecto transversal, porque el historial se corresponde a cada investigador y esa correspondencia es parte del dominio; el Adaptador BLAST+ como componente clave que materializa EC-01 (subproceso independiente) y EC-02 (parser tolerante).
+- **Qué modificamos:**
+  - **Nombres de los componentes de dominio del API:** de "Servicio de Secuencia / Búsqueda / Resultados" a "Preparación de búsqueda / Ejecución y persistencia / Entrega de resultados", agrupando por fase del ciclo de la búsqueda.
+  - **Capa de datos:** "Repositorio" pasó a "Acceso a datos" para no arrastrar expectativas del Repository Pattern.
+  - **Autenticación y sesión** agregado al dominio del API aun sin HU dedicada, porque sin él no se explica cómo el historial queda asociado a cada investigador. En el catálogo aclaramos que los otros servicios reciben el identificador del investigador como parámetro desde los Controladores, no por invocación directa a Autenticación (así el diagrama no se llena de flechas redundantes).
+  - **Aspectos transversales** sacados del cuerpo del documento (se retiró del alcance de esta entrega), quedaron nombrados en 5.4 como pendientes.
+  - **Menciones al número de TP** eliminadas del cuerpo: el documento simula un proyecto real.
+- **Qué descartamos:** separar la vista de componentes del API en dos sub-vistas para evitar cruces de líneas (la consigna pide una por cada contenedor); dibujar flechas desde Preparación / Ejecución / Entrega hacia Autenticación y sesión (el identificador viaja como parámetro, no como invocación), una cola de mensajes implícita entre Ejecución y persistencia y el Adaptador BLAST+ (habría violado DA-04).
+- **Errores / imprecisiones detectadas:** la IA no decía abiertamente que la validación en el cliente **no es un control de seguridad**, en DA-05 dejamos explícito que el servidor repite la validación porque un atacante puede saltear la del cliente. En una iteración quiso agregar la cola implícita descartada arriba. Confusión recurrente entre contenedores de C4 y contenedores de despliegue (Docker): corregida cada vez.
   
 ## Reflexión sobre el uso de IA
 
