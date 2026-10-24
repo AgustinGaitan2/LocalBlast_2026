@@ -557,24 +557,29 @@ Esta sección recorre, sobre las vistas, el *Given-When-Then* de tres historias 
 
 ### 10.1 Escenario → táctica → estilo o patrón → decisión → elemento C4
 
-| Escenario (TP2) | Atributo | Tácticas | Estilo o patrón | Decisión | Elemento C4 |
+| Escenario | Atributo | Tácticas | Estilo / Patrón | Decisión | Elemento C4 |
 |---|---|---|---|---|---|
-| `EC-01` | [...] | [...] | [...] | `DA-01` | [Contenedor o componente] |
-| `EC-02` | [...] | [...] | [...] | `DA-02` | [...] |
+| **EC-01** · Concurrencia de invocaciones | Interoperabilidad | Introducir concurrencia; Encapsular | Estilo cliente-servidor (DA-01) + Patrón capas (DA-02) | DA-04 | Componente **Adaptador BLAST+** del contenedor API |
+| **EC-02** · Cambio menor de versión de BLAST+ | Interoperabilidad | Adaptar la interfaz; Encapsular | Patrón capas (DA-02) | DA-03 | Componente **Adaptador BLAST+** del contenedor API |
 
 ### 10.2 Historia de usuario → elementos C4
 
 | Historia de usuario | Contenedores | Componentes |
 |---|---|---|
-| `HU[xx]_CU00[x]_[slice]` | [...] | [...] |
+| HU01_CU001_B · Cargar secuencia | Aplicación Web → API → Base de datos | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Preparación de búsqueda → Acceso a datos |
+| HU02_CU001_E1 · Rechazo de secuencia inválida | Aplicación Web (rechazo local) o Aplicación Web → API (rechazo tras validación del servidor) | **Web:** Pantallas → Validación y envío (devuelve error, no delega) · **API:** si la validación local fue salteada, Controladores → Preparación de búsqueda (rechaza) |
+| HU03_CU002_B · Configurar la búsqueda | Aplicación Web → API → Base de datos (al leer catálogo) | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Preparación de búsqueda → Acceso a datos (lee catálogo) |
+| HU05_CU003_B · Validar la búsqueda | Aplicación Web → API | **Web:** Pantallas → Validación y envío · **API:** Controladores → Preparación de búsqueda (validación semántica en memoria) |
+| HU08_CU004_B · Ejecutar búsqueda | Aplicación Web → API → BLAST+ · API → Base de datos | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** → Ejecución y persistencia → Acceso a datos |
+| HU09_CU004_A1 · Cancelación | Aplicación Web → API → BLAST+ | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** (termina el subproceso) |
+| HU10_CU004_E1 · Fallo del modo remoto | Aplicación Web → API | **API:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** → Controladores (propagan el error literal al cliente) |
+| HU11_CU005_B · Presentar y persistir | Aplicación Web → API → Base de datos | **API:** Controladores → Ejecución y persistencia → Acceso a datos |
+| HU12_CU006_B · Filtrado | Aplicación Web → API → Base de datos | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Entrega de resultados → Acceso a datos |
+| HU13_CU007_B · Descarga | Aplicación Web → API → Base de datos | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Entrega de resultados → Acceso a datos |
 
-### 10.3 Contenedor o componente → responsabilidad de origen
+Todo driver llega a al menos un contenedor y un componente. Todo componente de las vistas corresponde a una responsabilidad del sistema o a una decisión de arquitectura de este documento.
 
-<!-- Ningún elemento puede quedar sin origen: debe venir de un RF, una HU o una DA. -->
-
-| Elemento | Tipo | Origen (RF / HU / DA) |
-|---|---|---|
-| [...] | [Contenedor / Componente] | [...] |
+**Nota sobre Autenticación y sesión.** No aparece en la columna de componentes porque no existe una historia de usuario propia para la autenticación en el alcance actual, pero el componente participa en **todas** las historias de la tabla: los Controladores lo consultan al inicio de cada solicitud HTTP para identificar al investigador y recién después delegan en el servicio de dominio correspondiente. Agregarlo en cada fila sería redundante; su participación es uniforme.
 
 ---
 
