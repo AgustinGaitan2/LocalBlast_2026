@@ -245,16 +245,6 @@ Cómo la arquitectura cubre cada driver y qué sacrifica a cambio.
 **Conflictos entre tácticas: verificación.** Ninguna de las tácticas que adoptamos entra en conflicto con las demás. Encapsular el acceso a BLAST+ mejora modularidad y, al mismo tiempo, es lo que permite el aislamiento de concurrencia (cada subproceso lo lanza el mismo componente, con su propia correspondencia a la sesión). Respetar estándares de comunicación con el cliente (REST + JSON) no interfiere con el canal CLI hacia BLAST+ (son dos interfaces distintas, una por cada relación entre contenedores).
 
 ---
-## 6. Vista de contenedores
-
-<!-- Reglas (secc. 4.4 del enunciado):
-     - Una sola vista global, con título.
-     - Dentro del límite del sistema solo contenedores; personas y sistemas externos van afuera.
-     - Cada contenedor: nombre (rol, sin tecnología), tecnología y responsabilidad en una frase.
-     - Bases de datos y colas son contenedores.
-     - Un contenedor no contiene otros contenedores ni componentes.
-     - Sin elementos aislados. Máximo aproximado: 10 elementos.
-     - Flechas desde quien inicia, con verbo y protocolo; sin flecha de respuesta. -->
 
 ## 6. Vista de contenedores
 
