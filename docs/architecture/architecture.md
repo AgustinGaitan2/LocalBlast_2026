@@ -311,85 +311,143 @@ Verificando sobre el diagrama las reglas de la [sección 5.2](#52-estilo-arquite
 
 ---
 
-## 7. Vista de componentes
+## 7. Vistas de componentes
 
-<!-- Una vista por cada contenedor que implementa P1 y P2 y tiene lógica propia.
-     No se hace para bases de datos ni colas.
-     Reglas (secc. 4.5 del enunciado):
-     - Los componentes van dentro del límite de ese contenedor; lo externo va afuera sin sus componentes.
-     - Un componente pertenece a un solo contenedor y no contiene otros componentes.
-     - No son clases: son agrupaciones coherentes de funcionalidad.
-     - Respetar las restricciones de los patrones elegidos (por ejemplo, en capas las dependencias van hacia abajo).
-     - Los aspectos transversales adoptados se dibujan como componentes propios.
-     - Sin componentes huérfanos: cada uno se rastrea a una HU, un RF o una DA.
-     - Entre componentes la relación es una llamada interna: verbo, sin protocolo. -->
+Se hace una vista de componentes por cada contenedor del sistema con lógica propia: la **Aplicación Web** y el **API**. La Base de datos no se profundiza porque es un almacén sin lógica propia.
 
-### 7.1 Contenedor API
-
-#### Diagrama (versión actual)
-
-<!-- Propuesta inicial a validar: capas + puerto/adaptador hacia BLAST+ (si se adopta el patrón hexagonal). -->
+### 7.1 Vista de componentes del API
 
 ```mermaid
 C4Component
-    title Componentes del contenedor API
-    Container(web, "Aplicación web", "Por definir", "Cliente")
+    title Vista de componentes del contenedor API
+
+    Container(web, "Aplicación Web", "React")
+
     Container_Boundary(api, "API") {
-        Component(ctrl, "Controladores", "Por definir", "Presentación: reciben las solicitudes")
-        Component(aut, "Autenticación y sesión", "Por definir", "Transversal: identifica al usuario y controla la sesión")
-        Component(val, "Validación de búsqueda", "Por definir", "Dominio: valida la query, los parámetros y la compatibilidad programa/query/base")
-        Component(bus, "Servicio de búsqueda", "Por definir", "Dominio: ejecuta, cancela y registra la búsqueda")
-        Component(res, "Servicio de resultados", "Por definir", "Dominio: aplica filtros post-búsqueda sin reejecutar")
-        Component(exp, "Servicio de exportación", "Por definir", "Dominio: arma el archivo en el formato pedido")
-        Component(ada, "Adaptador de BLAST+", "Por definir", "Infraestructura: traduce una búsqueda en una invocación a BLAST+")
-        Component(repo, "Acceso a datos", "Por definir", "Datos: catálogo, historial y usuarios")
+        Component(ctrl, "Controladores", "Routers", "Presentación: reciben solicitudes HTTP")
+        Component(auth, "Autenticación y sesión", "Python", "Dominio: identifica al investigador y mantiene su sesión")
+
+        Component(svc_pre, "Preparación de búsqueda", "Python", "Dominio: valida secuencia, configuración y compatibilidad (CU001–CU003)")
+        Component(svc_eje, "Ejecución y persistencia", "Python", "Dominio: ejecuta vía Adaptador, recibe resultados y persiste (CU004–CU005)")
+        Component(svc_ent, "Entrega de resultados", "Python", "Dominio: filtra y arma descargas (CU006–CU007)")
+
+        Component(repo, "Acceso a datos", "SQLAlchemy", "Datos: lee y escribe en la base")
+        Component(adap, "Adaptador BLAST+", "CLI + parser", "Datos: invoca BLAST+ y parsea su salida")
     }
-    ContainerDb(bd, "Base de datos", "Por definir", "Usuarios, catálogo e historial")
-    System_Ext(blast, "BLAST+", "Motor de alineamiento")
+
+    ContainerDb(bd, "Base de datos", "PostgreSQL")
+    System_Ext(blast, "BLAST+", "Motor")
+
     Rel(web, ctrl, "Solicita", "JSON/HTTPS")
-    Rel(ctrl, aut, "Verifica sesión")
-    Rel(ctrl, val, "Valida")
-    Rel(ctrl, bus, "Ejecuta y cancela")
-    Rel(ctrl, res, "Filtra")
-    Rel(ctrl, exp, "Exporta")
-    Rel(bus, ada, "Invoca búsqueda")
-    Rel(bus, repo, "Guarda historial")
-    Rel(res, repo, "Lee resultados")
-    Rel(exp, res, "Obtiene resultados visibles")
-    Rel(val, repo, "Consulta catálogo")
-    Rel(aut, repo, "Consulta usuarios")
+
+    Rel(ctrl, auth, "Autentica")
+    Rel(ctrl, svc_pre, "Invoca")
+    Rel(ctrl, svc_eje, "Invoca")
+    Rel(ctrl, svc_ent, "Invoca")
+
+    Rel(auth, repo, "Lee usuarios")
+    Rel(svc_pre, repo, "Guarda")
+    Rel(svc_eje, repo, "Persiste")
+    Rel(svc_eje, adap, "Ejecuta")
+    Rel(svc_ent, repo, "Lee")
+
     Rel(repo, bd, "Lee y escribe", "SQL")
-    Rel(ada, blast, "Invoca", "Línea de comandos")
+    Rel(adap, blast, "Invoca", "CLI")
+
     UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
-#### Catálogo de componentes
+> **Nota sobre la disposición.** La sintaxis C4 de Mermaid tiene limitaciones de layout conocidas: coloca los contenedores vecinos (Aplicación Web, Base de datos, BLAST+) por encima del límite del API aunque las relaciones salgan hacia abajo. Las flechas que van del API a la Base de datos y a BLAST+ se leen entonces como "sube hacia el contenedor vecino que está arriba" en el dibujo, aunque conceptualmente la dependencia es *desde* el API *hacia* esos vecinos. Por el mismo motivo, las etiquetas sobre las flechas se mantuvieron cortas (un verbo cada una) y el detalle completo —qué comunica cada relación— vive en el catálogo de la [sección 7.1.2](#712-catálogo-de-relaciones-del-api).
 
-| Componente | Tecnología | Responsabilidad | Se rastrea a |
-|---|---|---|---|
-| Controladores | [...] | Reciben las solicitudes de la aplicación web | [RF / HU / DA] |
-| Autenticación y sesión | [...] | [...] | [...] |
-| Validación de búsqueda | [...] | [...] | RF-02, RF-05, RF-07 |
-| Servicio de búsqueda | [...] | [...] | RF-03, RF-08, RF-10 |
-| Servicio de resultados | [...] | [...] | RF-09, RF-11 |
-| Servicio de exportación | [...] | [...] | RF-12 |
-| Adaptador de BLAST+ | [...] | [...] | RF-03 |
-| Acceso a datos | [...] | [...] | RF-10 |
+#### 7.1.1 Catálogo de componentes del API
 
-#### Catálogo de relaciones
+| Componente | Capa | Responsabilidad |
+|---|---|---|
+| **Controladores** | Presentación | Exponen la interfaz HTTP del API: rutas, validación sintáctica de entradas, serialización de respuestas, códigos de estado. No contienen lógica del dominio: delegan en los componentes de dominio. En cada solicitud, antes de invocar a cualquier otro componente de dominio, consultan a **Autenticación y sesión** para saber qué investigador la originó y le pasan ese identificador como parámetro a los demás servicios. |
+| **Autenticación y sesión** | Dominio | Verifica la identidad del investigador en cada solicitud y mantiene su sesión activa durante el trabajo con el sistema. Expone el "investigador actual" al resto del dominio para que los efectos sobre la base de datos (la secuencia que guarda Preparación de búsqueda, la búsqueda que persiste Ejecución y persistencia, el historial que lee Entrega de resultados) queden asociados al investigador correcto. **Por qué está en el documento aunque no haya una historia de usuario propia**: el historial de las búsquedas se corresponde a cada investigador y esa correspondencia es parte del dominio del sistema; sin este componente no se puede explicar cómo se mantiene la correspondencia entre búsqueda e investigador. |
+| **Preparación de búsqueda** | Dominio | Todo lo que ocurre **antes** de invocar a BLAST+. Valida sintácticamente la secuencia query (RF-01, RF-02; implementa CU001) e infiere el alfabeto (ADN / ARN / proteína); recibe la configuración de la búsqueda (RF-03 a RF-06; CU002) y la valida semánticamente verificando compatibilidad entre programa, tipo de query y tipo de base de datos (RF-07; CU003). Esta validación repite la que ya hizo el cliente, porque la del cliente no es un control de confianza. |
+| **Ejecución y persistencia** | Dominio | Lo que ocurre **durante** y **al cierre** de la ejecución de BLAST+. Lanza la ejecución asíncrona con posibilidad de cancelación pidiéndosela al Adaptador BLAST+ (RF-08; CU004), recibe los resultados crudos, los deja disponibles para la presentación (RF-09) y persiste la búsqueda completa en el historial (RF-10; CU005). Nunca llama directamente a BLAST+: lo hace a través del Adaptador. |
+| **Entrega de resultados** | Dominio | Lo que ocurre **después** de la búsqueda, cada vez que el investigador refina o se lleva lo encontrado. Aplica los filtros post-búsqueda sobre los resultados crudos ya persistidos (RF-11; CU006) y arma los archivos descargables en los formatos soportados (RF-12; CU007). |
+| **Acceso a datos** | Datos | Único punto de acceso del API a la base de datos. Hace la traducción entre entidades del dominio y filas de SQL; agrupa las operaciones en transacciones cuando corresponde. |
+| **Adaptador BLAST+** | Datos | **Componente clave de los drivers de interoperabilidad.** Único punto de contacto con BLAST+. Lanza cada invocación como subproceso independiente, mantiene la correspondencia entre subproceso y sesión que lo originó (EC-01), parsea la salida reconociendo los campos conocidos y descartando los no mapeados sin corromper los conocidos (EC-02). |
 
-<!-- Entre componentes del mismo contenedor el tipo es "llamada interna" y no lleva protocolo. -->
+#### 7.1.2 Catálogo de relaciones del API
 
-| Origen | Destino | Qué se comunica | Tipo | Protocolo |
-|---|---|---|---|---|
-| Controladores | Autenticación y sesión | Verificación de sesión | Llamada interna | — |
-| [...] | [...] | [...] | Llamada interna | — |
+| Origen → Destino | Verbo en el diagrama | Qué comunica realmente |
+|---|---|---|
+| **Dentro del contenedor API** (llamadas internas, sin protocolo) | | |
+| Controladores → Autenticación y sesión | Autentica | En cada solicitud, antes de delegar en otro componente de dominio, los Controladores le piden a Autenticación y sesión que verifique quién es el investigador. Si no hay sesión válida, los Controladores responden con 401/403 sin invocar nada más. |
+| Controladores → Preparación de búsqueda | Invoca | Delega la carga y validación sintáctica de la secuencia, la recepción de la configuración y su validación semántica. Pasa el identificador del investigador que ya obtuvo de Autenticación y sesión. |
+| Controladores → Ejecución y persistencia | Invoca | Delega la ejecución asíncrona de la búsqueda validada, la recepción de resultados crudos y la persistencia en el historial. Pasa el identificador del investigador. |
+| Controladores → Entrega de resultados | Invoca | Delega el filtrado post-búsqueda sobre resultados ya persistidos y la generación del archivo de descarga. Pasa el identificador del investigador para que la lectura del historial se restrinja a sus propias búsquedas. |
+| Autenticación y sesión → Acceso a datos | Lee usuarios | Lee los registros de usuarios para validar credenciales y, cuando corresponde, las sesiones vigentes. |
+| Preparación de búsqueda → Acceso a datos | Guarda | Guarda la secuencia cargada (asociada al investigador actual) y lee el catálogo de bases de datos disponibles para validar la configuración. |
+| Ejecución y persistencia → Acceso a datos | Persiste | Persiste cada búsqueda ejecutada en el historial (parámetros, timestamps, resultados crudos), asociada al investigador que la originó. |
+| Ejecución y persistencia → Adaptador BLAST+ | Ejecuta | Pide la ejecución de una búsqueda validada, pasando la configuración completa. |
+| Entrega de resultados → Acceso a datos | Lee | Lee los resultados crudos de una búsqueda del historial —filtrada al investigador actual— para filtrarlos o prepararlos para descarga. |
+| **Hacia contenedores vecinos** (con protocolo) | | |
+| Aplicación Web → Controladores | Solicita | Solicitud REST (JSON / HTTPS). |
+| Acceso a datos → Base de datos | Lee y escribe | Consultas y transacciones (SQL). |
+| Adaptador BLAST+ → BLAST+ | Invoca | Invocación por línea de comandos; captura de stdout / stderr y código de salida (CLI / subproceso). |
 
-### 7.2 Otros contenedores
+> **Sobre por qué Preparación / Ejecución / Entrega no tienen flecha hacia Autenticación y sesión en el diagrama.** El identificador del investigador viaja como **parámetro** desde los Controladores hacia esos tres servicios, y de ahí hacia Acceso a datos; no viaja como una invocación de vuelta a Autenticación y sesión. Es decir, el "quién soy" se obtiene **una sola vez** por solicitud (en el borde del API, cuando los Controladores autentican) y después se propaga como dato por el resto del flujo. Dibujar tres flechas más —una desde cada servicio hacia Autenticación y sesión— ensuciaría el diagrama sin agregar información: no hay una invocación real.
 
-<!-- Agregar una subsección por cada contenedor que implemente P1 o P2 y tenga lógica propia
-     (por ejemplo, el Ejecutor de búsquedas, si se incorpora, o la Aplicación web si el patrón
-     MVC o MVVM aporta valor). Si no hay ninguno más, escribir "No aplica". -->
+#### 7.1.3 Comprobación del patrón de capas en el API
+
+Verificando sobre el diagrama las restricciones de la [sección 5.3](#53-patrón-arquitectónico-capas):
+
+- ✅ **Ninguna capa depende de las superiores.** Los componentes de datos (Acceso a datos, Adaptador BLAST+) no llaman a los componentes de dominio ni a los Controladores. Los componentes de dominio no llaman a los Controladores. Todas las flechas de dominio bajan hacia la capa de datos; todas las flechas de presentación bajan hacia la capa de dominio.
+- ✅ **No se saltean capas.** Los Controladores no llaman a Acceso a datos ni al Adaptador BLAST+ directamente: delegan en los componentes de dominio.
+- ✅ **Cada capa tiene su responsabilidad propia** (ver [sección 5.3](#53-patrón-arquitectónico-capas)).
+
+### 7.2 Vista de componentes de la Aplicación Web
+
+```mermaid
+C4Component
+    title Vista de componentes de la Aplicación Web
+
+    Person(inv, "Investigador/a")
+
+    Container_Boundary(web, "Aplicación Web") {
+        Component(views, "Pantallas", "React", "Presentación: pantallas de carga, configuración, resultados y descarga")
+        Component(valid, "Validación y envío", "JavaScript", "Dominio: valida formato de secuencia, rangos de parámetros y compatibilidad; si todo es válido, delega el envío")
+        Component(api_cli, "Cliente del API", "fetch", "Datos: encapsula las llamadas HTTP al servidor")
+    }
+
+    Container(api, "API", "Python")
+
+    Rel(inv, views, "Usa", "navegador")
+    Rel(views, valid, "Confirma")
+    Rel(valid, api_cli, "Delega")
+    Rel(api_cli, api, "Solicita", "JSON/HTTPS")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
+
+#### 7.2.1 Catálogo de componentes de la Aplicación Web
+
+| Componente | Capa | Responsabilidad |
+|---|---|---|
+| **Pantallas** | Presentación | Las pantallas que el investigador ve y manipula: carga de la secuencia (HU01), configuración y validación visible del formulario (HU03 a HU07), progreso y cancelación de la ejecución (HU08 a HU10), tabla de resultados y filtros interactivos (HU11, HU12), controles de descarga (HU13, HU14). |
+| **Validación y envío** | Dominio | Centro de la lógica del cliente. Valida: formato sintáctico de la secuencia, rangos de los parámetros pre-búsqueda, compatibilidad entre programa BLAST, tipo de secuencia y tipo de base de datos. Si la validación falla, devuelve a Pantallas los errores para que los muestre inline; si pasa, delega el envío al Cliente del API. |
+| **Cliente del API** | Datos | Encapsula el detalle de las llamadas HTTP (URL base, serialización de JSON, manejo de códigos de estado). Es la única pieza del cliente que conoce la forma concreta de la interfaz del API. |
+
+#### 7.2.2 Catálogo de relaciones de la Aplicación Web
+
+| Origen → Destino | Verbo en el diagrama | Qué comunica realmente |
+|---|---|---|
+| **Dentro de la Aplicación Web** (llamadas internas, sin protocolo) | | |
+| Pantallas → Validación y envío | Confirma | Cuando el investigador presiona un botón que dispara una acción contra el servidor (cargar secuencia, ejecutar búsqueda, aplicar filtros, descargar), Pantallas pasa el estado del formulario a Validación y envío para que valide y, si corresponde, dispare el envío. |
+| Validación y envío → Cliente del API | Delega | Cuando la validación local pasa, Validación y envío arma el *payload* y le pide al Cliente del API que haga la llamada. |
+| **Hacia actores y contenedores vecinos** | | |
+| Investigador/a → Pantallas | Usa | Interacciones de la UI mediante el navegador. |
+| Cliente del API → API | Solicita | Solicitud REST (JSON / HTTPS). |
+
+#### 7.2.3 Comprobación del patrón de capas en la Aplicación Web
+
+- ✅ **Ninguna capa depende de las superiores.** Validación y envío no conoce a Pantallas (le devuelve datos, no la llama). Cliente del API no conoce a Validación y envío.
+- ✅ **No se saltean capas.** Pantallas no llama al Cliente del API directamente: toda acción que requiere comunicación con el servidor pasa por Validación y envío.
+- ✅ **Cada capa tiene su responsabilidad propia** (ver [sección 5.3](#53-patrón-arquitectónico-capas)).
 
 ---
 
