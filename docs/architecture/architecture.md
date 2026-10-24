@@ -256,68 +256,58 @@ Cómo la arquitectura cubre cada driver y qué sacrifica a cambio.
      - Sin elementos aislados. Máximo aproximado: 10 elementos.
      - Flechas desde quien inicia, con verbo y protocolo; sin flecha de respuesta. -->
 
-### 6.1 Diagrama (versión actual)
+## 6. Vista de contenedores
 
-<!-- Punto de partida: cliente-servidor. Evolucionar con cada driver (ver 6.4).
-     Reemplazar "Por definir" por la tecnología real. -->
+### 6.1 Diagrama
 
 ```mermaid
 C4Container
-    Person(inv, "Investigador/a", "Ejecuta búsquedas, refina y descarga resultados")
-    System_Ext(blast, "BLAST+", "Motor de alineamiento local y remoto")
-    
+    title Vista de contenedores de LocalBlast
+
+    Person(inv, "Investigador/a", "Carga secuencias, lanza búsquedas, filtra y descarga resultados")
+
     System_Boundary(lb, "LocalBlast") {
-        Container(web, "Aplicación web", "Por definir", "Interfaz de carga, configuración, resultados y filtros")
-        Container(api, "API", "Por definir", "Valida, ejecuta búsquedas, filtra y exporta resultados")
-        ContainerDb(bd, "Base de datos", "Por definir", "Usuarios, catálogo de bases e historial de búsquedas")
+        Container(web, "Aplicación Web", "React", "Interfaz de carga, configuración, ejecución, filtrado y descarga")
+        Container(api, "API", "Python", "Valida, invoca BLAST+, persiste búsquedas, aplica filtros, arma descargas")
+        ContainerDb(bd, "Base de datos", "PostgreSQL", "Usuarios, catálogo de bases de datos y historial de búsquedas")
     }
-    
-    Rel_D(inv, web, "Usa", "HTTPS")
-    Rel_D(web, api, "Solicita operaciones", "JSON/HTTPS")
-    Rel_D(api, bd, "Lee y escribe", "SQL")
-    Rel_R(api, blast, "Invoca alineamientos", "Línea de comandos")
-    
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="1")
+
+    System_Ext(blast, "BLAST+", "Motor de alineamiento (local o remoto con flag -remote)")
+
+    Rel(inv, web, "Usa", "HTTPS")
+    Rel(web, api, "Solicita", "JSON / HTTPS")
+    Rel(api, bd, "Lee y escribe", "SQL")
+    Rel(api, blast, "Invoca", "CLI / subproceso")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
-
-<!-- Variante candidata si un driver (por ejemplo, tolerancia a fallos o ejecución asíncrona con cancelación)
-     exige desacoplar la ejecución de la búsqueda: agregar una cola y un proceso separado.
-     Solo se incorpora si queda justificada por una decisión DA-xx.
-
-     ContainerQueue(cola, "Cola de búsquedas", "Por definir", "Solicitudes de búsqueda pendientes")
-     Container(ejecutor, "Ejecutor de búsquedas", "Por definir", "Toma solicitudes, invoca BLAST+ y guarda resultados")
-     Rel(api, cola, "Publica solicitudes", "AMQP")
-     Rel(ejecutor, cola, "Consume solicitudes", "AMQP")
-     Rel(ejecutor, bd, "Guarda resultados", "SQL")
-     Rel(ejecutor, blast, "Invoca alineamientos", "Línea de comandos")
--->
 
 ### 6.2 Catálogo de contenedores
 
-| Contenedor | Tecnología | Responsabilidad |
-|---|---|---|
-| Aplicación web | [...] | [...] |
-| API | [...] | [...] |
-| Base de datos | [...] | [...] |
+| Contenedor | Responsabilidad |
+|---|---|
+| **Aplicación Web** | Única interfaz humana del sistema. Formulario de carga, configuración, validación cliente y ejecución de búsquedas; vista de progreso y cancelación; tabla de resultados con filtros interactivos; disparo de descargas. No contiene lógica de dominio del servidor: toda operación sobre BLAST+ o sobre la base de datos la hace el API. |
+| **API** | Núcleo del sistema. Recibe solicitudes HTTP de la Aplicación Web, orquesta los servicios de dominio (carga, búsqueda, filtrado, descarga), persiste en la base de datos y es el único contenedor que invoca a BLAST+. |
+| **Base de datos** | Almacén único del sistema. Guarda los usuarios habilitados, el catálogo de bases de datos BLAST disponibles (D1 del DFD) y el historial de búsquedas con sus parámetros, timestamps y resultados crudos (D2 del DFD). |
+| **BLAST+** *(sistema externo)* | Motor de alineamiento. En modo local lee índices del servidor del laboratorio; en modo remoto recibe la flag `-remote` y él mismo dialoga con NCBI. LocalBlast lo trata uniformemente en ambos modos: le pasa argumentos por CLI, recibe su salida por stdout y su código de retorno. |
 
 ### 6.3 Catálogo de relaciones
 
-| Origen | Destino | Qué se comunica | Tipo | Protocolo |
-|---|---|---|---|---|
-| Investigador/a | Aplicación web | Uso de la interfaz | Persona hacia contenedor | HTTPS |
-| Aplicación web | API | [...] | Síncrona | [...] |
-| API | Base de datos | [...] | Acceso a datos | [...] |
-| API | BLAST+ | [...] | Integración externa | [...] |
+| Origen → Destino | Qué se comunica |
+|---|---|
+| Investigador/a → Aplicación Web | Interacciones de la UI: carga de archivo, formulario, botones. |
+| Aplicación Web → API | Solicitudes REST: carga de secuencia (ya validada en el cliente), configuración, ejecución, consulta de progreso, filtrado y descarga. |
+| API → Base de datos | Lectura y escritura: usuarios para asociar sesión, catálogo para listar bases disponibles, historial para persistir cada búsqueda ejecutada. |
+| API → BLAST+ | Invocación como subproceso con los argumentos de la búsqueda (programa, modo, base de datos, parámetros, ruta a secuencia query). Lee la salida por stdout. |
 
-### 6.4 Evolución de la vista
+### 6.4 Comprobación del estilo cliente-servidor
 
-<!-- Cada cambio significativo en la vista es una decisión de arquitectura (DA-xx). -->
+Verificando sobre el diagrama las reglas de la [sección 5.2](#52-estilo-arquitectónico-base-cliente-servidor):
 
-| Versión | Driver | Decisión | Qué cambia en las vistas |
-|---|---|---|---|
-| v0 | Punto de partida | [Estilo base y patrón inicial] | [Contenedores iniciales] |
-| v1 | `EC-xx` | `DA-xx` | [...] |
-| v2 | `EC-xx` | `DA-xx` | [...] |
+- ✅ No hay flechas entre clientes (solo hay un cliente).
+- ✅ No hay flechas de la base de datos hacia la Aplicación Web (toda escritura y lectura pasa por el API).
+- ✅ No hay flechas del API hacia la Aplicación Web (el servidor no inicia la comunicación).
+- ✅ El cliente inicia siempre la comunicación: la cadena Investigador/a → Web → API → BD y Web → API → BLAST+ fluye hacia abajo.
 
 ---
 
