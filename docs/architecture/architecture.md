@@ -87,31 +87,52 @@ Para el alcance de este documento conviene retener dos aclaraciones del contexto
 
 ## 4. Drivers arquitectónicos
 
-<!-- Partir de los escenarios del TP2 y asignarles identificador EC-01, EC-02, etc.
-     No todo escenario es driver: solo los que condicionan la estructura
-     (estilo, división en contenedores o componentes, colas, réplicas, transacciones).
-     Los atributos ya elegidos en el SRS son: Interoperabilidad, Operabilidad,
-     Confidencialidad, Tolerancia a fallos y Modularidad. -->
+### 4.1 Elección del atributo de calidad como driver
 
-### 4.1 Atributos elegidos y su correspondencia
+De los cinco atributos de calidad priorizados en el documento de [escenarios de calidad](../requeriments/quality-scenarios/escenarios-calidad.md), elegimos un único atributo como **driver arquitectónico**: **Interoperabilidad** (Compatibilidad / Interoperabilidad en ISO/IEC 25010:2023).
 
-| Atributo (ISO/IEC 25010:2023) | Atributo del libro (Tabla 1 del TP3) |
+**Por qué este y no otro:**
+
+- **Es condición de existencia del producto.** LocalBlast *es*, por definición, una interfaz gráfica para BLAST+. Toda ejecución —local o remota— termina siendo una invocación al binario externo y un parseo de su salida. Sin interoperabilidad con BLAST+ el sistema no existe; con los otros atributos, LocalBlast puede ser menos ágil, menos robusto o menos modular, pero sigue siendo un sistema.
+- **Fue el atributo más crítico en la matriz comparativa**, con 9 victorias sobre 9 posibles. Ningún otro atributo lo venció en ningún par.
+- **Es el atributo que más condiciona la estructura.** La elección de cómo invocar a BLAST+, dónde alojar al adaptador, cómo aislar las versiones del binario del resto del código, y cómo manejar la concurrencia de subprocesos son decisiones estructurales. Los otros atributos se materializan sobre todo *dentro* de las piezas que la interoperabilidad obliga a crear:
+  - *Operabilidad* se juega en la Aplicación Web (parte del cliente del estilo que vamos a elegir).
+  - *Confidencialidad* se resuelve con TLS en el canal cliente-servidor y con el componente **Autenticación y sesión** del API (ver sección 7.1), que acompaña al estilo elegido pero no es un estilo propio.
+  - *Tolerancia a fallos* se trata, en nuestro caso, delegando a BLAST+ el reporte de errores remotos y propagándolos sin reinterpretarlos: una responsabilidad del adaptador que la interoperabilidad exige crear.
+  - *Modularidad* se obtiene en gran medida como consecuencia del patrón que la interoperabilidad justifica (ver [sección 5.3](#53-patrón-arquitectónico-capas)): aislar BLAST+ en una capa dedicada deja el resto del sistema modular por diseño.
+
+**Qué hacen los otros atributos en esta arquitectura.** No se descartan: se cubren mediante decisiones de implementación y restricciones de desarrollo dentro de los contenedores y componentes que la interoperabilidad justifica. La elección de un único driver es una **decisión de énfasis**, no una renuncia a los otros atributos.
+
+### 4.2 Escenarios seleccionados como drivers
+
+De los dos escenarios de interoperabilidad disponibles, ambos son drivers arquitectónicos: cada uno condiciona la estructura del sistema de un modo distinto.
+
+#### EC-01 · Sobrecarga por concurrencia de invocaciones
+
+| Campo | Contenido |
 |---|---|
-| Interoperabilidad | Interoperabilidad |
-| Operabilidad | Usabilidad |
-| Confidencialidad | Seguridad |
-| Tolerancia a fallos | Disponibilidad |
-| Modularidad | Modificabilidad |
+| **Estímulo** | Hasta cinco investigadores lanzan búsquedas concurrentes contra el sistema, mezclando modo local y remoto. |
+| **Respuesta esperada** | Cada búsqueda corre como subproceso independiente de BLAST+; los resultados se entregan a la sesión que los originó, sin cruce con otras. |
+| **Medida** | **Cero** cruces de resultados con hasta cinco búsquedas concurrentes. |
+| **Por qué condiciona la estructura** | Exige un contenedor servidor capaz de alojar subprocesos independientes de BLAST+ (uno por búsqueda), con un componente dedicado a mantener la correspondencia entre subproceso y sesión del investigador. No se puede resolver dentro de un único componente, ni solo en la interfaz. |
 
-### 4.2 Escenarios y selección de drivers
+#### EC-02 · Degradado por cambio menor de versión de BLAST+
 
-| ID | Atributo | Resumen del escenario (estímulo → respuesta) | Medida de respuesta | ¿Es driver? | Por qué condiciona (o no) la estructura |
-|---|---|---|---|---|---|
-| `EC-01` | [Tolerancia a fallos] | BLAST+ sufre un error o caida durante un alineamiento pesado. Respuesta: El sistema detecta la falla, aborta la tarea y notifica al usuario sin colgar la interfaz | Se recupera el control y se muestra el error en menos de 5 segundos | Sí | Esto implica separar la ejecucion de la busqueda en un proceso aparte, requiere una gestion de excepciones en el backend. |
-| `EC-02` | [Confidencialidad] | Un usuario intenta acceder mediante URL directa a los resultados del historial (D2) de otro investigador. Respuesta: El sistema deniega el acceso | 100% de los intentos no autorizados bloqueados | Si  | Condiciona la estructura al exigir la implementacion de un aspecto transversal de autenticacion/autorizacion en la capa de Controladores de la API |
-| `EC-03` | [Interoperabilidad] | El usuario selecciona el modo "remoto". Respuesta: El sistema invoca el motor delegando la comunicacion a la API de NCBI mediante la flag -remote | El comando se arma y ejecuta exitosamente usando el formato estandar | Sí | Obliga a definir un componente especifico (Gestor de Ejecucion) que abstraiga y adapte la llamada al sistema externo (BLAST+) aislando el nucleo de dominio |
-| `EC-04` | [Operabilidad] | El usuario ingresa un archivo con formato FASTA sintacticamente invalido. Respuesta: El sistema bloquea el envio y muestra un mensaje de ayuda contextual | Error visible inmediatamente antes de hacer la peticion al servidor | No | Se resuelve con validaciones estandar en el componente de la interfaz de usuario (frontend) sin afectar la arquitectura global ni requerir nuevos contenedores |
-| `EC-05`| [Modularidad] | Se requiere agregar un nuevo formato de descarga a los resultados existentes. Respuesta: Se añade el serializador sin modificar la logica principal de la busqueda | El cambio afecta a un unico modulo sin efectos colaterales | Sí | Fundamenta la eleccion de un patron de capas, separando estrictamente la capa de dominio (busqueda) de la capa de presentacion/controladores (formateo de salida). |
+| Campo | Contenido |
+|---|---|
+| **Estímulo** | El administrador de sistemas actualiza BLAST+ a una versión posterior que suma columnas o campos a la salida, sin coordinarlo con el equipo de desarrollo. |
+| **Respuesta esperada** | El parser reconoce los campos conocidos, ignora los nuevos sin corromper los conocidos, no aborta y registra una advertencia. |
+| **Medida** | **100%** de las búsquedas con salida "casi conocida" presentan intactos los campos obligatorios. |
+| **Por qué condiciona la estructura** | Exige un componente adaptador aislado entre el núcleo del sistema y BLAST+. Los demás componentes **no deben saber** cómo es la salida real del binario, para que un cambio en esa salida no se propague por todo el código. Es una decisión de dependencia estructural, no de implementación interna. |
+
+La especificación completa de ambos escenarios, con todos sus componentes (fuente del estímulo, estímulo, entorno, artefacto, respuesta, medida), está en la sección 5.1 de [`escenarios-calidad.md`](../requeriments/quality-scenarios/escenarios-calidad.md#51-interoperabilidad).
+
+### 4.3 Restricciones del proyecto que acompañan a los drivers
+
+Dos restricciones de la [sección 2](#2-restricciones) influyen directamente en cómo se traducen estos drivers en estructura:
+
+- **Equipo de 3 personas con dedicación parcial.** Toda alternativa de arquitectura que atienda los drivers debe ser realizable con ese presupuesto. Esto descarta soluciones de alta complejidad operativa aunque sean técnicamente superiores (ver [DA-01](#da-01--estilo-base-cliente-servidor) y [DA-02](#da-02--patrón-capas-en-los-contenedores-con-lógica-propia)).
+- **Tecnologías dominadas o adoptables por el equipo.** El estilo elegido se realiza del lado servidor con Python (que el equipo ya domina) y, del lado cliente, con React (que el equipo adopta en el cuatrimestre).
 
 ---
 
