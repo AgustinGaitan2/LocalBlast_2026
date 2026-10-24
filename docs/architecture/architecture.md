@@ -64,19 +64,16 @@ Las siglas se definen la primera vez que se usan en el cuerpo del documento. El 
 
 ## 3. Contexto
 
-<!-- Debe ser coherente con el DFD Nivel 0 del TP1: mismos actores y mismas entidades externas. -->
+El diagrama de contexto del sistema, con sus actores humanos (Investigador/a y Administrador/a) y el único sistema externo con el que dialoga (BLAST+), se desarrolla en el documento dedicado del repositorio:
 
-```mermaid
-C4Context
-    Person(inv, "Investigador/a", "Ejecuta búsquedas BLAST, refina y descarga resultados")
-    System(lb, "LocalBlast", "Interfaz gráfica web para BLAST+")
-    System_Ext(blast, "BLAST+", "Motor de alineamiento local y remoto")
-    
-    Rel_Down(inv, lb, "Envía query y parámetros, luego , obtiene resultados")
-    Rel_Down(lb, blast, "Invoca alineamientos y construcción de índices")
-    
-    UpdateLayoutConfig($c4ShapeInRow="1")
-```
+👉 [`contexto-inicial.md`](contexto-inicial.md)
+
+Para el alcance de este documento conviene retener dos aclaraciones del contexto, porque condicionan directamente las decisiones de arquitectura:
+
+- **Local vs. remoto es transparente para LocalBlast.** La diferencia entre modo local y modo remoto queda enteramente del lado de BLAST+: en modo local lee índices del servidor del laboratorio; en modo remoto recibe la flag `-remote` y él mismo dialoga con NCBI. Nuestro sistema no implementa cliente HTTP hacia NCBI. Para LocalBlast, los dos modos son la misma operación —invocar BLAST+ con argumentos distintos— y la arquitectura los trata uniformemente.
+- **Procesos profundizados.** Solo P1 y P2 entran en esta arquitectura; el actor Administrador/a y el proceso P3 quedan documentados en el contexto pero no se detallan acá.
+
+---
 
 **Descripción de elementos:**
 
