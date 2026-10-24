@@ -583,37 +583,42 @@ Todo driver llega a al menos un contenedor y un componente. Todo componente de l
 
 ---
 
-## 11. Glosario y bibliografía
+## 11. Glosario
 
-### 11.1 Glosario
+### 11.1 Siglas usadas en este documento
 
-| Término | Significado |
+| Sigla | Significado |
 |---|---|
-| Contenedor | Aplicación o almacén de datos que se ejecuta por separado |
-| Componente | Agrupación coherente de funcionalidad dentro de un contenedor |
-| Driver arquitectónico | Escenario de calidad que condiciona la estructura del sistema |
-| [...] | [...] |
+| API | Interfaz de programación de aplicaciones; en este documento, además, el nombre del contenedor servidor |
+| C4 | Modelo de documentación de arquitectura en cuatro niveles: contexto, contenedores, componentes y código |
+| CLI | Interfaz de línea de comandos (*command-line interface*) |
+| CU | Caso de uso |
+| CSV | Formato de texto con valores separados por comas |
+| DA | Decisión de arquitectura |
+| DFD | Diagrama de flujo de datos |
+| EC | Escenario de calidad |
+| HTTP / HTTPS | Protocolo de la web / HTTP sobre una conexión cifrada |
+| HU | Historia de usuario |
+| ISO/IEC 25010:2023 | Norma del modelo de calidad del producto de software |
+| JSON | Formato de texto para intercambiar datos estructurados |
+| NCBI | *National Center for Biotechnology Information*, proveedor del BLAST remoto |
+| REST | Estilo de diseño de APIs sobre HTTP |
+| RF | Requerimiento funcional |
+| SOA | Arquitectura orientada a servicios (mencionada solo para descartarla) |
+| SQL | Lenguaje para consultar y modificar bases de datos relacionales |
+| TLS | *Transport Layer Security*: la "S" de HTTPS |
+| XML | Formato de datos estructurados con etiquetas, usado por BLAST+ como una de sus salidas |
 
-### 11.2 Bibliografía
+### 11.2 Términos del dominio
 
-- Bass, L., Clements, P. y Kazman, R. *Software Architecture in Practice*. Addison-Wesley.
-- ISO/IEC 25010:2023. *Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model*.
-- Brown, S. El modelo C4 para visualizar la arquitectura de software.
-- arc42. Plantilla de documentación de arquitectura.
-- [Material teórico de la materia sobre arquitectura de software]
+Los términos del dominio (BLAST, BLAST+, query, base de datos BLAST, FASTA, E-value, etc.) están definidos en el [Glosario del SRS](../requeriments/srs.md#10-glosario). Se usan en este documento con el mismo significado, para preservar la coherencia entre el modelo del dominio y la arquitectura.
 
 ---
 
-## Checklist antes del Pull Request
+## Documentos relacionados
 
-<!-- Borrar esta sección al entregar. -->
-
-- [ ] El contexto coincide con el DFD Nivel 0 del TP1.
-- [ ] Todos los diagramas están en Mermaid, dentro del `.md`, sin imágenes pegadas.
-- [ ] Cada driver tiene tácticas, al menos una DA y un elemento C4.
-- [ ] El estilo y los patrones declarados coinciden con lo que muestran las vistas.
-- [ ] Los contenedores de la vista de componentes son los mismos de la vista de contenedores.
-- [ ] Cada elemento se llama igual en las vistas, en las DA y en la trazabilidad.
-- [ ] No hay vistas de clases, de código ni de despliegue.
-- [ ] Las siglas están aclaradas la primera vez que se usan.
-- [ ] El registro de uso de IA está en `docs/uso-ia.md`.
+- [SRS, procesos y requerimientos](../requeriments/srs.md)
+- [Diagrama de contexto del sistema](contexto-inicial.md) *(incluye el actor Administrador/a y el proceso P3, fuera del alcance del cuatrimestre actual)*
+- [Escenarios de atributo de calidad](../requeriments/quality-scenarios/escenarios-calidad.md)
+- [Casos de uso](../requeriments/casos-de-uso.md) e [Historias de usuario](../requeriments/historias-usuario.md)
+- [Bitácora de uso de IA](../uso-ia.md)
