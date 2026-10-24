@@ -1,5 +1,9 @@
 # Documento de Especificación de Arquitectura — LocalBlast
 
+Este documento define la arquitectura de LocalBlast para los procesos de **ejecución de búsqueda BLAST (P1)** y **filtrado y entrega de resultados (P2)**. Representa las decisiones estructurales con las vistas de contenedores y componentes del modelo C4 (Context, Containers, Components, Code), apoyándose en los escenarios de atributo de calidad del sistema para justificar cada decisión.
+
+---
+
 ## Índice
 
 1. [Introducción](#1-introducción)
@@ -8,11 +12,11 @@
 4. [Drivers arquitectónicos](#4-drivers-arquitectónicos)
 5. [Estrategia de solución](#5-estrategia-de-solución)
 6. [Vista de contenedores](#6-vista-de-contenedores)
-7. [Vista de componentes](#7-vista-de-componentes)
+7. [Vistas de componentes](#7-vistas-de-componentes)
 8. [Historias de usuario sobre las vistas](#8-historias-de-usuario-sobre-las-vistas)
 9. [Decisiones de arquitectura](#9-decisiones-de-arquitectura)
 10. [Trazabilidad](#10-trazabilidad)
-11. [Glosario y bibliografía](#11-glosario-y-bibliografía)
+11. [Glosario](#11-glosario)
 
 ---
 
@@ -20,36 +24,27 @@
 
 ### 1.1 Propósito
 
-Este documento describe la arquitectura de LocalBlast, una interfaz gráfica web para BLAST+. Tiene la funcion de registrar y justificar las decisiones de diseño estructural de un sistema de software, especificando como se organiza el sistema a gran escala y por qué se eligió esa estructura frente a otras alternativas. 
+Describir las decisiones estructurales de LocalBlast que atienden los escenarios de calidad críticos del sistema, y representarlas con las vistas de contenedores y componentes del modelo C4. El documento es la línea base arquitectónica para el desarrollo iterativo del sistema.
 
 ### 1.2 Alcance
 
-- **Procesos con arquitectura detallada:** P1 (Ejecutar búsqueda BLAST) y P2 (Filtrar y entregar resultados), tal como se eligieron en el SRS (sección 5).
-- **Caja negra:** P3 (Administrar bases de datos). Se representa como parte del contexto y no se detalla internamente.
-- **Fuera de este TP:** Vistas de clases y de código.
+La arquitectura se define para los dos procesos del sistema que se desarrollan en el alcance actual:
+
+- **P1 · Ejecutar búsqueda BLAST** (casos de uso CU001 a CU005).
+- **P2 · Filtrar y entregar resultados** (casos de uso CU006 y CU007).
+
+El proceso **P3 · Administrar bases de datos** queda fuera del alcance del cuatrimestre (ver [SRS, sección 1.4](../requeriments/srs.md#14-fuera-del-alcance)); su actor Administrador/a y el flujo de administración del catálogo no se detallan en estas vistas.
+
+Las vistas de clases y de código, y los diagramas de despliegue, no forman parte de este documento: se desarrollarán en una iteración posterior.
 
 ### 1.3 Audiencia
 
-Este documento arquitectonico esta dirigido a los miembros del equipo de desarrollo y a la catedra Ing. de Software.
+- **Equipo de desarrollo** de LocalBlast: usa el documento como guía de construcción.
+- **Integrantes futuros** del proyecto: lo consultan al incorporarse para entender rápidamente la estructura del sistema y las razones de cada decisión.
 
-### 1.4 Documentos relacionados
+### 1.4 Siglas
 
-- [SRS](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/requeriments/srs.md)
-- [Contexto inicial (DFD Nivel 0 y 1)](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/architecture/contexto-inicial.md)
-- [Escenarios de calidad](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/requeriments/quality-scenarios/escenarios-calidad.md)
-- [Registro de uso de IA](https://github.com/AgustinGaitan2/LocalBlast_2026/blob/aeda8b42ce036e441e2f3e1209ee59dba300e07f/docs/uso-ia.md)
-
-### 1.5 Siglas usadas
-
-<!-- Aclarar cada sigla la primera vez que aparece en el documento. Esta tabla las reúne. -->
-
-| Sigla | Significado |
-|---|---|
-| C4 | Modelo de documentación de arquitectura en cuatro niveles: contexto, contenedores, componentes y código |
-| DA | Decisión de arquitectura |
-| EC | Escenario de calidad |
-| HU | Historia de usuario |
-| RF | Requerimiento funcional |
+Las siglas se definen la primera vez que se usan en el cuerpo del documento. El glosario completo está en la [sección 11](#11-glosario).
 
 ---
 
