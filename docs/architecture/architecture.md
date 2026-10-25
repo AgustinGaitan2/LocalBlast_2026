@@ -264,7 +264,7 @@ C4Container
         ContainerDb(bd, "Base de datos", "PostgreSQL", "Usuarios, catálogo de bases de datos y historial de búsquedas")
     }
 
-    System_Ext(blast, "BLAST+", "Motor de alineamiento (local o remoto con flag -remote)")
+    System_Ext(blast, "BLAST+", "Motor de alineamiento (local o remoto)")
 
     Rel(inv, web, "Usa", "HTTPS")
     Rel(web, api, "Solicita", "JSON / HTTPS")
