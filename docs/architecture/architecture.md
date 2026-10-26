@@ -319,9 +319,9 @@ C4Component
         Component(ctrl, "Controladores", "Routers", "Presentación: reciben solicitudes HTTP")
         Component(auth, "Autenticación y sesión", "Python", "Dominio: identifica al investigador y mantiene su sesión")
 
-        Component(svc_pre, "Preparación de búsqueda", "Python", "Dominio: valida secuencia, configuración y compatibilidad (CU001–CU003)")
-        Component(svc_eje, "Ejecución y persistencia", "Python", "Dominio: ejecuta vía Adaptador, recibe resultados y persiste (CU004–CU005)")
-        Component(svc_ent, "Generación de archivos de descarga", "Python", "Dominio: arma los archivos de descarga (CU007)")
+        Component(svc_pre, "Preparación de búsqueda", "Python", "Dominio: valida secuencia, configuración y compatibilidad")
+        Component(svc_eje, "Ejecución y persistencia", "Python", "Dominio: ejecuta vía Adaptador, recibe resultados y persiste")
+        Component(svc_ent, "Generación de archivos de descarga", "Python", "Dominio: arma los archivos de descarga")
 
         Component(repo, "Acceso a datos", "SQLAlchemy", "Datos: lee y escribe en la base")
         Component(adap, "Adaptador BLAST+", "CLI + parser", "Datos: invoca BLAST+ y parsea su salida")
