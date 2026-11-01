@@ -1,6 +1,6 @@
 # Documento de Especificación de Arquitectura — LocalBlast
 
-Este documento define la arquitectura de LocalBlast para los procesos de **ejecución de búsqueda BLAST (P1)** y **filtrado y entrega de resultados (P2)**. Representa las decisiones estructurales con las vistas de contenedores y componentes del modelo C4 (Context, Containers, Components, Code), apoyándose en los escenarios de atributo de calidad del sistema para justificar cada decisión.
+Este documento define la arquitectura de LocalBlast para los procesos de **ejecución de búsqueda BLAST (P1)** y **filtrado y entrega de resultados (P2)**. Representa las decisiones estructurales con las vistas de contenedores, de componentes y de despliegue del modelo C4 (Context, Containers, Components, Code), apoyándose en los escenarios de atributo de calidad del sistema para justificar cada decisión.
 
 ---
 
@@ -13,10 +13,11 @@ Este documento define la arquitectura de LocalBlast para los procesos de **ejecu
 5. [Estrategia de solución](#5-estrategia-de-solución)
 6. [Vista de contenedores](#6-vista-de-contenedores)
 7. [Vistas de componentes](#7-vistas-de-componentes)
-8. [Historias de usuario sobre las vistas](#8-historias-de-usuario-sobre-las-vistas)
-9. [Decisiones de arquitectura](#9-decisiones-de-arquitectura)
-10. [Trazabilidad](#10-trazabilidad)
-11. [Glosario](#11-glosario)
+8. [Vista de despliegue](#8-vista-de-despliegue)
+9. [Historias de usuario sobre las vistas](#9-historias-de-usuario-sobre-las-vistas)
+10. [Decisiones de arquitectura](#10-decisiones-de-arquitectura)
+11. [Trazabilidad](#11-trazabilidad)
+12. [Glosario](#12-glosario)
 
 ---
 
@@ -24,7 +25,7 @@ Este documento define la arquitectura de LocalBlast para los procesos de **ejecu
 
 ### 1.1 Propósito
 
-Describir las decisiones estructurales de LocalBlast que atienden los escenarios de calidad críticos del sistema, y representarlas con las vistas de contenedores y componentes del modelo C4. El documento es la línea base arquitectónica para el desarrollo iterativo del sistema.
+Describir las decisiones estructurales de LocalBlast que atienden los escenarios de calidad críticos del sistema, y representarlas con las vistas de contenedores, de componentes y de despliegue del modelo C4. El documento es la línea base arquitectónica para el desarrollo iterativo del sistema.
 
 ### 1.2 Alcance
 
@@ -35,7 +36,7 @@ La arquitectura se define para los dos procesos del sistema que se desarrollan e
 
 El proceso **P3 · Administrar bases de datos** queda fuera del alcance del cuatrimestre (ver [SRS, sección 1.4](../requeriments/srs.md#14-fuera-del-alcance)); su actor Administrador/a y el flujo de administración del catálogo no se detallan en estas vistas.
 
-Las vistas de clases y de código, y los diagramas de despliegue, no forman parte de este documento: se desarrollarán en una iteración posterior.
+Se documenta una única vista de despliegue, la del entorno de producción. Las vistas de clases y de código no forman parte de este documento: se desarrollarán en una iteración posterior.
 
 ### 1.3 Audiencia
 
@@ -44,7 +45,7 @@ Las vistas de clases y de código, y los diagramas de despliegue, no forman part
 
 ### 1.4 Siglas
 
-Las siglas se definen la primera vez que se usan en el cuerpo del documento. El glosario completo está en la [sección 11](#11-glosario).
+Las siglas se definen la primera vez que se usan en el cuerpo del documento. El glosario completo está en la [sección 12](#12-glosario).
 
 ---
 
