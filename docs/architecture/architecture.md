@@ -529,22 +529,95 @@ Verificando sobre el diagrama las restricciones de la [sección 5.3.2](#532-mvc-
 
 ---
 
-## 8. Historias de usuario sobre las vistas
+## 8. Vista de despliegue
 
-Esta sección recorre, sobre las vistas, el *Given-When-Then* de cuatro historias representativas (carga, ejecución con BLAST+, filtrado y descarga). El objetivo es verificar que cada paso del criterio de aceptación tiene un lugar donde ocurre en la arquitectura.
+Esta vista muestra en qué infraestructura se ejecuta cada contenedor de la [sección 6](#6-vista-de-contenedores) en el **entorno de producción**: el entorno real en el que LocalBlast funciona para los investigadores. No se documentan otros entornos.
 
-| HU | Criterio recorrido | Contenedores que atraviesa | Componentes involucrados |
-|---|---|---|---|
-| **HU01_CU001_B** · Carga de la secuencia FASTA | **Given** un archivo FASTA bien formado · **When** el investigador lo sube · **Then** el sistema lo deja disponible con alfabeto inferido | Aplicación Web → API → Base de datos | **Web:** Pantallas → Validación y envío (chequea FASTA en el cliente) → Cliente del API · **API:** Controladores → Preparación de búsqueda → Acceso a datos |
-| **HU08_CU004_B** · Ejecución asíncrona de la búsqueda | **Given** una búsqueda ya configurada y validada · **When** el investigador presiona "Ejecutar" · **Then** la interfaz muestra progreso y permanece navegable; al terminar se dispara CU005 (presentación + persistencia) | Aplicación Web → API → BLAST+ (ejecución) · API → Base de datos (persistencia) | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Ejecución y persistencia → Adaptador BLAST+ (invoca BLAST+ como subproceso independiente, EC-01) → Ejecución y persistencia → Acceso a datos |
-| **HU12_CU006_B** · Filtrado post-búsqueda | **Given** resultados crudos ya devueltos por BLAST+ · **When** el investigador modifica los umbrales de filtro · **Then** la tabla se refresca sobre el crudo original, en menos de 1 segundo | Aplicación Web | **Web:** Pantallas → Filtrado de resultados · **API:** no interviene |
-| **HU13_CU007_B** · Descarga | **Given** una tabla con o sin filtros aplicados · **When** el investigador elige el formato y presiona "Descargar" · **Then** recibe un archivo con los hits visibles y los metadatos de la búsqueda | Aplicación Web → API → Base de datos | **Web:** Pantallas → Filtrado de resultados → Cliente del API · **API:** Controladores → Generación de archivos de descarga → Acceso a datos |
+### 8.1 Diagrama
 
-**Lectura del escenario de EC-02 sobre las vistas.** Cuando BLAST+ devuelve una salida con un campo adicional no mapeado, la respuesta del sistema queda contenida enteramente dentro del **Adaptador BLAST+**: reconoce los campos conocidos, descarta el nuevo sin romper los conocidos, y devuelve los resultados a Ejecución y persistencia como si el formato fuera el esperado. Ni los Controladores, ni los otros componentes de dominio, ni la Aplicación Web se enteran del cambio. Esta es la propiedad arquitectónica concreta que el patrón de Capas, con el Adaptador BLAST+ en su capa de datos, aporta.
+```mermaid
+C4Deployment
+    title Vista de despliegue de LocalBlast - Producción
 
-**Lectura del escenario de EC-01 sobre las vistas.** Cinco investigadores lanzan búsquedas concurrentes: cada una entra como una solicitud HTTP distinta a los Controladores, llega a Ejecución y persistencia, que a su vez le pide al Adaptador BLAST+ ejecutar la búsqueda. El Adaptador lanza un subproceso independiente de BLAST+ por cada una, con su propio identificador y una referencia a la sesión; cuando cada subproceso termina, el Adaptador entrega el resultado a Ejecución y persistencia, que lo guarda en el historial correspondiente y lo devuelve a los Controladores que respondieron esa solicitud. No hay un punto en el que los resultados de dos búsquedas puedan cruzarse porque no comparten ni estado interno ni canal.
+    Deployment_Node(pc, "PC del investigador/a", "Ubuntu (GNU/Linux)") {
+        System_Ext(nav, "Navegador web", "Chrome / Firefox", "Descarga y renderiza la Aplicación Web")
+    }
 
-**Lectura del escenario de filtrado sobre las vistas.** La Aplicación Web recibe la tabla cruda una sola vez y Filtrado de resultados recalcula la tabla visible en cada cambio de umbral, sin pasar por el API ni por la base de datos; por eso el tiempo de respuesta no depende de la red ni de la carga del servidor.
+    Deployment_Node(srv, "Servidor del laboratorio", "Debian (GNU/Linux)") {
+        Deployment_Node(py, "Python 3", "Entorno de ejecución") {
+            Container(web, "Aplicación Web", "React", "Archivos estáticos HTML, JS y CSS que el navegador descarga")
+            Container(backend, "Backend", "Python / FastAPI", "Valida, invoca BLAST+, persiste búsquedas, arma descargas")
+        }
+        Deployment_Node(pg, "PostgreSQL", "Entorno de ejecución") {
+            ContainerDb(bd, "Base de datos", "PostgreSQL", "Usuarios, catálogo de bases de datos y historial de búsquedas")
+        }
+        Deployment_Node(bl, "BLAST+ 2.14", "Entorno de ejecución") {
+            System_Ext(blast, "BLAST+", "BLAST+ 2.14", "Binarios y secuencias locales del laboratorio")
+        }
+    }
+
+    System_Ext(ncbi, "Servicio BLAST de NCBI", "Solo en modo remoto")
+
+    Rel(nav, web, "Descarga y ejecuta", "HTTPS")
+    Rel(nav, backend, "Solicita", "JSON / HTTPS")
+    Rel(backend, bd, "Lee y escribe", "SQL / TCP")
+    Rel(backend, blast, "Invoca", "CLI / subproceso")
+    Rel(blast, ncbi, "Consulta en modo remoto", "HTTPS")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
+
+> **Nota sobre la notación.** Mermaid no admite nodos vacíos: todo nodo debe contener al menos un elemento. Como la PC del investigador no ejecuta ningún contenedor de LocalBlast (solo el navegador), el navegador se dibuja como un elemento de software de terceros (`System_Ext`) dentro del nodo. **No es un contenedor nuevo ni forma parte del sistema que construimos**: es el programa que descarga y renderiza la Aplicación Web.
+
+### 8.2 Cómo se despliega la Aplicación Web
+
+La Aplicación Web es un contenedor de la vista de contenedores, y en producción **se aloja en el Servidor del laboratorio** junto con el Backend, dentro del entorno de ejecución Python 3. Lo que se aloja son sus archivos estáticos (HTML, JS y CSS compilados), que el Backend publica para que se descarguen.
+
+La **PC del investigador solo tiene un navegador web**. Al abrir LocalBlast, el navegador descarga esos archivos por HTTPS y los renderiza y ejecuta localmente; de ahí en adelante, el navegador envía al Backend solicitudes REST (JSON sobre HTTPS) y dibuja las respuestas. El investigador no instala ni ejecuta la Aplicación Web en su máquina: la ejecuta el navegador a partir de lo que descargó del servidor.
+
+Esto es coherente con el estilo cliente-servidor ([sección 5.2](#52-estilo-arquitectónico-base-cliente-servidor)): el cliente inicia siempre la comunicación, tanto para descargar la aplicación como para pedirle trabajo al Backend. La decisión se justifica en [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio).
+
+### 8.3 Catálogo de nodos
+
+| Nodo | Tipo o tecnología | Qué ejecuta o aloja | Artefactos | Instancias | Escenario o decisión que lo justifica |
+|---|---|---|---|---|---|
+| **PC del investigador/a** | Ubuntu (GNU/Linux), con navegador web | Solo el navegador, que descarga y renderiza la Aplicación Web. No tiene contenedores de LocalBlast instalados. | — (los archivos HTML, JS y CSS se descargan del servidor en cada uso) | Una por investigador (hasta diez concurrentes) | [DA-01](#da-01--estilo-base-cliente-servidor) y [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio): es el cliente del estilo; no requiere instalar nada, solo un navegador. |
+| **Servidor del laboratorio** | Debian (GNU/Linux) | Los tres entornos de ejecución siguientes. | — | 1 | [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio): un único servidor, ya existente, donde BLAST+ está instalado. |
+| **Python 3** *(dentro del servidor)* | Entorno de ejecución | **Backend** (lo ejecuta) y **Aplicación Web** (la aloja y publica) | Paquete Python `localblast-api` y sus bibliotecas; archivos estáticos HTML, JS y CSS de la Aplicación Web | 1 | EC-01 y [DA-04](#da-04--ejecutar-cada-búsqueda-como-subproceso-independiente-de-blast): el Backend lanza cada búsqueda como subproceso local de BLAST+ en este mismo servidor. |
+| **PostgreSQL** *(dentro del servidor)* | Entorno de ejecución | **Base de datos** | Base de datos de LocalBlast: usuarios, catálogo de bases de datos e historial de búsquedas | 1 | [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio): comparte el servidor para no sumar un nodo que operar; solo el Backend accede a ella (restricción del estilo, [sección 5.2](#52-estilo-arquitectónico-base-cliente-servidor)). |
+| **BLAST+ 2.14** *(dentro del servidor)* | Entorno de ejecución | **BLAST+** (sistema externo instalado, no un contenedor propio) | Binarios de BLAST+ (`blastn`, `blastp`, `blastx`, etc.) y secuencias locales del laboratorio (las bases de datos BLAST locales, cuyas rutas registra el catálogo de la Base de datos) | 1 | Restricción de la [sección 2](#2-restricciones) y EC-02: lo instala y actualiza el administrador de sistemas, por lo que su versión puede cambiar sin coordinarse con el equipo; el Adaptador BLAST+ absorbe esos cambios. |
+
+El **Servicio BLAST de NCBI** no es un nodo de nuestra infraestructura: es un sistema externo, usado solo en modo remoto.
+
+### 8.4 Catálogo de relaciones del despliegue
+
+| Origen → Destino | Qué se comunica | Protocolo | Dónde ocurre | Corresponde en la vista de contenedores a |
+|---|---|---|---|---|
+| Navegador web → Aplicación Web | Descarga de los archivos estáticos de la aplicación al abrirla | HTTPS | Red entre la PC del investigador y el servidor | Investigador/a → Aplicación Web (el investigador usa la aplicación a través del navegador) |
+| Navegador web → Backend | Solicitudes REST con los datos de la búsqueda, el progreso, los resultados y las descargas | JSON / HTTPS | Red entre la PC del investigador y el servidor | Aplicación Web → Backend (la Aplicación Web, al ejecutarse en el navegador, es quien envía las solicitudes) |
+| Backend → Base de datos | Lectura y escritura de usuarios, catálogo e historial | SQL / TCP | Local, dentro del servidor (de Python 3 a PostgreSQL) | Backend → Base de datos |
+| Backend → BLAST+ | Invocación como subproceso con los argumentos de la búsqueda; lectura de la salida | CLI / subproceso | Local, dentro del servidor (de Python 3 a BLAST+ 2.14) | Backend → BLAST+ |
+| BLAST+ → Servicio BLAST de NCBI | Búsqueda remota, solo cuando el investigador elige el modo remoto | HTTPS | Salida del servidor hacia Internet | No figura en la vista de contenedores: la origina BLAST+, no LocalBlast (ver nota siguiente) |
+
+> **Por qué NCBI aparece acá y no en la vista de contenedores.** LocalBlast no dialoga con NCBI: en modo remoto es BLAST+ quien lo contacta ([sección 2](#2-restricciones)), y por eso no hay relación entre LocalBlast y NCBI en la vista de contenedores. En el despliegue sí importa dónde nace ese tráfico: sale del servidor del laboratorio, de modo que el servidor necesita salida HTTPS a Internet para que el modo remoto funcione.
+
+### 8.5 Qué se ve en esta vista
+
+- **EC-01 (concurrencia).** Backend y BLAST+ comparten nodo: cada búsqueda es un subproceso del sistema operativo del servidor, sin red de por medio. Con cinco búsquedas concurrentes habrá cinco procesos de BLAST+ en el mismo servidor.
+- **EC-02 (cambio de versión de BLAST+).** BLAST+ es un entorno de ejecución propio dentro del servidor, mantenido por el administrador de sistemas. El único contacto con él es el Backend (a través del Adaptador BLAST+), y por eso una actualización no se propaga a los demás nodos.
+- **Qué cruza la red.** Solo hay un cruce de red entre nodos propios: el que va de la PC del investigador al servidor, siempre por HTTPS. Todo lo demás es comunicación local dentro del servidor. Al servidor se le suma, en modo remoto, la salida hacia NCBI.
+
+**Sacrificios asumidos.** Con un único servidor, si el servidor cae se detienen el Backend, la base de datos y BLAST+, y el investigador no puede ni abrir la aplicación; es el mismo punto único de falla que ya aceptó [DA-01](#da-01--estilo-base-cliente-servidor). Además, el Backend, la base de datos y los procesos de BLAST+ comparten procesador y memoria: durante un pico de cinco búsquedas concurrentes puede degradarse el tiempo de respuesta del Backend y de la base. Si esto ocurriera en la práctica, el paso siguiente sería sacar la base de datos a un nodo propio. El grupo acepta estos riesgos para no multiplicar la infraestructura que debe operar y lo registra en DA-08.
+
+### 8.6 Comprobación de consistencia con la vista de contenedores
+
+- ✅ **Todo contenedor aparece una vez, dentro de un nodo:** Aplicación Web y Backend en el entorno Python 3, Base de datos en el entorno PostgreSQL.
+- ✅ **No se crean contenedores nuevos.** El navegador y BLAST+ se dibujan como software de terceros (`System_Ext`), igual que BLAST+ en la vista de contenedores.
+- ✅ **Las relaciones corresponden a las de la vista de contenedores** y llevan el mismo protocolo (con el detalle de transporte "SQL / TCP"); la única relación adicional, BLAST+ → NCBI, se explica en la nota de la [sección 8.4](#84-catálogo-de-relaciones-del-despliegue).
+- ✅ **Un solo entorno (producción) y dos niveles de anidamiento** (servidor → entorno de ejecución).
+- ✅ **Cada nodo tiene nombre y tecnología**, y el número de instancias figura en el catálogo de nodos.
+
+> **Nota sobre la disposición.** Como en las otras vistas, la disposición automática de Mermaid puede superponer las etiquetas de las flechas. Si ocurre al renderizar, se corrige con `UpdateRelStyle(origen, destino, $offsetX="…", $offsetY="…")` sin cambiar el contenido del diagrama.
 
 ---
 
