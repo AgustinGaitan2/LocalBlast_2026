@@ -642,33 +642,143 @@ Esta sección recorre, sobre las vistas, el *Given-When-Then* de cuatro historia
 
 ---
 
-## 10. Trazabilidad
+## 10. Decisiones de arquitectura
 
-### 10.1 Escenario → táctica → estilo o patrón → decisión → elemento C4
+### DA-01 · Estilo base cliente-servidor
 
-| Escenario | Atributo | Tácticas | Estilo / Patrón | Decisión | Elemento C4 |
-|---|---|---|---|---|---|
-| **EC-01** · Concurrencia de invocaciones | Interoperabilidad | Introducir concurrencia; Encapsular | Estilo cliente-servidor (DA-01) + Patrón capas (DA-02) | DA-04 | Componente **Adaptador BLAST+** del contenedor API |
-| **EC-02** · Cambio menor de versión de BLAST+ | Interoperabilidad | Adaptar la interfaz; Encapsular | Patrón capas (DA-02) | DA-03 | Componente **Adaptador BLAST+** del contenedor API |
+- **Escenario que la motiva:** EC-01 y EC-02 (ambos de interoperabilidad). El sistema entero necesita un estilo que permita alojar un servidor con BLAST+ invocado del lado del servidor, mientras el investigador usa una interfaz web del lado del cliente.
+- **Contexto:** LocalBlast es una interfaz gráfica para BLAST+. El equipo tiene 3 integrantes con dedicación parcial y domina Python; para el frontend adopta React. Hasta diez investigadores concurrentes.
+- **Decisión:**
+  - **Tácticas:** respetar estándares de comunicación (JSON sobre HTTPS entre cliente y servidor); encapsular el acceso a BLAST+ del lado del servidor.
+  - **Estilo:** Cliente-Servidor como estilo base, aplicado a todo el sistema. El cliente es la Aplicación Web, alojada en el servidor y ejecutada en el navegador del investigador (ver [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio)).
+  - **Patrón:** se decide en DA-02.
+- **Alternativas consideradas:**
+  - **Microservicios** — descartado: alta complejidad operativa para el presupuesto del equipo; sin partes con ritmos de cambio distintos que lo justifiquen.
+  - **Orientada a eventos** — descartado: con cinco búsquedas concurrentes el acople síncrono alcanza; una cola sería un contenedor más que operar sin beneficio para los drivers actuales.
+  - **SOA** — descartado: no hay varios sistemas que integrar.
+- **Consecuencias:**
+  - **A favor:** modelo simple y familiar; comunicación entre cliente y servidor estándar y bien soportada por los frameworks; pocas piezas que desplegar.
+  - **En contra:** el servidor es punto único de falla; si el servidor cae, el sistema deja de responder. Aceptable para un laboratorio pequeño sin exigencia de 24/7.
+- **Elementos afectados:** contenedores "Aplicación Web", "Backend" y "Base de datos".
 
-### 10.2 Historia de usuario → elementos C4
+### DA-02 · Patrón Capas en el Backend
 
-| Historia de usuario | Contenedores | Componentes |
-|---|---|---|
-| HU01_CU001_B · Cargar secuencia | Aplicación Web → API → Base de datos | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Preparación de búsqueda → Acceso a datos |
-| HU02_CU001_E1 · Rechazo de secuencia inválida | Aplicación Web (rechazo local) o Aplicación Web → API (rechazo tras validación del servidor) | **Web:** Pantallas → Validación y envío (devuelve error, no delega) · **API:** si la validación local fue salteada, Controladores → Preparación de búsqueda (rechaza) |
-| HU03_CU002_B · Configurar la búsqueda | Aplicación Web → API → Base de datos (al leer catálogo) | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Preparación de búsqueda → Acceso a datos (lee catálogo) |
-| HU05_CU003_B · Validar la búsqueda | Aplicación Web → API | **Web:** Pantallas → Validación y envío · **API:** Controladores → Preparación de búsqueda (validación semántica en memoria) |
-| HU08_CU004_B · Ejecutar búsqueda | Aplicación Web → API → BLAST+ · API → Base de datos | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** → Ejecución y persistencia → Acceso a datos |
-| HU09_CU004_A1 · Cancelación | Aplicación Web → API → BLAST+ | **Web:** Pantallas → Validación y envío → Cliente del API · **API:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** (termina el subproceso) |
-| HU10_CU004_E1 · Fallo del modo remoto | Aplicación Web → API | **API:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** → Controladores (propagan el error literal al cliente) |
-| HU11_CU005_B · Presentar y persistir | Aplicación Web → API → Base de datos | **Web:** Pantallas → Filtrado de resultados → Cliente del API · **API:** Controladores → Ejecución y persistencia → Acceso a datos |
-| HU12_CU006_B · Filtrado | Aplicación Web | **Web:** Pantallas → Filtrado de resultados |
-| HU13_CU007_B · Descarga | Aplicación Web → API → Base de datos | **Web:** Pantallas → Filtrado de resultados → Cliente del API · **API:** Controladores → Generación de archivos de descarga → Acceso a datos |
+- **Escenario que la motiva:** EC-02 principalmente, y secundariamente EC-01. El Backend necesita aislar el acceso a BLAST+ (que puede cambiar) y a la base de datos del resto del código.
+- **Contexto:** Se eligió cliente-servidor como estilo base (DA-01). El Backend aloja varias responsabilidades (recibir solicitudes, identificar al investigador, preparar y ejecutar búsquedas, generar descargas, acceder a datos y a BLAST+) que conviene separar. Su flujo es una cadena vertical: cada solicitud entra por el borde HTTP, atraviesa el dominio y termina en la base de datos o en BLAST+.
+- **Decisión:**
+  - **Tácticas:** encapsular (del atributo modificabilidad) y adaptar la interfaz (de interoperabilidad).
+  - **Estilo:** respeta el cliente-servidor base (vive dentro del servidor).
+  - **Patrón:** Capas, con tres capas (Presentación, Dominio, Datos), aplicado dentro del Backend: Controladores (presentación) → Autenticación y sesión, Preparación de búsqueda, Ejecución y persistencia, Generación de archivos de descarga (dominio) → Acceso a datos, Adaptador BLAST+ (datos). La Aplicación Web, que tiene un problema de otra naturaleza (una interfaz interactiva), usa otro patrón (ver DA-07).
+- **Alternativas consideradas:**
+  - **Hexagonal** — descartado: aísla más estrictamente, pero con un único sistema externo (BLAST+) las piezas extra son sobreingeniería.
+  - **MVC** — descartado para el Backend: separa presentación, interacción y modelo en una interfaz; el Backend no tiene vista, responde JSON. Se aplica a la Aplicación Web (DA-07).
+  - **Broker** — descartado: resuelve desacoplar emisores y receptores en procesos distintos; el Backend y el Adaptador BLAST+ viven en el mismo proceso.
+- **Consecuencias:**
+  - **A favor:** modificabilidad (un cambio en BLAST+ no se propaga más allá del Adaptador); capacidad de prueba (cada capa se prueba por separado); claridad del código (cada módulo tiene una responsabilidad por capa).
+  - **En contra:** cierta indirección (una solicitud atraviesa tres capas antes de llegar a la base de datos o a BLAST+); algo de rendimiento (despreciable en el régimen de uso de LocalBlast).
+- **Elementos afectados:** todos los componentes del contenedor Backend (sección 7.1).
+- **Cómo se verifica:** revisión de dependencias del código (ningún módulo de una capa importa de una capa superior) y prueba del escenario EC-02 sobre el Adaptador BLAST+ con una salida que incluye un campo adicional: los campos obligatorios llegan intactos al dominio.
 
-Todo driver llega a al menos un contenedor y un componente. Todo componente de las vistas corresponde a una responsabilidad del sistema o a una decisión de arquitectura de este documento.
+### DA-03 · Adaptador BLAST+ como componente dedicado en la capa de datos
 
-**Nota sobre Autenticación y sesión.** No aparece en la columna de componentes porque no existe una historia de usuario propia para la autenticación en el alcance actual, pero el componente participa en **todas** las historias de la tabla que llegan al API: los Controladores lo consultan al inicio de cada solicitud HTTP para identificar al investigador y recién después delegan en el servicio de dominio correspondiente. Agregarlo en cada fila sería redundante; su participación es uniforme.
+- **Escenario que la motiva:** EC-02 (cambio menor de versión de BLAST+ sin romper el parseo).
+- **Contexto:** BLAST+ es externo, lo mantiene el administrador de sistemas del laboratorio con sus propios criterios, y su salida puede evolucionar (campos nuevos en formato tabular, atributos nuevos en XML).
+- **Decisión:**
+  - **Tácticas:** adaptar la interfaz; encapsular.
+  - **Estilo:** respeta el cliente-servidor base (vive dentro del servidor).
+  - **Patrón:** aplicado dentro del patrón Capas (DA-02), en la capa de datos del Backend.
+- **Alternativas consideradas:**
+  - **Parsear BLAST+ directamente en los Servicios** — descartado: cada cambio de BLAST+ obligaría a tocar varios servicios; viola la táctica de encapsular.
+  - **Un microservicio aparte "Executor"** — descartado por los mismos motivos que microservicios en DA-01.
+- **Consecuencias:**
+  - **A favor:** cambios de versión de BLAST+ se absorben en un único componente; el resto del Backend no sabe cómo es la salida real del binario y es inmune a sus cambios menores; EC-02 se cumple como propiedad arquitectónica.
+  - **En contra:** una capa de indirección entre Ejecución y persistencia y BLAST+; obligación de mantener el mapeo "campo de BLAST+ → entidad del dominio" al día en el Adaptador.
+- **Elementos afectados:** componente "Adaptador BLAST+" del Backend.
+
+### DA-04 · Ejecutar cada búsqueda como subproceso independiente de BLAST+
+
+- **Escenario que la motiva:** EC-01 (cinco búsquedas concurrentes sin cruce de resultados).
+- **Contexto:** BLAST+ es un binario de línea de comandos. Cada invocación es un proceso del sistema operativo con su propia memoria y su propio stdout/stderr. Lanzar varias en paralelo requiere decidir dónde se guarda la correspondencia entre proceso y sesión del investigador.
+- **Decisión:**
+  - **Tácticas:** introducir concurrencia (del atributo desempeño, aplicada acá al escenario de interoperabilidad).
+  - **Estilo:** respeta el cliente-servidor base.
+  - **Patrón:** la correspondencia proceso↔sesión vive dentro del Adaptador BLAST+ (DA-03), no en los Controladores ni en los componentes de dominio.
+- **Alternativas consideradas:**
+  - **Un único proceso BLAST+ en el que se encolan las búsquedas** — descartado: serializa las invocaciones y el escenario pedía cinco concurrentes; además, BLAST+ no está pensado para recibir "jobs" por una API persistente.
+  - **Una cola de mensajes externa y un pool de workers** — descartado: suma un contenedor (broker) que no es necesario para la escala actual (ver DA-01).
+- **Consecuencias:**
+  - **A favor:** aislamiento natural entre búsquedas (cada subproceso tiene su propia memoria); si BLAST+ falla en una invocación, las otras no se ven afectadas; cumple EC-01 por diseño.
+  - **En contra:** consumo de CPU y memoria crece linealmente con la concurrencia; cada subproceso implica el overhead de cargar BLAST+ en memoria. Aceptable para el régimen de uso previsto.
+- **Elementos afectados:** componente "Adaptador BLAST+" (en el Backend).
+
+### DA-05 · Validación en la Aplicación Web, además de en el servidor
+
+- **Escenario que la motiva:** la operabilidad del formulario de configuración de la búsqueda. La configuración es compleja (compatibilidad programa-query-base, rangos de parámetros, formato de la secuencia): si el investigador recibe el feedback de "esta configuración no es válida" después de un round-trip al servidor por cada campo que ajusta, la experiencia se degrada rápido. Secundariamente, cada round-trip evitado es una solicitud menos que el servidor atiende.
+- **Contexto:** La Aplicación Web se organiza con el patrón MVC (ver DA-07). La validación del formulario es la lógica del cliente más visible y más repetida en la interacción.
+- **Decisión:**
+  - **Táctica:** mantener modelos de tarea y de usuario del lado del cliente (del grupo de usabilidad): el cliente conoce las reglas de validación y las aplica localmente para asistir al investigador antes de pedirle nada al servidor.
+  - **Estilo:** respeta cliente-servidor. **El cliente propone, el servidor dispone**: la validación del cliente mejora la experiencia pero no reemplaza a la del servidor.
+  - **Patrón:** las reglas de validación viven en el Modelo de la Aplicación Web (componente **Modelo de búsqueda**) y las aplica el Controlador de búsqueda antes de pedir el envío al servidor (ver DA-07).
+- **Alternativas consideradas:**
+  - **Validar solo en el servidor** — descartada: cada error en el formulario exigiría un round-trip, con una experiencia frustrante y una carga innecesaria al servidor por configuraciones que el cliente podría descartar antes.
+- **Consecuencias:**
+  - **A favor:** feedback inmediato al investigador; menos carga en el servidor; descartes temprano de configuraciones mal armadas.
+  - **En contra:** la lógica de validación queda duplicada entre cliente y servidor y debe mantenerse coherente. **La validación del cliente no es un control de seguridad**: un actor malicioso puede saltearla hablando directamente con el Backend. Por eso el servidor **repite** su propia validación completa sobre todo lo que recibe, independientemente de lo que haya hecho el cliente.
+- **Elementos afectados:** componentes "Modelo de búsqueda" y "Controlador de búsqueda" de la Aplicación Web; también el componente "Preparación de búsqueda" del Backend, que mantiene las validaciones completas (sintácticas de la secuencia, semánticas de la configuración) aun cuando el cliente ya haya validado.
+
+### DA-06 · Filtrado de resultados en la Aplicación Web
+
+- **Escenario que la motiva:** el escenario 1 de operabilidad (sección 5.2 de [`escenarios-calidad.md`](../requeriments/quality-scenarios/escenarios-calidad.md#52-operabilidad)): cada cambio de filtro debe reflejarse en menos de 1 segundo sobre tablas de hasta 500 hits.
+- **Contexto:** el cliente ya recibe la tabla cruda al terminar la búsqueda (CU005). Con varias búsquedas en curso (EC-01) el servidor está ocupado, y una solicitud por cada ajuste de umbral no garantizaría ese tiempo.
+- **Decisión:**
+  - **Táctica:** mantener copias de datos (del atributo desempeño): el cliente conserva el crudo en memoria y filtra sobre él.
+  - **Estilo:** respeta cliente-servidor: el cliente muestra, el servidor persiste y genera los archivos.
+  - **Patrón:** el filtrado vive en el Modelo de la Aplicación Web (componente **Modelo de resultados**, que calcula los hits visibles) y lo dispara el Controlador de resultados (ver DA-07). Para descargar, el cliente envía el id de la búsqueda, el formato y los hits visibles; el servidor verifica que pertenezcan a la búsqueda del investigador y genera el archivo.
+- **Alternativas consideradas:**
+  - **Filtrar en el servidor** — descartada: cada ajuste sería una solicitud, atada a la red y a la carga del servidor.
+  - **Reenviar los parámetros del filtro para que el servidor filtre al descargar** — descartada: la regla existiría en dos lenguajes y el archivo podría no coincidir con lo visible (CU007).
+- **Consecuencias:**
+  - **A favor:** respuesta inmediata y sin solicitudes; una sola implementación de la regla de filtrado; el archivo coincide con lo visible.
+  - **En contra:** el cliente guarda la tabla cruda en memoria (aceptable hasta 500 hits); el servidor debe validar cada pedido de descarga, porque el cliente no es un control de confianza (como en DA-05).
+- **Elementos afectados:** componentes "Modelo de resultados" y "Controlador de resultados" de la Aplicación Web y componente "Generación de archivos de descarga" del Backend.
+
+---
+
+### DA-07 · Patrón MVC en la Aplicación Web
+
+- **Escenario que la motiva:** los dos escenarios de operabilidad (sección 5.2 de [`escenarios-calidad.md`](../requeriments/quality-scenarios/escenarios-calidad.md#52-operabilidad)): cada cambio de filtro debe reflejarse en menos de 1 segundo sobre tablas de hasta 500 hits (escenario 1), y cualquier cambio en el formulario posterior a la validación debe invalidar la marca "lista para ejecutar" y deshabilitar el botón de ejecución en menos de 500 ms (escenario 2). No son drivers arquitectónicos (ver sección 4.1), pero determinan la estructura interna del cliente.
+- **Contexto:** La Aplicación Web tiene cuatro pantallas que comparten estado: la secuencia cargada, la configuración (con su marca de validada o no) y los resultados. La misma información se muestra a la vez en varias partes de la interfaz y cambia varias veces por minuto por acciones del investigador. A diferencia del Backend, cuyo flujo es una cadena vertical, el de la interfaz es un ciclo: acción → cambio de estado → refresco de lo que se ve.
+- **Decisión:**
+  - **Tácticas:** dividir módulos y encapsular (del atributo modificabilidad); cancelar (del atributo usabilidad), cuya acción interpreta el Controlador de búsqueda y refleja el Modelo de búsqueda (HU09).
+  - **Estilo:** respeta cliente-servidor: el patrón vive enteramente dentro del cliente.
+  - **Patrón:** MVC (Modelo-Vista-Controlador) aplicado dentro de la Aplicación Web, en la variante con notificación de cambios por suscripción (la Vista observa a los Modelos; los Modelos no conocen a la Vista). Vista: Pantallas. Controladores: Controlador de búsqueda y Controlador de resultados. Modelos: Modelo de búsqueda y Modelo de resultados. El Cliente del Backend es un componente de apoyo que usan solo los Controladores.
+- **Alternativas consideradas:**
+  - **Capas** — descartado para el cliente: no define quién es dueño del estado que varias pantallas muestran a la vez ni cómo se refresca lo que se ve cuando cambia; el flujo cíclico de una interfaz no se parece a una cadena vertical.
+  - **MVVM** — descartado: pensado para interfaces con estado complejo y enlace automático entre vista y modelo de vista. El estado de LocalBlast es acotado, y el enlace automático sumaría una pieza más y dificultaría la depuración sin un beneficio proporcional.
+- **Consecuencias:**
+  - **A favor:** modificabilidad (cambiar una pantalla no obliga a tocar las reglas, y viceversa); capacidad de prueba (la validación y el filtrado, que viven en los Modelos, se prueban sin pantallas); respuesta inmediata de la interfaz ante un cambio de estado.
+  - **En contra:** más piezas que en una aplicación simple (dos Controladores y dos Modelos para cuatro pantallas); exige disciplina para que la Vista no modifique los Modelos directamente; con la notificación por suscripción, seguir qué cambió y por qué es algo más difícil de depurar.
+- **Elementos afectados:** todos los componentes de la Aplicación Web (sección 7.2).
+- **Cómo se verifica:** pruebas de los Modelos sin montar la interfaz (aplicar cuatro filtros sobre 500 hits recalcula los hits visibles en menos de 1 segundo; modificar un campo después de validar invalida la marca) y revisión de dependencias del código (ningún módulo de Modelo importa de la Vista ni de los Controladores).
+
+### DA-08 · Despliegue en un único servidor del laboratorio
+
+- **Escenario que la motiva:** EC-01 (cinco búsquedas concurrentes, cada una como subproceso de BLAST+) y EC-02 (BLAST+ lo actualiza el administrador de sistemas, sin coordinar con el equipo). Secundariamente, la restricción de equipo y de tiempo de la sección 2.
+- **Contexto:** BLAST+ ya está instalado en el servidor del laboratorio y se invoca por línea de comandos como subproceso local (DA-04). El laboratorio es chico (hasta diez investigadores) y el equipo tiene tres integrantes con dedicación parcial. Los investigadores usan LocalBlast desde sus PC, donde solo cuentan con un navegador web.
+- **Decisión:**
+  - **Tácticas:** respetar estándares de comunicación (HTTPS con JSON en el único cruce de red entre nodos propios, de la PC del investigador al servidor).
+  - **Estilo:** respeta cliente-servidor: un nodo cliente (la PC del investigador) y un nodo servidor.
+  - **Patrón:** no aplica; es una decisión de infraestructura.
+  - **Despliegue:** un único Servidor del laboratorio (Debian GNU/Linux) con tres entornos de ejecución: Python 3 (Backend y Aplicación Web), PostgreSQL (Base de datos) y BLAST+ 2.14. La **Aplicación Web se aloja en el servidor**: sus archivos estáticos (HTML, JS y CSS) los publica el Backend y el navegador del investigador los descarga y los ejecuta. La PC del investigador no ejecuta ningún contenedor de LocalBlast: solo el navegador.
+- **Alternativas consideradas:**
+  - **Instalar la Aplicación Web en la PC de cada investigador** — descartada: obligaría a instalar y mantener el cliente en cada máquina y a distribuir cada versión nueva. Alojada en el servidor, el investigador solo necesita un navegador y actualizar la aplicación es actualizar un único lugar.
+  - **Servidor de base de datos separado** — descartada: ningún driver lo exige, y sumaría un nodo más que operar para un equipo de tres personas. Queda como paso siguiente si el consumo conjunto se vuelve un problema.
+  - **BLAST+ en un nodo de cómputo aparte** — descartada: BLAST+ ya está instalado en el servidor y se invoca como subproceso local (DA-04). Un nodo aparte convertiría esa invocación en comunicación por red y cambiaría el Adaptador BLAST+, sin que ningún escenario lo pida.
+- **Consecuencias:**
+  - **A favor:** nada que instalar en las PC; una única versión de la Aplicación Web; los subprocesos de BLAST+ son locales (EC-01); pocos nodos que operar; el único cruce de red propio viaja cifrado.
+  - **En contra:** el servidor es punto único de falla (ya aceptado en DA-01) y, si cae, el investigador ni siquiera puede abrir la aplicación; el Backend, la base de datos y los procesos de BLAST+ comparten procesador y memoria, por lo que un pico de búsquedas concurrentes puede degradar el tiempo de respuesta; el investigador necesita conectividad con el servidor para usar LocalBlast; en modo remoto el servidor necesita salida HTTPS a Internet.
+- **Elementos afectados:** nodos "PC del investigador/a", "Servidor del laboratorio" (entornos Python 3, PostgreSQL y BLAST+ 2.14); contenedores "Aplicación Web", "Backend" y "Base de datos" (sección 8).
+- **Cómo se verifica:** abrir LocalBlast desde una PC que solo tiene navegador, sin instalar nada, y completar una búsqueda local de punta a punta; con cinco búsquedas concurrentes (EC-01) comprobar que los subprocesos de BLAST+ corren en el servidor y que ningún resultado se cruza; con la búsqueda remota, comprobar que el tráfico hacia NCBI sale del servidor y no de la PC.
 
 ---
 
