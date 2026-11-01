@@ -148,7 +148,6 @@ Dos restricciones de la [sección 2](#2-restricciones) influyen directamente en 
 
 ---
 
-
 ## 5. Estrategia de solución
 
 Esta sección recorre, en orden de abstracción decreciente, las decisiones de la arquitectura: tácticas → estilo → patrón → cobertura de los drivers.
@@ -161,7 +160,7 @@ Para los dos drivers del punto anterior, las tácticas seleccionadas y descartad
 |---|---|---|
 | **Adaptar la interfaz** | ✅ Seleccionada | Es la táctica central para EC-02. Un componente dedicado traduce entre la salida real de BLAST+ (texto tabular, XML, código de salida) y la estructura interna del sistema. Si BLAST+ cambia, cambia solo ese componente. |
 | **Respetar estándares de comunicación** | ✅ Seleccionada | Entre el navegador y el servidor usamos HTTPS con JSON (web estándar); con BLAST+ usamos la interfaz de línea de comandos estándar documentada en el manual oficial del motor. Nada propietario entre contenedores. |
-| **Descubrir servicios** | ❌ Descartada | BLAST+ corre en el mismo servidor que el API, con ruta configurada. No hay universo de servicios por descubrir en tiempo de ejecución. |
+| **Descubrir servicios** | ❌ Descartada | BLAST+ corre en el mismo servidor que el Backend, con ruta configurada. No hay universo de servicios por descubrir en tiempo de ejecución. |
 | **Orquestar** | ❌ Descartada | No hay varios servicios que orquestar: hay un único sistema externo (BLAST+) invocado por una sola operación por búsqueda. |
 
 **Tácticas de otros atributos adoptadas en apoyo a los drivers de interoperabilidad.** Dos tácticas que pertenecen a otros atributos sostienen el cumplimiento de los drivers:
@@ -169,7 +168,7 @@ Para los dos drivers del punto anterior, las tácticas seleccionadas y descartad
 | Táctica | Atributo origen | Por qué la adoptamos para interoperabilidad |
 |---|---|---|
 | **Introducir concurrencia** | Desempeño | Es la táctica que atiende el "cero cruces con cinco concurrentes" de EC-01. Lanzar cada búsqueda como subproceso independiente del binario BLAST+, con su propio contexto, es lo que garantiza el aislamiento. |
-| **Encapsular** | Modificabilidad | Convierte al adaptador en el único punto de contacto con BLAST+. Es el mecanismo del patrón Capas (ver [sección 5.3](#53-patrón-arquitectónico-capas)) que materializa la táctica "adaptar la interfaz" dentro del contenedor API. |
+| **Encapsular** | Modificabilidad | Convierte al adaptador en el único punto de contacto con BLAST+. Es el mecanismo del patrón Capas (ver [sección 5.3.1](#531-capas-en-el-backend)) que materializa la táctica "adaptar la interfaz" dentro del contenedor Backend. |
 
 ### 5.2 Estilo arquitectónico base: Cliente-Servidor
 
@@ -178,18 +177,19 @@ Para los dos drivers del punto anterior, las tácticas seleccionadas y descartad
 **Por qué este estilo:**
 
 - **BLAST+ corre del lado servidor por obligación.** El binario está instalado en el servidor del laboratorio, no en el navegador del investigador. Una vez aceptado que hace falta un servidor, cliente-servidor es la estructura más chica que lo acompaña: un cliente que presenta, un servidor que ejecuta BLAST+ y persiste. Cualquier otro estilo multiplica piezas sin agregar nada que resuelva mejor nuestros drivers.
-- **Los dos drivers viven dentro de un único proceso servidor.** EC-01 se resuelve con subprocesos lanzados por el mismo API; EC-02 con un componente del mismo API. Ninguno exige estado distribuido, bus de eventos ni coordinación entre servicios. Un estilo que ofrezca esas capacidades sería un costo operativo pagado por algo que no necesitamos.
+- **Los dos drivers viven dentro de un único proceso servidor.** EC-01 se resuelve con subprocesos lanzados por el mismo Backend; EC-02 con un componente del mismo Backend. Ninguno exige estado distribuido, bus de eventos ni coordinación entre servicios. Un estilo que ofrezca esas capacidades sería un costo operativo pagado por algo que no necesitamos.
 - **REST + JSON es el contrato estándar entre cliente y servidor.** Materializa la táctica "respetar estándares de comunicación" en el borde más visible del sistema y mantiene abierta la puerta a un segundo cliente —por ejemplo un script de automatización que un investigador quiera correr— sin tocar el servidor.
 - **Permite evolucionar sin rehacer.** Si en el futuro aparece un escenario de procesamiento asincrónico pesado (lotes de 100 búsquedas, por ejemplo), se puede sumar una cola entre el servidor y un ejecutor dedicado sin romper el estilo base: cliente-servidor convive con esa evolución, mientras que elegir hoy un estilo más complejo nos obligaría a sostener su costo *desde el principio*.
+- **El cliente se aloja en el servidor y se ejecuta en el navegador.** La Aplicación Web se publica desde el mismo servidor que aloja al Backend (sus archivos estáticos se descargan al abrirla) y se ejecuta en el navegador del investigador. En la PC del investigador no se instala nada, y actualizar la aplicación es actualizar un único lugar. Ver [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio) y la [sección 8](#8-vista-de-despliegue).
 
 **Restricciones del estilo que la arquitectura respeta:**
 
 | Restricción del estilo cliente-servidor | Cómo se respeta en LocalBlast |
 |---|---|
 | Los clientes no se comunican entre sí | Solo hay un cliente (Aplicación Web); no hay comunicación cliente-cliente. |
-| El cliente no accede directamente a la base de datos | La Aplicación Web nunca habla SQL. Todo acceso a datos pasa por el API. |
-| El servidor no inicia la comunicación con el cliente | El API responde a las solicitudes del cliente; no empuja mensajes al navegador por iniciativa propia (el progreso de la búsqueda se consulta desde el cliente). |
-| El cliente inicia siempre la comunicación | Todas las flechas entre contenedores salen del cliente o del API hacia abajo (BD, BLAST+); ninguna sale de la BD o de BLAST+ hacia el cliente. |
+| El cliente no accede directamente a la base de datos | La Aplicación Web nunca habla SQL. Todo acceso a datos pasa por el Backend. |
+| El servidor no inicia la comunicación con el cliente | El Backend responde a las solicitudes del cliente; no empuja mensajes al navegador por iniciativa propia (el progreso de la búsqueda se consulta desde el cliente). |
+| El cliente inicia siempre la comunicación | Todas las flechas entre contenedores salen del cliente o del Backend hacia abajo (BD, BLAST+); ninguna sale de la BD o de BLAST+ hacia el cliente. |
 
 Esto se verifica directamente en la vista de contenedores de la [sección 6](#6-vista-de-contenedores).
 
@@ -201,52 +201,97 @@ Esto se verifica directamente en la vista de contenedores de la [sección 6](#6-
 | **Orientada a eventos** | Resuelve picos y tareas lentas con desacople asincrónico. Con cinco búsquedas concurrentes y usuarios de un laboratorio chico, el acople síncrono alcanza. Sumar una cola es un contenedor más que operar sin beneficio para los drivers actuales. Queda como opción para una iteración futura si los escenarios cambian. |
 | **SOA con bus** | Pensada para integrar sistemas existentes. En LocalBlast hay un único sistema externo (BLAST+) sin ningún bus de por medio y sin otros sistemas con los que integrarse. |
 
-### 5.3 Patrón arquitectónico: Capas
+### 5.3 Patrones arquitectónicos: Capas en el Backend y MVC en la Aplicación Web
 
-**Decisión.** Adoptamos el **patrón de Capas** dentro de los dos contenedores que alojan lógica propia: la Aplicación Web y el API. El estilo cliente-servidor organiza el sistema entero; el patrón de Capas organiza la lógica interna de cada uno de esos contenedores (ver [DA-02](#da-02--patrón-capas-en-los-contenedores-con-lógica-propia)).
+**Decisión.** El estilo cliente-servidor organiza el sistema entero; los patrones organizan el interior de cada contenedor que aloja lógica propia. Los dos contenedores resuelven problemas de naturaleza distinta, por lo que adoptamos un patrón para cada uno: **Capas** en el Backend (ver [DA-02](#da-02--patrón-capas-en-el-backend)) y **MVC** (Modelo-Vista-Controlador) en la Aplicación Web (ver [DA-07](#da-07--patrón-mvc-en-la-aplicación-web)).
 
-**Por qué este patrón:**
+**Por qué no el mismo patrón en ambos.** La fuerza dominante en cada contenedor es distinta:
 
-- **Materializa la táctica "adaptar la interfaz" de forma mínima y suficiente.** En el API, pone al adaptador de BLAST+ en la capa de datos, aislado detrás de una interfaz interna estable. Las capas superiores (dominio, presentación) no saben cómo es la salida real del binario; invocan al adaptador por sus métodos. Un cambio en la salida de BLAST+ se absorbe en el adaptador y no se propaga.
+- El **Backend** recibe una solicitud, la procesa y dialoga con piezas que están fuera de él (la base de datos y BLAST+). Su flujo es una cadena vertical, y lo que más importa es aislar esas dependencias externas del resto del código. Eso es lo que modela Capas.
+- La **Aplicación Web** es una interfaz interactiva: el investigador dispara acciones todo el tiempo (ajusta un campo, mueve un umbral, cancela una búsqueda) y la misma información —la configuración validada, los resultados— se muestra a la vez en varias partes de la pantalla. Su flujo es un ciclo (acción → cambio de estado → refresco de lo que se ve), y lo que más importa es separar lo que se muestra, la interpretación de la acción del usuario y la información que se maneja. Eso es lo que modela MVC.
+
+#### 5.3.1 Capas en el Backend
+
+**Por qué este patrón en el Backend:**
+
+- **Materializa la táctica "adaptar la interfaz" de forma mínima y suficiente.** Pone al adaptador de BLAST+ en la capa de datos, aislado detrás de una interfaz interna estable. Las capas superiores (dominio, presentación) no saben cómo es la salida real del binario; invocan al adaptador por sus métodos. Un cambio en la salida de BLAST+ se absorbe en el adaptador y no se propaga.
 - **Cumple con las restricciones del equipo.** Capas es más chico que Hexagonal (puertos y adaptadores) y es el que un equipo de tres personas puede sostener sin sobreingeniería. Hexagonal también funcionaría —y queda como opción si el proyecto crece— pero introduce más piezas (puertos explícitos, inversión de dependencias) que no son necesarias para los drivers actuales.
-- **Permite replicar la misma mentalidad en el cliente.** La Aplicación Web también tiene lógica interna (validaciones, filtrado de resultados, llamadas al servidor); organizarla por capas la hace evolucionar al mismo ritmo que el servidor, con un modelo mental consistente.
 - **Satisface tácticas de modificabilidad por diseño.** Separar en capas con dependencias hacia abajo mejora modularidad y capacidad de prueba.
 
-**Las tres capas, aplicadas en cada contenedor:**
+**Las tres capas del Backend:**
 
-| Capa | En la Aplicación Web | En el API |
+| Capa | Responsabilidad | Componentes |
 |---|---|---|
-| **Presentación** | Pantallas que ve el investigador (carga, configuración, resultados, descarga). Componente: **Pantallas**. | Borde HTTP del servidor: recibe solicitudes, valida sintácticamente las entradas, serializa respuestas, devuelve códigos de estado. Componente: **Controladores**. |
-| **Dominio** | Lógica de aplicación del cliente: valida formato de secuencia, rangos de parámetros y compatibilidad programa-query-base **antes** de pedir el envío al servidor, y filtra los resultados recibidos. Componentes: **Validación y envío**, **Filtrado de resultados**. | Lógica del dominio del servidor. Tres componentes para las fases del ciclo de la búsqueda —antes de BLAST+, durante y después— más un componente para la identidad del investigador, que es parte del dominio porque el historial se corresponde a cada uno. Componentes: **Autenticación y sesión**, **Preparación de búsqueda**, **Ejecución y persistencia**, **Generación de archivos de descarga**. |
-| **Datos** | Acceso al mundo exterior del cliente (que para el cliente es el API). Componente: **Cliente del API**. | Acceso al mundo exterior del servidor: la base de datos y el binario BLAST+. Componentes: **Acceso a datos**, **Adaptador BLAST+**. |
+| **Presentación** | Borde HTTP del servidor: recibe solicitudes, valida sintácticamente las entradas, serializa respuestas, devuelve códigos de estado. | **Controladores** |
+| **Dominio** | Lógica del dominio del servidor. Tres componentes para las fases del ciclo de la búsqueda —antes de BLAST+, durante y después— más un componente para la identidad del investigador, que es parte del dominio porque el historial se corresponde a cada uno. | **Autenticación y sesión**, **Preparación de búsqueda**, **Ejecución y persistencia**, **Generación de archivos de descarga** |
+| **Datos** | Acceso al mundo exterior del servidor: la base de datos y el binario BLAST+. | **Acceso a datos**, **Adaptador BLAST+** |
 
-**Validación en el cliente, además de en el servidor.** La capa de dominio de la Aplicación Web aloja la validación del formulario antes de enviar la configuración al servidor. Esta decisión se documenta aparte en [DA-05](#da-05--validación-en-la-aplicación-web-además-de-en-el-servidor): el cliente valida para que el investigador reciba feedback inmediato y para reducir solicitudes al servidor por configuraciones mal armadas; el servidor **repite** la validación completa sobre todo lo que recibe, porque la validación del cliente puede ser salteada por un actor malicioso y, por lo tanto, no es un control de seguridad.
-
-**Filtrado en el cliente.** La capa de dominio de la Aplicación Web también filtra los resultados ya recibidos, sin consultar al servidor (ver [DA-06](#da-06--filtrado-de-resultados-en-la-aplicación-web)).
-
-**Restricciones del patrón que la arquitectura respeta en ambos contenedores:**
+**Restricciones del patrón que el Backend respeta:**
 
 | Restricción del patrón de Capas | Cómo se respeta |
 |---|---|
-| Una capa no depende de las superiores | En el API, ningún componente de dominio llama a los Controladores; ningún componente de datos llama a los de dominio ni a los Controladores. En la Aplicación Web, el Cliente del API no llama a los componentes de dominio, y estos (Validación y envío, Filtrado de resultados) no llaman a Pantallas. |
-| Cada capa usa solo a la inmediatamente inferior | En el API: Controladores → componentes de dominio → Acceso a datos / Adaptador BLAST+. En la Aplicación Web: Pantallas → Validación y envío / Filtrado de resultados → Cliente del API. |
+| Una capa no depende de las superiores | Ningún componente de dominio llama a los Controladores; ningún componente de datos llama a los de dominio ni a los Controladores. |
+| Cada capa usa solo a la inmediatamente inferior | Controladores → componentes de dominio → Acceso a datos / Adaptador BLAST+. |
 | Cada capa tiene una responsabilidad clara | Ver la tabla de capas más arriba. Ninguna capa mezcla responsabilidades que correspondan a otra. |
 
-Esto se verifica directamente en las vistas de componentes de la [sección 7](#7-vistas-de-componentes): todas las flechas entre capas van en la misma dirección.
+Esto se verifica directamente en la vista de componentes de la [sección 7.1](#71-vista-de-componentes-del-backend): todas las flechas entre capas van en la misma dirección.
 
-**Alternativas consideradas y descartadas:**
+**Alternativas consideradas y descartadas para el Backend:**
 
 | Alternativa | Por qué se descartó |
 |---|---|
 | **Hexagonal (puertos y adaptadores)** | Aísla más estrictamente, pero con un único sistema externo (BLAST+) las piezas extra (puertos explícitos, inversión de dependencias) son sobreingeniería para un equipo de 3 personas. Capas cubre nuestras necesidades con menos piezas. |
-| **MVC** | Está pensado para separar presentación, lógica de interacción y modelo en una interfaz. Capas es más general y permite aplicar la misma mentalidad tanto en el cliente como en el servidor, cosa que MVC no cubre con la misma naturalidad. |
-| **Broker** | Resuelve desacoplar emisores y receptores con un intermediario de mensajes. En LocalBlast, el API y el adaptador de BLAST+ viven en el mismo proceso: una cola de mensajes sería un contenedor más que operar sin beneficio. |
+| **MVC** | Está pensado para separar presentación, lógica de interacción y modelo en una interfaz. El Backend no tiene vista que separar: responde datos en JSON. Por eso MVC se aplica al contenedor que sí tiene interfaz, la Aplicación Web (sección 5.3.2). |
+| **Broker** | Resuelve desacoplar emisores y receptores con un intermediario de mensajes. En LocalBlast, el Backend y el adaptador de BLAST+ viven en el mismo proceso: una cola de mensajes sería un contenedor más que operar sin beneficio. |
+
+#### 5.3.2 MVC en la Aplicación Web
+
+**Por qué este patrón en la Aplicación Web:**
+
+- **El estado que se muestra tiene un dueño explícito.** La secuencia cargada, la configuración y los resultados los muestran varias pantallas a la vez. MVC los pone en el **Modelo**, y la **Vista** se limita a mostrarlos. Esto es lo que permite cumplir los dos escenarios de operabilidad de la [sección 5.2 de `escenarios-calidad.md`](../requeriments/quality-scenarios/escenarios-calidad.md#52-operabilidad): el filtrado recalcula sobre el crudo guardado en el Modelo de resultados y la Vista se redibuja en menos de 1 segundo (escenario 1), y la marca "configuración validada / no validada" vive en el Modelo de búsqueda, de modo que cualquier cambio posterior la invalida y la Vista lo refleja de inmediato (escenario 2).
+- **Separa piezas que cambian por motivos distintos.** Las pantallas cambian cuando se ajusta la usabilidad; las reglas de validación y de filtrado, cuando cambia el dominio; el flujo de interacción, cuando cambia el recorrido del investigador. Con MVC cada una puede modificarse sin tocar a las otras.
+- **Las reglas se prueban sin pantallas.** Los Modelos no dependen de React ni de la Vista: la validación del formulario y el filtrado se prueban con datos, sin montar la interfaz.
+- **Es un patrón pensado para interfaces.** Sostiene de forma natural acciones como cancelar una búsqueda en curso (HU09): el Controlador interpreta la acción, el Modelo refleja el nuevo estado de la ejecución y la Vista lo muestra.
+- **Costo asumido:** más piezas que en una aplicación simple (dos Controladores y dos Modelos para cuatro pantallas). Aceptable porque cada pieza tiene una responsabilidad acotada y el equipo ya domina la idea de separar interacción y estado.
+
+**Los roles del patrón en la Aplicación Web:**
+
+| Rol | Componentes | Responsabilidad |
+|---|---|---|
+| **Vista** | **Pantallas** | Las pantallas que el investigador ve (carga, configuración, ejecución, resultados, descarga). Muestra el estado de los Modelos y delega las acciones del usuario en los Controladores. |
+| **Controlador** | **Controlador de búsqueda**, **Controlador de resultados** | Interpretan las acciones del investigador y actualizan los Modelos. Cuando hace falta hablar con el servidor, lo hacen a través del Cliente del Backend. |
+| **Modelo** | **Modelo de búsqueda**, **Modelo de resultados** | La información que maneja el cliente y sus reglas: secuencia, configuración, estado de la ejecución y reglas de validación (Modelo de búsqueda); resultados crudos, criterios de filtro y hits visibles (Modelo de resultados). |
+| *(apoyo, fuera de la tríada)* | **Cliente del Backend** | Encapsula las llamadas HTTP al Backend. Solo lo usan los Controladores. |
+
+**Variante adoptada.** Usamos MVC con **notificación de cambios por suscripción**: la Vista observa a los Modelos (en React, el estado que renderiza) y se vuelve a dibujar cuando cambian; los Modelos no conocen a la Vista ni a los Controladores. La Vista nunca modifica un Modelo directamente: toda acción pasa por un Controlador. Además dividimos Controlador y Modelo en dos (búsqueda y resultados) porque corresponden a los dos momentos del trabajo del investigador —preparar y lanzar la búsqueda, y explorar lo que devolvió— y comparten poco estado.
+
+**Validación en el cliente, además de en el servidor.** Las reglas de validación del formulario viven en el Modelo de búsqueda, y el Controlador de búsqueda las aplica antes de pedir el envío al servidor. Esta decisión se documenta aparte en [DA-05](#da-05--validación-en-la-aplicación-web-además-de-en-el-servidor): el cliente valida para que el investigador reciba feedback inmediato y para reducir solicitudes al servidor por configuraciones mal armadas; el servidor **repite** la validación completa sobre todo lo que recibe, porque la validación del cliente puede ser salteada por un actor malicioso y, por lo tanto, no es un control de seguridad.
+
+**Filtrado en el cliente.** El Modelo de resultados conserva los resultados crudos y calcula los hits visibles sin consultar al servidor (ver [DA-06](#da-06--filtrado-de-resultados-en-la-aplicación-web)).
+
+**Restricciones del patrón que la Aplicación Web respeta:**
+
+| Restricción del patrón MVC | Cómo se respeta |
+|---|---|
+| El Modelo no conoce a la Vista ni al Controlador | Ninguno de los dos Modelos llama a las Pantallas ni a los Controladores; la Vista los observa por suscripción, sin que ellos la referencien. |
+| La Vista no modifica el Modelo directamente | Las Pantallas solo leen el estado de los Modelos; toda acción del usuario se delega en un Controlador. |
+| El Controlador interpreta las acciones del usuario y actualiza el Modelo | Cada acción llega a un Controlador, que actualiza el Modelo correspondiente y, si hace falta, pide algo al Backend. |
+| La Vista muestra el estado del Modelo | Las Pantallas se dibujan a partir del estado de los dos Modelos y no guardan reglas propias. |
+
+Esto se verifica directamente en la vista de componentes de la [sección 7.2](#72-vista-de-componentes-de-la-aplicación-web): no sale ninguna flecha de los Modelos hacia la Vista ni hacia los Controladores.
+
+**Alternativas consideradas y descartadas para la Aplicación Web:**
+
+| Alternativa | Por qué se descartó |
+|---|---|
+| **Capas** | Es el patrón del Backend, pero en una interfaz no define quién es dueño del estado que varias pantallas muestran a la vez ni cómo se refresca lo que se ve cuando ese estado cambia. Cada refresco tendría que resolverse a mano atravesando capas, y el flujo cíclico de una interfaz no se parece a una cadena vertical. |
+| **MVVM (Modelo-Vista-Modelo de Vista)** | Pensado para interfaces con estado complejo y enlace automático entre vista y modelo de vista. El estado de LocalBlast (una secuencia, una configuración y una tabla de resultados) es acotado: el enlace automático sumaría una pieza más y haría más difícil depurar, sin un beneficio proporcional. |
 
 ### 5.4 Aspectos transversales
 
 Los aspectos transversales habituales en una arquitectura de este estilo —auditoría, gestión de excepciones, instrumentación— **no forman parte de esta entrega del documento de arquitectura**. Se incorporarán en una iteración posterior, cuando el sistema entre en una etapa en la que esas responsabilidades se vuelvan parte del alcance de desarrollo.
 
-**La autenticación y gestión de sesión sí se modela, pero no como aspecto transversal**: se la trata como un componente de dominio propio en el API (**Autenticación y sesión**, visible en la [sección 7.1](#71-vista-de-componentes-del-api)). La razón es que en LocalBlast la identidad del investigador no es solo un chequeo invisible al código: el historial de búsquedas se corresponde a cada investigador y esa correspondencia es parte del dominio del sistema, no un detalle de infraestructura. Modelarla como componente la vuelve explícita y permite trazar cómo cada efecto sobre la base de datos queda asociado al investigador correcto.
+**La autenticación y gestión de sesión sí se modela, pero no como aspecto transversal**: se la trata como un componente de dominio propio en el Backend (**Autenticación y sesión**, visible en la [sección 7.1](#71-vista-de-componentes-del-backend)). La razón es que en LocalBlast la identidad del investigador no es solo un chequeo invisible al código: el historial de búsquedas se corresponde a cada investigador y esa correspondencia es parte del dominio del sistema, no un detalle de infraestructura. Modelarla como componente la vuelve explícita y permite trazar cómo cada efecto sobre la base de datos queda asociado al investigador correcto.
 
 ### 5.5 Tabla de cobertura
 
@@ -254,8 +299,8 @@ Cómo la arquitectura cubre cada driver y qué sacrifica a cambio.
 
 | Driver | Táctica(s) | Dónde se materializa en la arquitectura | Qué se sacrifica |
 |---|---|---|---|
-| **EC-01** · Hasta cinco invocaciones concurrentes a BLAST+ sin cruce de resultados | Introducir concurrencia + encapsular | Componente **Adaptador BLAST+** del API: cada invocación corre como subproceso independiente, con identificador propio y referencia a la sesión que la lanzó (ver [DA-04](#da-04--ejecutar-cada-búsqueda-como-subproceso-independiente-de-blast)). | Mayor consumo de CPU y memoria durante los picos de concurrencia (un proceso de BLAST+ por búsqueda). Aceptable en un laboratorio chico. |
-| **EC-02** · Cambios menores de versión de BLAST+ sin romper el parseo de la salida | Adaptar la interfaz + encapsular | Componente **Adaptador BLAST+** del API: su parser reconoce los campos conocidos por nombre, ignora los no mapeados y descarta sin corromper los conocidos. El resto del sistema no cambia (ver [DA-03](#da-03--adaptador-blast-como-componente-dedicado-en-la-capa-de-datos)). | El equipo debe sostener el mapeo "campo de BLAST+ → entidad del dominio" al día en el adaptador cuando el motor evoluciona. Es un costo operativo bajo. |
+| **EC-01** · Hasta cinco invocaciones concurrentes a BLAST+ sin cruce de resultados | Introducir concurrencia + encapsular | Componente **Adaptador BLAST+** del Backend: cada invocación corre como subproceso independiente, con identificador propio y referencia a la sesión que la lanzó (ver [DA-04](#da-04--ejecutar-cada-búsqueda-como-subproceso-independiente-de-blast)). En el despliegue, corre en el entorno Python 3 del Servidor del laboratorio, junto al entorno de BLAST+ (ver [sección 8](#8-vista-de-despliegue)). | Mayor consumo de CPU y memoria durante los picos de concurrencia (un proceso de BLAST+ por búsqueda). Aceptable en un laboratorio chico. |
+| **EC-02** · Cambios menores de versión de BLAST+ sin romper el parseo de la salida | Adaptar la interfaz + encapsular | Componente **Adaptador BLAST+** del Backend: su parser reconoce los campos conocidos por nombre, ignora los no mapeados y descarta sin corromper los conocidos. El resto del sistema no cambia (ver [DA-03](#da-03--adaptador-blast-como-componente-dedicado-en-la-capa-de-datos)). En el despliegue, BLAST+ es un entorno de ejecución propio dentro del servidor, que mantiene el administrador de sistemas (ver [sección 8](#8-vista-de-despliegue)). | El equipo debe sostener el mapeo "campo de BLAST+ → entidad del dominio" al día en el adaptador cuando el motor evoluciona. Es un costo operativo bajo. |
 
 **Conflictos entre tácticas: verificación.** Ninguna de las tácticas que adoptamos entra en conflicto con las demás. Encapsular el acceso a BLAST+ mejora modularidad y, al mismo tiempo, es lo que permite el aislamiento de concurrencia (cada subproceso lo lanza el mismo componente, con su propia correspondencia a la sesión). Respetar estándares de comunicación con el cliente (REST + JSON) no interfiere con el canal CLI hacia BLAST+ (son dos interfaces distintas, una por cada relación entre contenedores).
 
