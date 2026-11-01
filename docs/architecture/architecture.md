@@ -828,6 +828,41 @@ Todo driver llega a al menos un contenedor, un componente y un nodo de despliegu
 
 ---
 
+## 12. Glosario
+
+### 12.1 Siglas usadas en este documento
+
+| Sigla | Significado |
+|---|---|
+| API | Interfaz de programación de aplicaciones: las operaciones que un programa ofrece a otros. En este documento, la API REST que expone el Backend; no es el nombre de ningún contenedor |
+| Backend | Contenedor servidor de LocalBlast: lógica del dominio, persistencia e integración con BLAST+, que expone una API REST a la Aplicación Web |
+| C4 | Modelo de documentación de arquitectura en cuatro niveles: contexto, contenedores, componentes y código |
+| CLI | Interfaz de línea de comandos (*command-line interface*) |
+| CU | Caso de uso |
+| CSV | Formato de texto con valores separados por comas |
+| DA | Decisión de arquitectura |
+| DFD | Diagrama de flujo de datos |
+| EC | Escenario de calidad |
+| HTTP / HTTPS | Protocolo de la web / HTTP sobre una conexión cifrada |
+| HU | Historia de usuario |
+| ISO/IEC 25010:2023 | Norma del modelo de calidad del producto de software |
+| JSON | Formato de texto para intercambiar datos estructurados |
+| MVC | Modelo-Vista-Controlador: patrón que separa la presentación, la interpretación de las acciones del usuario y la información que se maneja |
+| MVVM | Modelo-Vista-Modelo de Vista: patrón para interfaces con enlace automático entre vista y modelo (mencionado solo para descartarlo) |
+| NCBI | *National Center for Biotechnology Information*, proveedor del BLAST remoto |
+| REST | Estilo de diseño de APIs sobre HTTP |
+| RF | Requerimiento funcional |
+| SOA | Arquitectura orientada a servicios (mencionada solo para descartarla) |
+| SQL | Lenguaje para consultar y modificar bases de datos relacionales |
+| TCP | Protocolo de transporte de la red sobre el que viaja, por ejemplo, la comunicación con la base de datos |
+| TLS | *Transport Layer Security*: la "S" de HTTPS |
+| XML | Formato de datos estructurados con etiquetas, usado por BLAST+ como una de sus salidas |
+
+### 12.2 Términos del dominio
+
+Los términos del dominio (BLAST, BLAST+, query, base de datos BLAST, FASTA, E-value, etc.) están definidos en el [Glosario del SRS](../requeriments/srs.md#10-glosario). Se usan en este documento con el mismo significado, para preservar la coherencia entre el modelo del dominio y la arquitectura.
+
+---
 
 ## Documentos relacionados
 
