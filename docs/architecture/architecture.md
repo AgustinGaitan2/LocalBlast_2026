@@ -60,8 +60,10 @@ Las siglas se definen la primera vez que se usan en el cuerpo del documento. El 
 | **Equipo** | El equipo se compone por 3 estudiantes | No se adoptan arquitecturas de alta complejidad operativa |
 | **Tiempo** | Duración disponible: un cuatrimestre | Se acota el alcance arquitectonico a los procesos criticos (P1 y P2) |
 | **Tecnológica** | Lenguajes y frameworks que el equipo ya domina | El equipo domina lenguajes como Python y bases de datos relacionales. Para el frontend el equipo adopta **React**, con una curva de aprendizaje asumible dentro del cuatrimestre pero tiene tiempo limitado para aprender otras tecnologias o lenguajes completamente nuevos |
+| **Infraestructura** | El laboratorio cuenta con un único servidor (Debian GNU/Linux) donde BLAST+ ya está instalado; en su PC, el investigador solo dispone de un navegador web | No se instala nada en la PC del investigador y no hay otros servidores que operar: la Aplicación Web se aloja en el servidor y el navegador la descarga y ejecuta (ver [DA-08](#da-08--despliegue-en-un-único-servidor-del-laboratorio)) |
 
 ---
+
 
 ## 3. Contexto
 
