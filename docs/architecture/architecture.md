@@ -64,7 +64,6 @@ Las siglas se definen la primera vez que se usan en el cuerpo del documento. El 
 
 ---
 
-
 ## 3. Contexto
 
 El diagrama de contexto del sistema, con sus actores humanos (Investigador/a y Administrador/a) y el único sistema externo con el que dialoga (BLAST+), se desarrolla en el documento dedicado del repositorio:
@@ -75,6 +74,16 @@ Para el alcance de este documento conviene retener dos aclaraciones del contexto
 
 - **Local vs. remoto es transparente para LocalBlast.** La diferencia entre modo local y modo remoto queda enteramente del lado de BLAST+: en modo local lee índices del servidor del laboratorio; en modo remoto recibe la flag `-remote` y él mismo dialoga con NCBI. Nuestro sistema no implementa cliente HTTP hacia NCBI. Para LocalBlast, los dos modos son la misma operación —invocar BLAST+ con argumentos distintos— y la arquitectura los trata uniformemente.
 - **Procesos profundizados.** Solo P1 y P2 entran en esta arquitectura; el actor Administrador/a y el proceso P3 quedan documentados en el contexto pero no se detallan acá.
+
+---
+
+**Descripción de elementos:**
+
+| Elemento | Tipo | Responsabilidad |
+|---|---|---|
+| Investigador/a | Persona | Actor que hace uso del sistema |
+| LocalBlast | Sistema | Sistema principal: interfaz web para ejecutar búsquedas con BLAST+ y trabajar con sus resultados |
+| BLAST+ | Sistema externo | Sistema encargado de ejecutar los alineamientos locales |
 
 ---
 
