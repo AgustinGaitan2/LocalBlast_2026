@@ -317,17 +317,17 @@ C4Container
     Person(inv, "Investigador/a", "Carga secuencias, lanza búsquedas, filtra y descarga resultados")
 
     System_Boundary(lb, "LocalBlast") {
-        Container(web, "Aplicación Web", "React", "Interfaz de carga, configuración, ejecución, filtrado y descarga")
-        Container(api, "API", "Python", "Valida, invoca BLAST+, persiste búsquedas, arma descargas")
+        Container(web, "Aplicación Web", "React", "Interfaz de carga, configuración, ejecución, filtrado y descarga; se ejecuta en el navegador")
+        Container(backend, "Backend", "Python / FastAPI", "Valida, invoca BLAST+, persiste búsquedas, arma descargas")
         ContainerDb(bd, "Base de datos", "PostgreSQL", "Usuarios, catálogo de bases de datos y historial de búsquedas")
     }
 
     System_Ext(blast, "BLAST+", "Motor de alineamiento (local o remoto)")
 
     Rel(inv, web, "Usa", "HTTPS")
-    Rel(web, api, "Solicita", "JSON / HTTPS")
-    Rel(api, bd, "Lee y escribe", "SQL")
-    Rel(api, blast, "Invoca", "CLI / subproceso")
+    Rel(web, backend, "Solicita", "JSON / HTTPS")
+    Rel(backend, bd, "Lee y escribe", "SQL")
+    Rel(backend, blast, "Invoca", "CLI / subproceso")
 
     UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
@@ -336,28 +336,30 @@ C4Container
 
 | Contenedor | Responsabilidad |
 |---|---|
-| **Aplicación Web** | Única interfaz humana del sistema. Formulario de carga, configuración, validación cliente y ejecución de búsquedas; vista de progreso y cancelación; tabla de resultados con filtros interactivos; disparo de descargas. No contiene lógica de dominio del servidor: toda operación sobre BLAST+ o sobre la base de datos la hace el API. |
-| **API** | Núcleo del sistema. Recibe solicitudes HTTP de la Aplicación Web, orquesta los servicios de dominio (carga, búsqueda, descarga), persiste en la base de datos y es el único contenedor que invoca a BLAST+. |
+| **Aplicación Web** | Única interfaz humana del sistema. Formulario de carga, configuración, validación cliente y ejecución de búsquedas; vista de progreso y cancelación; tabla de resultados con filtros interactivos; disparo de descargas. No contiene lógica de dominio del servidor: toda operación sobre BLAST+ o sobre la base de datos la hace el Backend. Se aloja en el Servidor del laboratorio y se ejecuta en el navegador del investigador: el navegador descarga y renderiza sus archivos estáticos, por lo que en la PC del investigador no se instala nada (ver [sección 8](#8-vista-de-despliegue)). |
+| **Backend** | Núcleo del sistema, del lado servidor. Expone una API REST que consume la Aplicación Web, recibe sus solicitudes HTTP, orquesta los servicios de dominio (carga, búsqueda, descarga), persiste en la base de datos y es el único contenedor que invoca a BLAST+. |
 | **Base de datos** | Almacén único del sistema. Guarda los usuarios habilitados, el catálogo de bases de datos BLAST disponibles (D1 del DFD) y el historial de búsquedas con sus parámetros, timestamps y resultados crudos (D2 del DFD). |
 | **BLAST+** *(sistema externo)* | Motor de alineamiento. En modo local lee índices del servidor del laboratorio; en modo remoto recibe la flag `-remote` y él mismo dialoga con NCBI. LocalBlast lo trata uniformemente en ambos modos: le pasa argumentos por CLI, recibe su salida por stdout y su código de retorno. |
+
+**Por qué se llama Backend y no API.** La API REST es solo la interfaz que este contenedor expone hacia la Aplicación Web (corresponde a su capa de presentación). El contenedor es bastante más que eso: contiene la lógica del dominio, la persistencia y la integración con BLAST+. Llamarlo «API» daría a entender que es una simple fachada de acceso y llevaría a confundir el contenedor con su interfaz; «Backend» nombra su rol en el sistema, el lado servidor. En este documento, «API» (o «API REST») se refiere únicamente a esa interfaz.
 
 ### 6.3 Catálogo de relaciones
 
 | Origen → Destino | Qué se comunica |
 |---|---|
 | Investigador/a → Aplicación Web | Interacciones de la UI: carga de archivo, formulario, botones. |
-| Aplicación Web → API | Solicitudes REST: carga de secuencia (ya validada en el cliente), configuración, ejecución, consulta de progreso, obtención de resultados y descarga. |
-| API → Base de datos | Lectura y escritura: usuarios para asociar sesión, catálogo para listar bases disponibles, historial para persistir cada búsqueda ejecutada. |
-| API → BLAST+ | Invocación como subproceso con los argumentos de la búsqueda (programa, modo, base de datos, parámetros, ruta a secuencia query). Lee la salida por stdout. |
+| Aplicación Web → Backend | Solicitudes REST: carga de secuencia (ya validada en el cliente), configuración, ejecución, consulta de progreso, obtención de resultados y descarga. |
+| Backend → Base de datos | Lectura y escritura: usuarios para asociar sesión, catálogo para listar bases disponibles, historial para persistir cada búsqueda ejecutada. |
+| Backend → BLAST+ | Invocación como subproceso con los argumentos de la búsqueda (programa, modo, base de datos, parámetros, ruta a secuencia query). Lee la salida por stdout. |
 
 ### 6.4 Comprobación del estilo cliente-servidor
 
 Verificando sobre el diagrama las reglas de la [sección 5.2](#52-estilo-arquitectónico-base-cliente-servidor):
 
 - ✅ No hay flechas entre clientes (solo hay un cliente).
-- ✅ No hay flechas de la base de datos hacia la Aplicación Web (toda escritura y lectura pasa por el API).
-- ✅ No hay flechas del API hacia la Aplicación Web (el servidor no inicia la comunicación).
-- ✅ El cliente inicia siempre la comunicación: la cadena Investigador/a → Web → API → BD y Web → API → BLAST+ fluye hacia abajo.
+- ✅ No hay flechas de la base de datos hacia la Aplicación Web (toda escritura y lectura pasa por el Backend).
+- ✅ No hay flechas del Backend hacia la Aplicación Web (el servidor no inicia la comunicación).
+- ✅ El cliente inicia siempre la comunicación: la cadena Investigador/a → Web → Backend → BD y Web → Backend → BLAST+ fluye hacia abajo.
 
 ---
 
