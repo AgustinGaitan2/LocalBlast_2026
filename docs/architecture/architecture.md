@@ -782,37 +782,52 @@ Esta sección recorre, sobre las vistas, el *Given-When-Then* de cuatro historia
 
 ---
 
-## 11. Glosario
+## 11. Trazabilidad
 
-### 11.1 Siglas usadas en este documento
+### 11.1 Escenario → táctica → estilo o patrón → decisión → elemento C4
 
-| Sigla | Significado |
+| Escenario | Atributo | Tácticas | Estilo / Patrón | Decisión | Elemento C4 |
+|---|---|---|---|---|---|
+| **EC-01** · Concurrencia de invocaciones | Interoperabilidad | Introducir concurrencia; Encapsular | Estilo cliente-servidor (DA-01) + Patrón capas en el Backend (DA-02) | DA-04, DA-08 | Componente **Adaptador BLAST+** del contenedor Backend; nodo **Python 3** del Servidor del laboratorio, junto al nodo **BLAST+ 2.14** |
+| **EC-02** · Cambio menor de versión de BLAST+ | Interoperabilidad | Adaptar la interfaz; Encapsular | Patrón capas en el Backend (DA-02) | DA-03, DA-08 | Componente **Adaptador BLAST+** del contenedor Backend; nodo **BLAST+ 2.14** del Servidor del laboratorio |
+
+Las decisiones que sostienen la estructura interna de la Aplicación Web se trazan a los escenarios de operabilidad de la sección 5.2 de [`escenarios-calidad.md`](../requeriments/quality-scenarios/escenarios-calidad.md#52-operabilidad), que no son drivers pero condicionan el cliente:
+
+| Escenario de operabilidad | Táctica | Patrón | Decisión | Elemento C4 |
+|---|---|---|---|---|
+| Escenario 1 · Filtrado interactivo sobre muchos resultados | Mantener copias de datos | MVC en la Aplicación Web | DA-06, DA-07 | Componentes **Modelo de resultados** y **Controlador de resultados** de la Aplicación Web |
+| Escenario 2 · Modificación posterior a la validación | Mantener modelos de tarea y de usuario | MVC en la Aplicación Web | DA-05, DA-07 | Componentes **Modelo de búsqueda** y **Controlador de búsqueda** de la Aplicación Web |
+
+### 11.2 Historia de usuario → elementos C4
+
+| Historia de usuario | Contenedores | Componentes |
+|---|---|---|
+| HU01_CU001_B · Cargar secuencia | Aplicación Web → Backend → Base de datos | **Web:** Pantallas → Controlador de búsqueda (Modelo de búsqueda) → Cliente del Backend · **Backend:** Controladores → Preparación de búsqueda → Acceso a datos |
+| HU02_CU001_E1 · Rechazo de secuencia inválida | Aplicación Web (rechazo local) o Aplicación Web → Backend (rechazo tras validación del servidor) | **Web:** Pantallas → Controlador de búsqueda (el Modelo de búsqueda marca el error, no se envía) · **Backend:** si la validación local fue salteada, Controladores → Preparación de búsqueda (rechaza) |
+| HU03_CU002_B · Configurar la búsqueda | Aplicación Web → Backend → Base de datos (al leer catálogo) | **Web:** Pantallas → Controlador de búsqueda (Modelo de búsqueda) → Cliente del Backend · **Backend:** Controladores → Preparación de búsqueda → Acceso a datos (lee catálogo) |
+| HU05_CU003_B · Validar la búsqueda | Aplicación Web → Backend | **Web:** Pantallas → Controlador de búsqueda (Modelo de búsqueda: marca validada) · **Backend:** Controladores → Preparación de búsqueda (validación semántica en memoria) |
+| HU08_CU004_B · Ejecutar búsqueda | Aplicación Web → Backend → BLAST+ · Backend → Base de datos | **Web:** Pantallas → Controlador de búsqueda → Cliente del Backend · **Backend:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** → Ejecución y persistencia → Acceso a datos |
+| HU09_CU004_A1 · Cancelación | Aplicación Web → Backend → BLAST+ | **Web:** Pantallas → Controlador de búsqueda (Modelo de búsqueda: estado de ejecución) → Cliente del Backend · **Backend:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** (termina el subproceso) |
+| HU10_CU004_E1 · Fallo del modo remoto | Aplicación Web → Backend | **Backend:** Controladores → Ejecución y persistencia → **Adaptador BLAST+** → Controladores (propagan el error literal al cliente) · **Web:** Controlador de búsqueda (registra el error en el Modelo de búsqueda) → Pantallas (lo muestran) |
+| HU11_CU005_B · Presentar y persistir | Aplicación Web → Backend → Base de datos | **Web:** Pantallas → Controlador de búsqueda → Cliente del Backend → Controlador de búsqueda → Modelo de resultados · **Backend:** Controladores → Ejecución y persistencia → Acceso a datos |
+| HU12_CU006_B · Filtrado | Aplicación Web | **Web:** Pantallas → Controlador de resultados → Modelo de resultados |
+| HU13_CU007_B · Descarga | Aplicación Web → Backend → Base de datos | **Web:** Pantallas → Controlador de resultados (Modelo de resultados) → Cliente del Backend · **Backend:** Controladores → Generación de archivos de descarga → Acceso a datos |
+
+### 11.3 Contenedor → nodo de despliegue
+
+| Contenedor | Nodo donde se ejecuta o se aloja |
 |---|---|
-| API | Interfaz de programación de aplicaciones; en este documento, además, el nombre del contenedor servidor |
-| C4 | Modelo de documentación de arquitectura en cuatro niveles: contexto, contenedores, componentes y código |
-| CLI | Interfaz de línea de comandos (*command-line interface*) |
-| CU | Caso de uso |
-| CSV | Formato de texto con valores separados por comas |
-| DA | Decisión de arquitectura |
-| DFD | Diagrama de flujo de datos |
-| EC | Escenario de calidad |
-| HTTP / HTTPS | Protocolo de la web / HTTP sobre una conexión cifrada |
-| HU | Historia de usuario |
-| ISO/IEC 25010:2023 | Norma del modelo de calidad del producto de software |
-| JSON | Formato de texto para intercambiar datos estructurados |
-| NCBI | *National Center for Biotechnology Information*, proveedor del BLAST remoto |
-| REST | Estilo de diseño de APIs sobre HTTP |
-| RF | Requerimiento funcional |
-| SOA | Arquitectura orientada a servicios (mencionada solo para descartarla) |
-| SQL | Lenguaje para consultar y modificar bases de datos relacionales |
-| TLS | *Transport Layer Security*: la "S" de HTTPS |
-| XML | Formato de datos estructurados con etiquetas, usado por BLAST+ como una de sus salidas |
+| Aplicación Web | Alojada en el entorno **Python 3** del Servidor del laboratorio; ejecutada en el **navegador** de la PC del investigador/a |
+| Backend | Entorno **Python 3** del Servidor del laboratorio |
+| Base de datos | Entorno **PostgreSQL** del Servidor del laboratorio |
+| BLAST+ *(sistema externo instalado)* | Entorno **BLAST+ 2.14** del Servidor del laboratorio |
 
-### 11.2 Términos del dominio
+Todo driver llega a al menos un contenedor, un componente y un nodo de despliegue. Todo componente de las vistas corresponde a una responsabilidad del sistema o a una decisión de arquitectura de este documento.
 
-Los términos del dominio (BLAST, BLAST+, query, base de datos BLAST, FASTA, E-value, etc.) están definidos en el [Glosario del SRS](../requeriments/srs.md#10-glosario). Se usan en este documento con el mismo significado, para preservar la coherencia entre el modelo del dominio y la arquitectura.
+**Nota sobre Autenticación y sesión.** No aparece en la columna de componentes porque no existe una historia de usuario propia para la autenticación en el alcance actual, pero el componente participa en **todas** las historias de la tabla que llegan al Backend: los Controladores lo consultan al inicio de cada solicitud HTTP para identificar al investigador y recién después delegan en el servicio de dominio correspondiente. Agregarlo en cada fila sería redundante; su participación es uniforme.
 
 ---
+
 
 ## Documentos relacionados
 
