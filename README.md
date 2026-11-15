@@ -32,14 +32,14 @@ LocalBlast_2026/
     │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07_final.html
     │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10_inicial.html
     │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10_final.html
-    │   │   ├── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_inicial.html
-    │   │   └── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14_final.html
+    │   │   ├── pantalla-04-resultados-filtros-descarga_HU08-HU11-HU12-HU13_inicial.html
+    │   │   └── pantalla-04-resultados-filtros-descarga_HU08-HU11-HU12-HU13_final.html
     │   ├── heuristic-review/
     │   │   ├── README.md
     │   │   ├── pantalla-01-carga-secuencia_HU01-HU02.md
     │   │   ├── pantalla-02-configuracion-validacion_HU03-HU04-HU05-HU06-HU07.md
     │   │   ├── pantalla-03-ejecucion_HU08-HU09-HU10.md
-    │   │   └── pantalla-04-resultados-filtros-descarga_HU11-HU12-HU13-HU14.md
+    │   │   └── pantalla-04-resultados-filtros-descarga_HU08-HU11-HU12-HU13.md
     │   └── user-profiles/
     │       ├── README.md
     │       └── investigador.md

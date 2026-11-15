@@ -105,15 +105,15 @@ De los tres procesos identificados en el DFD Nivel 1 (P1, P2, P3), el grupo elig
 
 ### 5.1 Qué se profundiza y por qué
 
-- **P1 · Ejecutar búsqueda BLAST — profundizado.** Es el proceso *core* del sistema: sin él no hay valor entregable. Concentra la complejidad interesante del dominio (dos modos de invocación a BLAST+ con o sin `-remote`, validación de parámetros pre-búsqueda, verificación de compatibilidad programa/query/base de datos, ejecución asíncrona con cancelación y persistencia automática en el historial). Da lugar a **cinco casos de uso**, uno por cada capacidad discreta que el sistema le brinda al investigador dentro del ciclo de una búsqueda: `CU001 · Cargar la secuencia query` (dejar la secuencia disponible y chequeada sintácticamente), `CU002 · Configurar los parámetros de la búsqueda` (armar modo, base de datos, programa y parámetros pre-búsqueda), `CU003 · Validar la búsqueda` (obtener el visto bueno semántico del sistema), `CU004 · Ejecutar la búsqueda` (correr BLAST+ con progreso y cancelación) y `CU005 · Ver los resultados y persistir la búsqueda en el historial` (presentar la tabla de alineamientos y dejarla registrada en D2). La partición refleja que cada una de esas capacidades tiene valor propio y es ejercitable por separado.
+- **P1 · Ejecutar búsqueda BLAST — profundizado.** Es el proceso *core* del sistema: sin él no hay valor entregable. Concentra la complejidad interesante del dominio (dos modos de invocación a BLAST+ con o sin `-remote`, validación de parámetros pre-búsqueda, verificación de compatibilidad programa/query/base de datos, ejecución asíncrona con cancelación y persistencia automática en el historial). Da lugar a **cuatro casos de uso**, uno por cada capacidad discreta que el sistema le brinda al investigador dentro del ciclo de una búsqueda: `CU001 · Cargar la secuencia query` (dejar la secuencia disponible y chequeada sintácticamente), `CU002 · Configurar los parámetros de la búsqueda` (armar modo, base de datos, programa y parámetros pre-búsqueda), `CU003 · Validar la búsqueda` (obtener el visto bueno semántico del sistema) y `CU004 · Ejecutar la búsqueda y ver sus resultados` (correr BLAST+ con progreso y cancelación, presentar la tabla de alineamientos y dejar la búsqueda registrada en D2). La partición refleja que cada una de esas capacidades tiene valor propio y es ejercitable por separado.
 
-- **P2 · Filtrar y entregar resultados — profundizado.** Es lo que le permite al investigador cerrar la interacción con valor real: sin filtrar ni descargar, la búsqueda queda "en el aire" en la interfaz. P2 se ejecuta sobre los datos ya devueltos por BLAST+ y su lógica es previsible (comparaciones numéricas para el filtro, serialización para la descarga), pero es indispensable para el flujo típico del usuario y por eso lo profundizamos. Da lugar a **dos casos de uso** con capacidades distintas para el mismo actor investigador: `CU006 · Refinar los resultados con filtros post-búsqueda` y `CU007 · Descargar los resultados en un formato`. Están detallados en [`docs/requeriments/casos-de-uso.md`](casos-de-uso.md).
+- **P2 · Filtrar y entregar resultados — profundizado.** Es lo que le permite al investigador cerrar la interacción con valor real: sin filtrar ni descargar, la búsqueda queda "en el aire" en la interfaz. P2 se ejecuta sobre los datos ya devueltos por BLAST+ y su lógica es previsible (comparaciones numéricas para el filtro, serialización para la descarga), pero es indispensable para el flujo típico del usuario y por eso lo profundizamos. Da lugar a **dos casos de uso** con capacidades distintas para el mismo actor investigador: `CU005 · Refinar los resultados con filtros post-búsqueda` y `CU006 · Descargar los resultados en un formato`. Están detallados en [`docs/requeriments/casos-de-uso.md`](casos-de-uso.md).
 
 ### 5.2 Qué queda fuera del profundizado y por qué
 
 - **P3 · Administrar bases de datos — no profundizado.** Es el proceso de un actor distinto (Administrador), con objetivo distinto y precondición distinta a los procesos anteriores. Un caso de uso derivado de P3, por ejemplo "Administrar base de datos BLAST local", pertenece conceptualmente a ese proceso, no a P1 ni a P2, y por lo tanto queda fuera de la cadena `RF → CU → slice → HU` de este TP. Se documenta a nivel de alcance en el DFD Nivel 1 (con sus flujos hacia BLAST+ y hacia D1) y sus entidades siguen presentes en el modelo de dominio, pero sin RF ni CU propios profundizados en este cuatrimestre.
 
-**Criterio general.** Esta decisión respeta la recomendación explícita de la cátedra: *"elegir uno bien resuelto vale más que varios a medio desarrollar"*. Concentrar el trabajo en los dos procesos que cubren una interacción completa del investigador (P1 y P2) nos permite descomponer esa interacción en las siete capacidades discretas que el sistema le da al investigador — cargar una secuencia, configurar los parámetros de una búsqueda, pedirle al sistema que la valide, ejecutarla, ver los resultados y dejarlos persistidos, refinarlos con filtros, y descargarlos en un formato —, cada una modelada como su propio CU con un objetivo bien delimitado y con un flujo principal de entre 1 y 4 pasos, implementable y probable de forma independiente. Es más rico que dispersar el esfuerzo entre P3, que responde a un objetivo y a un actor diferentes.
+**Criterio general.** Esta decisión respeta la recomendación explícita de la cátedra: *"elegir uno bien resuelto vale más que varios a medio desarrollar"*. Concentrar el trabajo en los dos procesos que cubren una interacción completa del investigador (P1 y P2) nos permite descomponer esa interacción en las seis capacidades discretas que el sistema le da al investigador — cargar una secuencia, configurar los parámetros de una búsqueda, pedirle al sistema que la valide, ejecutarla y ver sus resultados (que quedan persistidos), refinarlos con filtros, y descargarlos en un formato —, cada una modelada como su propio CU con un objetivo bien delimitado y con un flujo principal de entre 2 y 4 pasos, implementable y probable de forma independiente. Es más rico que dispersar el esfuerzo entre P3, que responde a un objetivo y a un actor diferentes.
 
 ---
 
@@ -122,7 +122,7 @@ Los RF-01 a RF-10 corresponden al proceso profundizado P1 y los RF-11 y RF-12 al
 
 ### 6.1 Proceso P1 — Ejecución de búsqueda BLAST
 
-Realizados por `CU001` (cargar la secuencia query), `CU002` (configurar los parámetros), `CU003` (validar la búsqueda), `CU004` (ejecutar) y `CU005` (ver resultados y persistir).
+Realizados por `CU001` (cargar la secuencia query), `CU002` (configurar los parámetros), `CU003` (validar la búsqueda) y `CU004` (ejecutar, ver resultados y persistir).
 
 | ID | Requerimiento |
 |---|---|
@@ -140,7 +140,7 @@ Realizados por `CU001` (cargar la secuencia query), `CU002` (configurar los par�
 
 ### 6.2 Proceso P2 — Filtrado y entrega de resultados
 
-Realizados por `CU006` (refinar con filtros post-búsqueda) y `CU007` (descargar en un formato).
+Realizados por `CU005` (refinar con filtros post-búsqueda) y `CU006` (descargar en un formato).
 
 | ID | Requerimiento |
 |---|---|
@@ -151,7 +151,7 @@ Realizados por `CU006` (refinar con filtros post-búsqueda) y `CU007` (descargar
 
 ## 7. Casos de uso e historias de usuario
 
-Los casos de uso en formato Cockburn (flujo principal detallado y slices secundarios nombrados), derivados de los procesos profundizados P1 (`CU001` a `CU005`) y P2 (`CU006` y `CU007`), están en:
+Los casos de uso en formato Cockburn (flujo principal detallado y slices secundarios nombrados), derivados de los procesos profundizados P1 (`CU001` a `CU004`) y P2 (`CU005` y `CU006`), están en:
 
 👉 [`docs/requeriments/casos-de-uso.md`](casos-de-uso.md)
 
