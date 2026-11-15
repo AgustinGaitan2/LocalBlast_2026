@@ -87,16 +87,6 @@ Para el alcance de este documento conviene retener dos aclaraciones del contexto
 
 ---
 
-**Descripción de elementos:**
-
-| Elemento | Tipo | Responsabilidad |
-|---|---|---|
-| Investigador/a | Persona | Actor que hace uso del sistema |
-| LocalBlast | Sistema | Sistema principal que permite la comunicacion con la API |
-| BLAST+ | Sistema externo | Sistema encargado de ejecutar los alineamientos locales |
-
----
-
 ## 4. Drivers arquitectónicos
 
 ### 4.1 Elección del atributo de calidad como driver
