@@ -427,6 +427,29 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
   - **Menciones al número de TP** eliminadas del cuerpo: el documento simula un proyecto real.
 - **Qué descartamos:** separar la vista de componentes del API en dos sub-vistas para evitar cruces de líneas (la consigna pide una por cada contenedor); dibujar flechas desde Preparación / Ejecución / Entrega hacia Autenticación y sesión (el identificador viaja como parámetro, no como invocación), una cola de mensajes implícita entre Ejecución y persistencia y el Adaptador BLAST+ (habría violado DA-04).
 - **Errores / imprecisiones detectadas:** la IA no decía abiertamente que la validación en el cliente **no es un control de seguridad**, en DA-05 dejamos explícito que el servidor repite la validación porque un atacante puede saltear la del cliente. En una iteración quiso agregar la cola implícita descartada arriba. Confusión recurrente entre contenedores de C4 y contenedores de despliegue (Docker): corregida cada vez.
+
+## Entrada 22 — Cambio de patrón en la Aplicación Web: de Capas a MVC, y ajuste de nombres en el Backend
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** revisar la vista de componentes de la Aplicación Web armada en la Entrada 21, donde habíamos aplicado al cliente las mismas tres capas que al Backend (presentación, dominio, datos). Al consultar en clases notamos que Capas no se ajustaba perfectamente bien con el problema del cliente. Le pedimos a la IA que evaluara qué patrón correspondía al cliente y que reescribiera la sección 5.3, la vista de componentes 7.2 y las decisiones afectadas.
+- **Qué generó:**
+  - Una sección 5.3 que separa el patrón por contenedor: **Capas en el Backend** (flujo vertical: solicitud → dominio → base de datos o BLAST+) y **MVC en la Aplicación Web** (flujo cíclico: acción → cambio de estado → refresco de la vista).
+  - Una nueva vista de componentes de la Aplicación Web con roles MVC: **Pantallas** (Vista), **Controlador de búsqueda** y **Controlador de resultados** (Controladores), **Modelo de búsqueda** y **Modelo de resultados** (Modelos), y el **Cliente del Backend** como componente de apoyo fuera de la tríada, usado solo por los Controladores.
+  - Una nueva decisión **DA-07 · Patrón MVC en la Aplicación Web**, trazada a los dos escenarios de operabilidad (filtrado en menos de 1 segundo e invalidación de la marca "validada" en menos de 500 ms), con Capas y MVVM como alternativas descartadas.
+  - La reubicación de las reglas de validación (DA-05) y de filtrado (DA-06) dentro de los Modelos, de modo que se puedan probar sin montar la interfaz.
+- **Qué aceptamos:**
+  - MVC en la variante con **notificación de cambios por suscripción**: la Vista observa a los Modelos (en React, el estado que renderiza) y los Modelos no conocen ni a la Vista ni a los Controladores. Encaja con cómo funciona React y deja verificable en el diagrama que ninguna flecha sale de los Modelos.
+  - Dividir Controlador y Modelo en dos (búsqueda y resultados), porque corresponden a los dos momentos del trabajo del investigador (preparar y lanzar la búsqueda, y explorar lo que devolvió) y comparten poco estado.
+  - La tabla de comprobación de restricciones del patrón (7.2.3), con el mismo formato que la de Capas en el Backend (7.1.3).
+- **Qué modificamos:**
+  - **"API" pasa a llamarse "Backend".** Al reescribir las vistas notamos que llamar "API" al contenedor confundía el contenedor con la interfaz que expone. Lo renombramos a **Backend** en todo el documento y dejamos en la sección 6.2 la aclaración de por qué. "API" (o "API REST") queda reservado para la interfaz REST que el Backend le ofrece a la Aplicación Web.
+  - **"Entrega de resultados" pasa a llamarse "Generación de archivos de descarga".** Con el filtrado movido al Modelo de resultados del cliente (DA-06), el componente del Backend ya no "entrega" resultados filtrados: solo arma los archivos descargables a partir de lo persistido y de los hits visibles que indica el cliente. El nombre nuevo describe lo que hace de verdad.
+  - **Motivación de DA-07.** La IA la trazaba a EC-01 y EC-02. La corregimos: los drivers de interoperabilidad no condicionan la estructura interna del cliente. Los que la condicionan son los escenarios de operabilidad, que no son drivers, y así quedó escrito en DA-07 y en la sección 11.1.
+- **Qué descartamos:**
+  - **Mantener Capas en el cliente.** Ver la tarea concreta: el flujo de una interfaz no es una cadena vertical.
+  - **MVVM.** Sirve para interfaces con estado complejo y enlace automático entre vista y modelo de vista. El estado de LocalBlast (una secuencia, una configuración, una tabla de resultados) es acotado, y el enlace automático sumaría una pieza más que haría más difícil depurar.
+- **Errores / imprecisiones detectadas:**
+  - **Cambio transversal aplicado a medias (patrón recurrente).** La IA actualizó la sección 5.3 y la vista 7.2, pero dejó menciones a "capas en la Aplicación Web" y a "API" en la sección 4.1, en DA-02 y en la trazabilidad. Hubo que pedirle un barrido completo del documento. Tampoco actualizó esta bitácora: las Entradas 20 y 21 siguen describiendo la versión anterior (capas en el cliente, "API", "Entrega de resultados"), y las dejamos así a propósito porque registran lo que se decidió en ese momento.
   
 ## Reflexión sobre el uso de IA
 
