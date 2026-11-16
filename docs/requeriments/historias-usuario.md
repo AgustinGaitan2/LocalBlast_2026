@@ -216,9 +216,11 @@ Para el TP1 se detallan las HU de **todos los slices identificados en los casos 
   - **Then** presenta los resultados en una tabla con al menos las columnas: identificador del hit, score, E-value observado, porcentaje de identidad y porcentaje de cobertura.
 
 - **CA-03.** Persistencia automática en el historial:
-  - **Given** los resultados crudos recién presentados en la tabla,
-  - **When** el sistema termina de mostrarlos,
-  - **Then** queda registrada en el historial (D2) una entrada con los parámetros pre-búsqueda, la base de datos usada, el timestamp y el conjunto **completo** de resultados crudos que devolvió BLAST+ (antes de cualquier filtro post-búsqueda) — sin que el investigador tenga que ejercer `CU005` ni `CU006` para que la persistencia ocurra.
+  - **Given** una búsqueda que BLAST+ terminó exitosamente,
+  - **When** el sistema recibe su conjunto crudo de alineamientos,
+  - **Then** registra en el historial (D2), antes de presentar la tabla, una entrada con los parámetros pre-búsqueda, la base de datos usada, el timestamp y el conjunto **completo** de resultados crudos que devolvió BLAST+ (antes de cualquier filtro post-búsqueda) — sin que el investigador tenga que ejercer `CU005` ni `CU006` para que la persistencia ocurra.
+
+> **Precisión de CA-03.** En su primera versión el criterio registraba la búsqueda "cuando el sistema termina de mostrar" la tabla. Al hacer el diseño detallado de esta HU se invirtió el orden (primero se guarda, después se muestra) para cumplir la garantía mínima de `CU004`: si la tabla se muestra, la entrada en D2 ya existe. Ver [`diseno-detallado.md`](../design/diseno-detallado.md#31-enunciado-y-criterios-de-aceptación).
 
 ---
 

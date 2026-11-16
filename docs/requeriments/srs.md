@@ -194,6 +194,7 @@ Cada atributo cuenta con dos escenarios de calidad, redactados en entornos de so
 |---|---|
 | **BLAST** | *Basic Local Alignment Search Tool*: familia de algoritmos para buscar regiones de similitud local entre secuencias biológicas. |
 | **BLAST+** | Suite oficial de línea de comandos de NCBI que implementa BLAST (`blastn`, `blastp`, `makeblastdb`, etc.). Es la herramienta que LocalBlast envuelve. |
+| **Programa BLAST** | Variante del algoritmo que se ejecuta (`blastn`, `blastp`, `blastx`, `tblastn`, `tblastx`). Determina qué tipo de query y qué tipo de base de datos son compatibles. |
 | **Query** | Secuencia biológica que el investigador quiere alinear contra una base de datos. |
 | **Base de datos BLAST** | Conjunto de secuencias biológicas indexadas para búsqueda BLAST. Físicamente: los archivos `.nhr/.nin/.nsq` (nucleótidos) o `.phr/.pin/.psq` (proteínas) generados por `makeblastdb`. |
 | **Hit / Alineamiento** | Cada una de las coincidencias que BLAST devuelve entre la query y una secuencia de la base de datos. |

@@ -174,8 +174,10 @@ Son terminaciones abruptas del flujo: el sistema detecta una condición que impi
 
 1. El investigador presiona **Ejecutar búsqueda** sobre una configuración ya validada por `CU003`.
 2. El sistema **invoca a BLAST+** en segundo plano con la combinación de opciones armada a partir de la configuración validada (programa, ruta de la base de datos, query, parámetros pre-búsqueda, y la flag `-remote` cuando el modo elegido es remoto), y muestra un indicador de progreso sin bloquear la interfaz. La comunicación con NCBI, cuando corresponde, la realiza BLAST+ internamente por la flag `-remote`; el sistema solo espera su respuesta.
-3. Cuando BLAST+ termina, el sistema recibe el conjunto crudo de alineamientos y muestra la **lista de alineamientos** (hits) en una tabla, con columnas mínimas: identificador del hit, score, E-value observado, % identidad, % cobertura.
-4. El sistema **persiste la búsqueda con sus resultados crudos en D2** (parámetros pre-búsqueda, base de datos usada, timestamp y lista completa de alineamientos antes de cualquier filtro).
+3. Cuando BLAST+ termina, el sistema recibe el conjunto crudo de alineamientos y **persiste la búsqueda con sus resultados crudos en D2** (parámetros pre-búsqueda, base de datos usada, timestamp y lista completa de alineamientos antes de cualquier filtro).
+4. El sistema muestra la **lista de alineamientos** (hits) en una tabla, con columnas mínimas: identificador del hit, score, E-value observado, % identidad, % cobertura.
+
+> **Orden de los pasos 3 y 4.** Persistir antes de mostrar es lo que sostiene la garantía mínima del CU: si la tabla se muestra, la entrada en D2 ya está escrita. El orden se fijó en el diseño detallado de `HU08_CU004_B` ([`diseno-detallado.md`](../design/diseno-detallado.md)).
 
 **Postcondición:** El investigador ve la tabla de alineamientos de su búsqueda en la interfaz, y la búsqueda queda persistida en D2. Los resultados quedan disponibles en la sesión para que el investigador los use en `CU005` (refinar) o `CU006` (descargar) si así lo decide.
 
@@ -188,7 +190,7 @@ En una versión anterior del modelado, "ver los resultados y persistir la búsqu
 ```
 CU004 · Ejecutar la búsqueda y ver sus resultados
 ├─ Camino feliz
-│  └─ CU004_B    — pasos 1-4:  invocar BLAST+, monitorear la ejecución, presentar la tabla de alineamientos y persistir en D2
+│  └─ CU004_B    — pasos 1-4:  invocar BLAST+, monitorear la ejecución, persistir en D2 y presentar la tabla de alineamientos
 ├─ Caminos alternativos (slices A)
 │  └─ CU004_A1   — cancelación manual de la búsqueda en curso
 └─ Terminaciones abruptas (slices E)
@@ -197,7 +199,7 @@ CU004 · Ejecutar la búsqueda y ver sus resultados
 
 ### Slice básico — descripción
 
-- **`CU004_B` · Ejecutar la búsqueda y ver sus resultados (pasos 1-4).** El sistema invoca a BLAST+ en segundo plano, muestra progreso, permite cancelar y, al terminar exitosamente, presenta la tabla de alineamientos y persiste la búsqueda con sus resultados crudos en D2. **Valor entregado:** el investigador ve los alineamientos de su búsqueda y no la pierde aunque no llegue a refinarla ni descargarla. **Realiza:** RF-08, RF-09, RF-10.
+- **`CU004_B` · Ejecutar la búsqueda y ver sus resultados (pasos 1-4).** El sistema invoca a BLAST+ en segundo plano, muestra progreso, permite cancelar y, al terminar exitosamente, persiste la búsqueda con sus resultados crudos en D2 y presenta la tabla de alineamientos. **Valor entregado:** el investigador ve los alineamientos de su búsqueda y no la pierde aunque no llegue a refinarla ni descargarla. **Realiza:** RF-08, RF-09, RF-10.
 
 ### Slice alternativo — descripción
 
