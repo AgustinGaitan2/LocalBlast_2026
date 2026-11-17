@@ -12,12 +12,23 @@
 LocalBlast_2026/
 ├── .gitignore
 ├── README.md
+├── requirements.txt
+├── pyproject.toml              # configuración de pytest y de la cobertura
+├── src/                        # código de HU08 (ver docs/design/diseno-detallado.md, sección 6)
+│   ├── main.py                 # punto de arranque
+│   ├── dominio/                # Busqueda, Alineamiento
+│   ├── aplicacion/             # ControladorEjecucion e interfaces (AdaptadorBlast, RepositorioHistorial)
+│   ├── infraestructura/        # BLAST+ real y simulado; historial en memoria y SQL
+│   └── interfaz/               # ruta HTTP del Backend y Aplicación Web (MVC, Tkinter)
+├── tests/                      # pruebas unitarias (pytest), misma estructura que src/
 └── docs/
     ├── architecture/
     │   ├── architecture.md
     │   └── contexto-inicial.md
     ├── design/
-    │   └── diseno-detallado.md
+    │   ├── diseno-detallado.md
+    │   ├── cobertura.md
+    │   └── generado/clases_pyreverse.mmd
     ├── requeriments/
     │   ├── casos-de-uso.md
     │   ├── historias-usuario.md
@@ -92,15 +103,73 @@ La evaluación heurística de usabilidad, con los prompts enviados a la IA, su r
 El documento de Especificación de Arquitectura, con la elección de interoperabilidad como driver único, la derivación hasta estilo cliente-servidor, patrón de capas en el Backend y patrón MVC en la Aplicación Web, las decisiones de arquitectura (`DA-01` a `DA-08`), las vistas de contenedores, de componentes y de despliegue del modelo C4 con sus catálogos, y la trazabilidad escenario → táctica → estilo/patrón → decisión → elemento C4, está en:
 👉 [`docs/architecture/architecture.md`](docs/architecture/architecture.md)
 
-El diseño detallado de la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados` (ficha y análisis tridimensional de la HU, diagrama de robustez, diagramas de secuencia, modelo de clases, justificación con GRASP, verificación de coherencia con la arquitectura y trazabilidad hasta las pruebas previstas) está en:
+El diseño detallado de la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados` (ficha y análisis tridimensional de la HU, diagrama de robustez, diagramas de secuencia, modelo de clases obtenido del código y su validación, justificación con GRASP, implementación, casos de prueba, complejidad ciclomática y trazabilidad hasta las pruebas) está en:
 👉 [`docs/design/diseno-detallado.md`](docs/design/diseno-detallado.md)
+
+El reporte de cobertura de las pruebas de HU08 y su análisis están en:
+👉 [`docs/design/cobertura.md`](docs/design/cobertura.md)
 
 El diagrama de contexto completo del sistema está en:
 👉 [`docs/architecture/contexto-inicial.md`](docs/architecture/contexto-inicial.md)
 
 ---
 
-## 3. Modelo de Ciclo de Vida Específico
+## 3. Cómo instalar y ejecutar (TP4)
+
+El TP4 implementa `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados`: un Backend en Python (FastAPI) con capas dominio / aplicación / infraestructura, y una Aplicación cliente MVC con interfaz gráfica mínima en Tkinter.
+
+### Requisitos
+
+- **Python 3.10 o posterior**. En Windows y macOS el instalador de python.org ya trae Tkinter; en Debian/Ubuntu: `sudo apt install python3-tk`.
+- **BLAST+ 2.14 o posterior es opcional.** Si `blastn` no está en el `PATH`, el sistema usa un BLAST+ simulado con datos de demostración.
+
+### Instalación (máquina limpia)
+
+```bash
+git clone https://github.com/AgustinGaitan2/LocalBlast_2026.git
+cd LocalBlast_2026
+python -m venv .venv
+# Windows:  .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Ejecutar la interfaz
+
+```bash
+python src/main.py
+```
+
+Abre la ventana con una secuencia de ejemplo y la base `base_demo` ya cargadas. Para recorrer la HU en la defensa:
+
+1. **Camino principal:** presionar **Ejecutar búsqueda**. Aparece el indicador de progreso (el simulado tarda 2 s, y la ventana se puede seguir usando), y luego la tabla con hit, score, E-value, % identidad y % cobertura. La búsqueda queda guardada en `localblast.db`.
+2. **Camino de rechazo:** cambiar la base de datos por `nt` (o cualquier otra) y ejecutar. Se muestra el mensaje de error de BLAST+, sin tabla, y no se guarda nada.
+
+Opciones del punto de arranque (`python src/main.py --help`):
+
+| Opción | Qué hace |
+|---|---|
+| `--historial memoria` | Historial en memoria, sin archivo |
+| `--historial sqlite:///otra.db` | Historial en otro archivo SQLite (por defecto `sqlite:///localblast.db`, se crea solo) |
+| `--historial postgresql://usuario:clave@host/localblast` | Historial en PostgreSQL (requiere `pip install psycopg2-binary`; las tablas se crean al arrancar) |
+| `--adaptador cli` / `simulado` | Fuerza BLAST+ real o simulado (por defecto `auto`) |
+| `--blast-bin RUTA` | Carpeta de los binarios de BLAST+ si no están en el `PATH` |
+| `--demora 0.5` | Segundos que tarda el BLAST+ simulado |
+| `backend` | Levanta solo el Backend en `http://127.0.0.1:8000` (documentación interactiva en `/docs`) |
+
+Cambiar el historial o BLAST+ es cambiar una opción: `ControladorEjecucion` no se modifica (decisión D9 del diseño).
+
+### Ejecutar las pruebas
+
+```bash
+python -m pytest                                          # 60 pruebas
+python -m pytest --cov --cov-branch --cov-report=term-missing   # con cobertura de ramas
+radon cc -s src                                           # complejidad ciclomática
+```
+
+---
+
+## 4. Modelo de Ciclo de Vida Específico
 
 El grupo se decanta por una **metodologia incremental con practicas agiles**. 
 

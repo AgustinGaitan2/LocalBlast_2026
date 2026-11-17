@@ -1,0 +1,104 @@
+classDiagram
+  class AdaptadorBlast {
+    ejecutar(programa: str, secuencia: str, base_datos: str, remota: bool, parametros: dict)* list[dict]
+  }
+  class AdaptadorBlastCli {
+    directorio_binarios : str
+    tiempo_maximo_segundos : float
+    ejecutar(programa: str, secuencia: str, base_datos: str, remota: bool, parametros: dict) list[dict]
+    leer_salida(salida_xml: str) list[dict]
+    registrar_advertencia(campos: list[str]) None
+  }
+  class AdaptadorBlastSimulado {
+    bases_disponibles : set[str]
+    demora_segundos : float | dict[str, float]
+    hits_por_defecto : list
+    hits_preparados : dict[str, list[dict]]
+    invocaciones : list[dict]
+    ejecutar(programa: str, secuencia: str, base_datos: str, remota: bool, parametros: dict) list[dict]
+  }
+  class Alineamiento {
+    descripcion : str
+    evalue : float
+    hit_id : str
+    identidades : int
+    longitud_alineamiento : int
+    longitud_query : int
+    query_desde : int
+    query_hasta : int
+    score : float
+    porcentaje_cobertura() float
+    porcentaje_identidad() float
+  }
+  class Busqueda {
+    alineamientos : list[Alineamiento]
+    base_datos : str
+    fecha : datetime
+    parametros : dict
+    programa : str
+    remota : bool
+    secuencia : str
+    longitud_query() int
+    registrar_resultados(hits: list[dict]) None
+    tabla_resultados() list[dict]
+  }
+  class ClienteBackend {
+    tiempo_maximo_segundos : float
+    url_base
+    ejecutar_busqueda(configuracion: dict) list[dict]
+  }
+  class ConfiguracionBusqueda {
+    base_datos : str
+    parametros : dict
+    programa : str
+    remota : bool
+    secuencia : str
+  }
+  class ControladorBusqueda {
+    ejecutar() None
+    preparar(configuracion: dict) None
+  }
+  class ControladorEjecucion {
+    ejecutar_busqueda(configuracion: dict) list[dict]
+  }
+  class ErrorBlast {
+    mensaje : str
+  }
+  class ErrorEjecucion {
+    mensaje : str
+  }
+  class ModeloBusqueda {
+    configuracion() dict
+    establecer_configuracion(configuracion: dict) None
+    estado() str
+    marcar_en_ejecucion() None
+    marcar_finalizada() None
+    mensaje_error() str | None
+    registrar_error(mensaje: str) None
+  }
+  class ModeloResultados {
+    cargar(filas: list[dict]) None
+    filas() list[dict]
+  }
+  class Observable {
+    suscribir(observador: Callable[[], None]) None
+  }
+  class RepositorioHistorial {
+    guardar(busqueda: Busqueda)* None
+  }
+  class RepositorioHistorialEnMemoria {
+    busquedas : tuple[Busqueda, ...]
+    guardar(busqueda: Busqueda) None
+  }
+  class RepositorioHistorialSql {
+    url_conexion : str
+    cerrar() None
+    guardar(busqueda: Busqueda) None
+  }
+  AdaptadorBlastCli --|> AdaptadorBlast
+  AdaptadorBlastSimulado --|> AdaptadorBlast
+  RepositorioHistorialEnMemoria --|> RepositorioHistorial
+  RepositorioHistorialSql --|> RepositorioHistorial
+  ModeloBusqueda --|> Observable
+  ModeloResultados --|> Observable
+  Busqueda --> Alineamiento : alineamientos
