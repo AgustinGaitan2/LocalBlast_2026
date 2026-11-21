@@ -52,10 +52,10 @@ Más allá de esas condiciones, es **la historia que justifica la existencia del
 
 | Sigla | Significado |
 |---|---|
+| BD | Base de datos relacional donde se guarda el historial (no confundir con la entidad `BaseDeDatos`, que es una base de datos BLAST) |
 | C4 | Modelo de documentación de arquitectura en cuatro niveles: contexto, contenedores, componentes y código |
 | CA | Criterio de aceptación de una historia de usuario |
 | CLI | Interfaz de línea de comandos (*command-line interface*) |
-| CP | Caso de prueba |
 | CU | Caso de uso |
 | D2 | Almacén del DFD con las búsquedas ejecutadas y sus resultados crudos (historial) |
 | DA | Decisión de arquitectura |
@@ -64,9 +64,10 @@ Más allá de esas condiciones, es **la historia que justifica la existencia del
 | GRASP | Patrones generales para asignar responsabilidades (*General Responsibility Assignment Software Patterns*) |
 | HTTP / HTTPS | Protocolo de la web / HTTP sobre una conexión cifrada |
 | HU | Historia de usuario |
-| JSON | Formato de texto para intercambiar datos estructurados entre la Aplicación Web y el Backend |
+| JSON | Formato de texto para intercambiar datos estructurados; es el formato de las solicitudes entre la Aplicación Web y el Backend |
 | MVC | Modelo-Vista-Controlador |
 | NCBI | *National Center for Biotechnology Information*, proveedor del BLAST remoto |
+| REST | Estilo de interfaz web basado en recursos y operaciones HTTP; es la interfaz que el Backend ofrece a la Aplicación Web |
 | RF | Requerimiento funcional |
 | SQL | Lenguaje para consultar y modificar bases de datos relacionales |
 | XML | Formato de datos con etiquetas; es la salida de BLAST+ que usa este diseño (`-outfmt 5`) |
@@ -82,8 +83,8 @@ Más allá de esas condiciones, es **la historia que justifica la existencia del
 | **Funcionalidad** | `HU08_CU004_B`, slice básico `CU004_B` del caso de uso `CU004 · Ejecutar la búsqueda y ver sus resultados` (pasos 1 a 4). Caminos: el principal (ejecutar, guardar en el historial y mostrar la tabla) y uno de error (BLAST+ no termina bien: no se muestra tabla ni se guarda nada, como exige la garantía mínima de `CU004`). |
 | **Estructura** | Contenedor **Aplicación Web** (patrón MVC, `DA-07`): Pantallas, Controlador de búsqueda, Modelo de búsqueda, Modelo de resultados y Cliente del Backend. Contenedor **Backend** (patrón Capas, `DA-02`): **Controladores** (presentación), **Ejecución y persistencia** (dominio), **Acceso a datos** y **Adaptador BLAST+** (datos). Sistema externo **BLAST+**. Estilo base cliente-servidor (`DA-01`). **Componente principal: Ejecución y persistencia.** |
 | **Calidad** | `EC-01` · hasta cinco búsquedas concurrentes sin cruce de resultados. Tácticas: *introducir concurrencia* y *encapsular*. Decisión: `DA-04` (un subproceso de BLAST+ por búsqueda). `EC-02` · cambio menor de versión de BLAST+ sin romper la lectura de la salida. Tácticas: *adaptar la interfaz* y *encapsular*. Decisión: `DA-03` (Adaptador BLAST+ dedicado en la capa de datos). |
-| **Dominio** | Entidades del modelo de dominio que intervienen: `Busqueda` y `Alineamiento` como clases; `SecuenciaQuery`, `ProgramaBlast`, `ParametrosPreBusqueda`, `ModoEjecucion` y `BaseDeDatos` como datos de la búsqueda. No intervienen `Usuario`, `Investigador`, `Administrador`, `FiltroPostBusqueda`, `Reporte` ni `FormatoDescarga` (ver [3.2](#32-entidades-del-modelo-de-dominio-que-intervienen)). |
-| **Verificación** | `EC-01`: prueba CP-21, cinco búsquedas lanzadas a la vez sobre `AdaptadorBlastSimulado` con demoras distintas; cada una recibe exactamente sus propios alineamientos (cero cruces). `EC-02`: prueba CP-24, lectura de una salida XML con campos desconocidos; los campos obligatorios llegan intactos y queda registrada una advertencia (ver sección 7). |
+| **Dominio** | Entidades del modelo de dominio que intervienen: `Busqueda` y `Alineamiento` como clases; `SecuenciaQuery`, `ParametrosPreBusqueda` (con su `VarianteBlast` y su `ModoEjecucion`) y `BaseDeDatos` como datos de la búsqueda. No intervienen `Investigador`, `FiltroPostBusqueda`, `Reporte` ni `FormatoDescarga` (ver [3.2](#32-entidades-del-modelo-de-dominio-que-intervienen)). |
+| **Verificación** | `EC-01`: se verificará con una prueba de cinco búsquedas lanzadas a la vez sobre un adaptador simulado con demoras distintas; cada una recibe exactamente sus propios alineamientos (cero cruces). `EC-02`: se verificará con una prueba de la lectura de una salida XML con campos desconocidos; los campos obligatorios llegan intactos y queda registrada una advertencia. Las pruebas concretas se diseñan en la etapa de pruebas, una vez aprobado este diseño. |
 
 ### 2.2 Recorrido de la HU sobre los componentes
 
@@ -120,7 +121,7 @@ flowchart LR
 
 ★ componente principal de la HU.
 
-La verificación completa de coherencia con la arquitectura está en la [sección 8.2](#82-verificación-de-coherencia), porque necesita los diagramas de las secciones 3 y 4.
+La verificación completa de coherencia con la arquitectura está en la [sección 3.6](#36-verificación-de-coherencia-con-la-arquitectura), porque necesita los diagramas de robustez y de secuencia.
 
 ---
 
@@ -142,44 +143,38 @@ La verificación completa de coherencia con la arquitectura está en la [secció
 
 ### 3.2 Entidades del modelo de dominio que intervienen
 
-Se marcaron los sustantivos del enunciado y de los criterios ("búsqueda validada", "BLAST+", "alineamientos", "tabla", "historial", "parámetros pre-búsqueda", "base de datos usada", "timestamp", "resultados crudos", "identificador del hit", "score", "E-value", "porcentaje de identidad", "porcentaje de cobertura") y se buscaron en el [modelo de dominio](../requeriments/modelo-dominio.md). En verde, las entidades que intervienen:
+Se marcaron los sustantivos del enunciado y de los criterios ("búsqueda validada", "BLAST+", "alineamientos", "tabla", "historial", "parámetros pre-búsqueda", "base de datos usada", "timestamp", "resultados crudos", "identificador del hit", "score", "E-value", "porcentaje de identidad", "porcentaje de cobertura") y se buscaron en el [modelo de dominio](../requeriments/modelo-dominio.md). En verde, las entidades que intervienen. El diagrama muestra la parte del modelo que está dentro del alcance de implementación: se omiten `Usuario` y `Administrador`, porque la administración del catálogo de bases no se implementa (ver la [nota sobre el alcance](../requeriments/modelo-dominio.md#nota-sobre-el-alcance) del modelo).
 
 ```mermaid
 classDiagram
-    class Usuario
     class Investigador
-    class Administrador
     class Busqueda
     class SecuenciaQuery
-    class ProgramaBlast
     class ParametrosPreBusqueda
+    class VarianteBlast
     class ModoEjecucion
     class BaseDeDatos
     class Alineamiento
     class FiltroPostBusqueda
     class Reporte
     class FormatoDescarga
-    Usuario <|-- Investigador
-    Usuario <|-- Administrador
     Investigador "1" --> "*" SecuenciaQuery : carga
     Investigador "1" --> "*" Busqueda : lanza
     Busqueda "*" --> "1" SecuenciaQuery : usa
-    Busqueda "*" --> "1" ProgramaBlast : se ejecuta con
     Busqueda "1" *-- "1" ParametrosPreBusqueda : configurada con
-    Busqueda "*" --> "1" ModoEjecucion : se ejecuta en
     Busqueda "*" --> "1" BaseDeDatos : consulta
     Busqueda "1" *-- "*" Alineamiento : produce
-    Busqueda "1" --> "*" FiltroPostBusqueda : refinada por
     Busqueda "1" --> "*" Reporte : origina
-    ProgramaBlast "1" --> "*" ParametrosPreBusqueda : propone valores por defecto
+    ParametrosPreBusqueda "*" --> "1" VarianteBlast : usa la variante
+    ParametrosPreBusqueda "*" --> "1" ModoEjecucion : se ejecuta en
     BaseDeDatos "*" --> "1" ModoEjecucion : disponible en
+    FiltroPostBusqueda "*" --> "*" Alineamiento : deja visibles
     Reporte "*" --> "*" Alineamiento : incluye los visibles
     Reporte "*" --> "*" FiltroPostBusqueda : registra los aplicados
     Reporte "*" --> "1" FormatoDescarga : exportado en
-    Administrador "1" --> "*" BaseDeDatos : administra
     style Busqueda fill:#dcfce7,stroke:#15803d
     style SecuenciaQuery fill:#dcfce7,stroke:#15803d
-    style ProgramaBlast fill:#dcfce7,stroke:#15803d
+    style VarianteBlast fill:#dcfce7,stroke:#15803d
     style ParametrosPreBusqueda fill:#dcfce7,stroke:#15803d
     style ModoEjecucion fill:#dcfce7,stroke:#15803d
     style BaseDeDatos fill:#dcfce7,stroke:#15803d
@@ -191,26 +186,25 @@ classDiagram
 | `Busqueda` | Sí, como clase | Su configuración, para invocar a BLAST+; los alineamientos que produce; el momento en que se ejecutó | Crea (a partir de la configuración validada) |
 | `Alineamiento` | Sí, como clase | Identificador del hit, score, E-value, % identidad y % cobertura: las cinco columnas de la tabla | Crea |
 | `SecuenciaQuery` | Sí, como dato de `Busqueda` | El texto FASTA que recibe BLAST+ y su longitud (para la cobertura) | Consulta |
-| `ProgramaBlast` | Sí, como dato de `Busqueda` | Qué binario se invoca (`blastn`, `blastp`, …) | Consulta |
-| `ParametrosPreBusqueda` | Sí, como dato de `Busqueda` | E-value máximo, tamaño de palabra, matriz y penalizaciones de gap | Consulta |
-| `ModoEjecucion` | Sí, como dato de `Busqueda` | Si la invocación lleva la flag `-remote` | Consulta |
+| `ParametrosPreBusqueda` | Sí, como dato de `Busqueda` | E-value máximo, tamaño de palabra, matriz y penalizaciones de gap, y la variante y el modo elegidos | Consulta |
+| `VarianteBlast` | Sí, como dato de `ParametrosPreBusqueda` | Qué variante de BLAST+ se invoca (`blastn`, `blastp`, …) | Consulta |
+| `ModoEjecucion` | Sí, como dato de `ParametrosPreBusqueda` | Si la invocación lleva la flag `-remote` | Consulta |
 | `BaseDeDatos` | Sí, como dato de `Busqueda` | Su ubicación (ruta del índice local o nombre de la base de NCBI) | Consulta |
-| `Usuario`, `Investigador` | No | La identificación del investigador queda afuera de esta HU (1.2) | — |
-| `Administrador` | No | Fuera del alcance; el catálogo de bases ya está cargado | — |
+| `Investigador` | No | La identificación del investigador queda afuera de esta HU (1.2) | — |
 | `FiltroPostBusqueda` | No | CA-03 exige guardar el conjunto **crudo**; filtrar es `HU11_CU005_B` | — |
 | `Reporte`, `FormatoDescarga` | No | Descargar es `HU12_CU006_B` | — |
 
-**Por qué cinco entidades intervienen solo como datos.** `SecuenciaQuery`, `ProgramaBlast`, `ParametrosPreBusqueda`, `ModoEjecucion` y `BaseDeDatos` tienen reglas propias (alfabeto, rangos, compatibilidad entre programa, query y base), pero esas reglas pertenecen a las HU de carga, configuración y validación (`HU01` a `HU07`). Esta HU solo lee sus valores para pasárselos a BLAST+ y guardarlos en el historial. Alcanza con que `Busqueda` los exponga como atributos; convertirlas en clases acá agregaría clases sin comportamiento.
+**Por qué cinco entidades intervienen solo como datos.** `SecuenciaQuery`, `ParametrosPreBusqueda`, `VarianteBlast`, `ModoEjecucion` y `BaseDeDatos` tienen reglas propias (alfabeto, rangos, compatibilidad entre programa, query y base), pero esas reglas pertenecen a las HU de carga, configuración y validación (`HU01` a `HU07`). Esta HU solo lee sus valores para pasárselos a BLAST+ y guardarlos en el historial. Alcanza con que `Busqueda` los exponga como atributos (la configuración que recibe); convertirlas en clases acá agregaría clases sin comportamiento.
 
-**Cambios al modelo de dominio.** Al armar esta tabla se detectó que el modelo no tenía el concepto **ProgramaBlast** y que tenía multiplicidades que contradecían a `CU001` (una misma secuencia se usa en varias búsquedas). El modelo se corrigió; los cambios están en el *Registro de cambios* de [`modelo-dominio.md`](../requeriments/modelo-dominio.md#registro-de-cambios).
+**Cambios al modelo de dominio.** Al armar esta tabla se detectó que el modelo no tenía el concepto de variante de BLAST (hoy `VarianteBlast`) y que tenía multiplicidades que contradecían a `CU001` (una misma secuencia se usa en varias búsquedas). En una segunda revisión se reorganizaron las relaciones para que no pasen todas por `Busqueda`: la variante y el modo cuelgan ahora de `ParametrosPreBusqueda` (se eligen en la misma configuración previa), y `FiltroPostBusqueda` se conecta con `Alineamiento` y con `Reporte`, que es lo que realmente toca, en lugar de con `Busqueda`. Los cambios están en el *Registro de cambios* de [`modelo-dominio.md`](../requeriments/modelo-dominio.md#registro-de-cambios) (cambios 1 a 11). También se renombró `ProgramaBlast` a `VarianteBlast`, porque el nombre anterior se confundía con BLAST+.
 
 ### 3.3 Análisis tridimensional
 
 | Elemento | Funcionalidad (qué hace) | Estructura (con qué se hace) | Calidad (qué propiedad cumple) |
 |---|---|---|---|
-| **CA-01** | Lanzar la búsqueda sin bloquear la interfaz y mostrar un indicador de progreso hasta que llegue la respuesta | `PantallaBusqueda` (delega y muestra); `ControladorBusqueda` (marca la búsqueda en ejecución en `ModeloBusqueda` y pide la ejecución a `ClienteBackend` de forma asíncrona); `ControladorEjecucion` | La interfaz sigue navegable mientras BLAST+ corre, porque nadie en el cliente se queda bloqueado esperando la respuesta |
-| **CA-02** | Al terminar BLAST+, mostrar la tabla con hit, score, E-value, % identidad y % cobertura | `AdaptadorBlast` (invoca y lee la salida); `Busqueda` y `Alineamiento`, que calcula sus porcentajes; en el cliente, `ControladorBusqueda` carga las filas en `ModeloResultados` y `PantallaBusqueda` las dibuja | `EC-02`: si la salida trae campos nuevos, la tabla igual sale con los campos obligatorios intactos |
-| **CA-03** | Guardar en el historial la búsqueda con parámetros, base, timestamp y todos los alineamientos crudos | `RepositorioHistorial` | Nunca se muestra una tabla sin su entrada en el historial: primero se guarda y después se devuelve la tabla |
+| **CA-01** | Lanzar la búsqueda sin bloquear la interfaz y mostrar un indicador de progreso hasta que llegue la respuesta | `PantallaBusqueda` (delega y muestra el estado de los Modelos); `ControladorBusqueda` (marca la búsqueda en ejecución en `ModeloBusqueda` y pide la ejecución a `ClienteBackend` de forma asíncrona); `ControladorEjecucion` | La interfaz sigue navegable mientras BLAST+ corre, porque nadie en el cliente se queda bloqueado esperando la respuesta |
+| **CA-02** | Al terminar BLAST+, mostrar la tabla con hit, score, E-value, % identidad y % cobertura | `AdaptadorBlast` (invoca y lee la salida); `Busqueda` y `Alineamiento`, que calcula sus porcentajes; en el cliente, `ControladorBusqueda` carga las filas en `ModeloResultados` y `PantallaBusqueda` las dibuja al observar el cambio | `EC-02`: si la salida trae campos nuevos, la tabla igual sale con los campos obligatorios intactos |
+| **CA-03** | Guardar en el historial la búsqueda con parámetros, base, timestamp y todos los alineamientos crudos | `RepositorioHistorial` (arma el registro a partir de `Busqueda`) y `ConexionBD` (lo escribe en la base en una transacción) | Nunca se muestra una tabla sin su entrada en el historial: primero se guarda y después se devuelve la tabla |
 | **`EC-01`** · Concurrencia | Hasta cinco investigadores ejecutan a la vez | Cada solicitud se atiende en su propio hilo del servidor; `AdaptadorBlast` lanza un subproceso propio por búsqueda | **Cero cruces de resultados**: los resultados vuelven por la misma llamada que los pidió, sin estado compartido entre búsquedas |
 | **`EC-02`** · Cambio de versión de BLAST+ | BLAST+ devuelve campos que el sistema no conoce | `AdaptadorBlast`, que es el único que conoce el formato de la salida | El 100 % de las salidas "casi conocidas" conserva los campos obligatorios y deja una advertencia en el log |
 
@@ -218,10 +212,10 @@ Los escenarios de **tolerancia a fallos** (rate limit y timeout de NCBI) describ
 
 ### 3.4 Diagrama de robustez
 
-Leyenda: borde punteado = actor o sistema externo; cilindro gris = almacén de datos; rectángulo redondeado azul = *boundary*; círculo naranja = *controller*; rectángulo con barras verde = *entity*; flecha punteada = observación de solo lectura de la Vista sobre los Modelos (MVC). Los recuadros grises agrupan los elementos de cada contenedor.
+Leyenda: borde punteado = actor o sistema externo; cilindro gris = almacén de datos; rectángulo redondeado azul = *boundary*; círculo naranja = *controller*; rectángulo con barras verde = *entity*. Los recuadros grises agrupan los elementos de cada contenedor y el recuadro verde punteado, el agregado `Busqueda`. Cada flecha dice qué le pide un elemento a otro.
 
 ```mermaid
-%%{init: {"flowchart": {"nodeSpacing": 70, "rankSpacing": 60}}}%%
+%%{init: {"flowchart": {"nodeSpacing": 60, "rankSpacing": 60}}}%%
 flowchart LR
     inv["Investigador/a<br/>(actor)"]
 
@@ -236,7 +230,8 @@ flowchart LR
     subgraph be["Backend (Capas)"]
         ce(("«controller»<br/>ControladorEjecucion"))
         ab(["«boundary»<br/>AdaptadorBlast"])
-        rh(("«controller»<br/>«interface»<br/>RepositorioHistorial"))
+        rh(("«controller»<br/>RepositorioHistorial"))
+        cbd(["«boundary»<br/>ConexionBD"])
         subgraph agg["agregado Busqueda"]
             bu[["«entity»<br/>Busqueda"]]
             al[["«entity»<br/>Alineamiento"]]
@@ -245,20 +240,19 @@ flowchart LR
     db[("Base de datos<br/>historial D2")]
     blast["BLAST+<br/>(sistema externo)"]
 
-    inv --> ui
-    ui --> cb
-    cb --> mb
-    cb --> mr
-    cb --> cl
+    inv -->|presiona Ejecutar| ui
+    ui -->|delega la acción| cb
+    cb -->|lee la configuración<br/>y cambia el estado| mb
+    cb -->|carga las filas| mr
+    cb -->|pide la ejecución| cl
     cl -->|JSON / HTTPS| ce
-    ce --> bu
-    ce --> ab
-    ab ----> blast
-    ce --> rh
-    rh -->|guarda| bu
-    rh ----> db
-    ui -.->|observa| mb
-    ui -.->|observa| mr
+    ce -->|crea y registra<br/>los resultados| bu
+    ce -->|pide ejecutar| ab
+    ab -->|CLI / subproceso| blast
+    ce -->|pide guardar| rh
+    rh -->|lee lo que guarda| bu
+    rh -->|pide escribir| cbd
+    cbd -->|SQL| db
 
     classDef actor fill:#f3f4f6,stroke:#4b5563,color:#111827,stroke-dasharray: 4 3
     classDef boundary fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
@@ -266,7 +260,7 @@ flowchart LR
     classDef entity fill:#dcfce7,stroke:#15803d,color:#0f172a
     classDef store fill:#e5e7eb,stroke:#374151,color:#111827
     class inv,blast actor
-    class ui,ab boundary
+    class ui,ab,cbd boundary
     class cb,cl,ce,rh controller
     class mb,mr,bu,al entity
     class db store
@@ -277,19 +271,30 @@ flowchart LR
 
 **Cómo se clasificó cada elemento.**
 
-- **Fronteras.** Hay dos, porque el sistema habla con dos cosas que no son él: el investigador, a través de `PantallaBusqueda`, y BLAST+, a través de `AdaptadorBlast`.
-- **Controladores de la Aplicación Web.** `ControladorBusqueda` interpreta la acción del investigador y actualiza los Modelos (rol Controlador del MVC). `ClienteBackend` es el único que sabe hablar con el Backend por HTTP. La comunicación entre la Aplicación Web y el Backend **no** es una frontera: los dos contenedores son parte de LocalBlast, así que es una coordinación entre controladores.
-- **Controladores del Backend.** `ControladorEjecucion` coordina la ejecución y `RepositorioHistorial` es la **interfaz con la base de datos**: define qué se puede hacer con el historial (`guardar`) pero no cómo ni dónde. Detrás tiene implementaciones intercambiables (ver el modelo de clases).
-- **Entidades del Backend.** `Busqueda` y `Alineamiento`, que salen de la tabla 3.2. Forman un agregado: un alineamiento no existe sin su búsqueda, y desde afuera se accede siempre a través de `Busqueda`.
+- **Fronteras.** Hay tres, una por cada cosa con la que el sistema habla y que no es código nuestro: el investigador, a través de `PantallaBusqueda`; BLAST+, a través de `AdaptadorBlast`; y el motor de base de datos, a través de `ConexionBD`. La base de datos es un contenedor de LocalBlast, pero no tiene lógica nuestra: es un producto de terceros (PostgreSQL) al que se llega por una conexión y un protocolo (SQL). Para el código del Backend es tan externa como BLAST+, y por eso se accede a ella por una frontera y no directamente desde un controlador.
+- **Controladores de la Aplicación Web.** `ControladorBusqueda` interpreta la acción del investigador y actualiza los Modelos (rol Controlador del MVC). `ClienteBackend` es el único que sabe hablar con el Backend por HTTP. La comunicación entre la Aplicación Web y el Backend **no** es una frontera: los dos contenedores tienen lógica nuestra y en los dos extremos hay controladores, así que es una coordinación entre controladores.
+- **Controladores del Backend.** `ControladorEjecucion` coordina la ejecución. `RepositorioHistorial` sabe **qué** se guarda del historial (arma el registro a partir de la `Busqueda`), y `ConexionBD` sabe **cómo** se habla con el motor (conexión, sentencias SQL y transacción). El repositorio es un controlador técnico: no tiene reglas del negocio, solo coordina el guardado.
+- **Entidades del Backend.** `Busqueda` y `Alineamiento`, que salen de la tabla 3.2. Forman un agregado: un alineamiento no existe sin su búsqueda, y desde afuera se accede siempre a través de `Busqueda`. Por eso `Alineamiento` no tiene flechas propias: solo lo crea y lo consulta su `Busqueda`.
 - **Entidades de la Aplicación Web.** `ModeloBusqueda` y `ModeloResultados` son el rol Modelo del MVC: la representación, en el cliente, de la `Busqueda` que se va a ejecutar (su configuración validada y su estado) y de sus `Alineamiento` ya calculados (las filas de la tabla). No son entidades nuevas del dominio, sino la copia en el cliente de dos que ya están en el modelo.
-- **Base de datos.** Es el almacén donde queda el historial (D2), en el contenedor *Base de datos*. No es una de las tres categorías de la robustez: se dibuja para mostrar dónde terminan los datos, igual que BLAST+. Solo la toca `RepositorioHistorial`.
+- **Base de datos.** Es el almacén donde queda el historial (D2), en el contenedor *Base de datos*. No es una de las tres categorías de la robustez: se dibuja para mostrar dónde terminan los datos, igual que BLAST+. Solo la toca `ConexionBD`.
 
 **Reglas de conexión verificadas.**
 
-- El actor solo toca la pantalla, y la pantalla solo le delega acciones a `ControladorBusqueda`. **La Vista nunca se conecta con el Backend:** el único camino hacia el servidor es `ControladorBusqueda → ClienteBackend → ControladorEjecucion`.
-- Ninguna frontera modifica una entidad. Las flechas punteadas de `PantallaBusqueda` a los Modelos son la **observación de solo lectura** que fija la arquitectura para el MVC de la Aplicación Web (`DA-07`, variante con notificación por suscripción): la Vista se redibuja cuando cambia un Modelo, pero nunca lo modifica ni decide nada con él. Toda modificación pasa por `ControladorBusqueda`. Es la razón de ser de la regla "boundary no toca entity" (que la pantalla no decida ni cambie datos), y aquí se respeta.
+| Tipo de conexión | Flechas del diagrama | ¿Permitida? |
+|---|---|---|
+| Actor → boundary | Investigador → `PantallaBusqueda` | Sí |
+| Boundary → controller | `PantallaBusqueda` → `ControladorBusqueda` | Sí |
+| Controller → boundary | `ControladorEjecucion` → `AdaptadorBlast`; `RepositorioHistorial` → `ConexionBD` | Sí: el controlador se apoya en fronteras para llegar a un sistema externo |
+| Controller → controller | `ControladorBusqueda` → `ClienteBackend` → `ControladorEjecucion` → `RepositorioHistorial` | Sí |
+| Controller → entity | `ControladorBusqueda` → `ModeloBusqueda`, `ModeloResultados`; `ControladorEjecucion` → `Busqueda`; `RepositorioHistorial` → `Busqueda` | Sí |
+| Boundary → sistema externo o almacén | `AdaptadorBlast` → BLAST+; `ConexionBD` → Base de datos | Sí: es la razón de ser de esas fronteras |
+| Boundary → entity | — | No hay ninguna |
+| Actor → controller o entity | — | No hay ninguna |
+
+- **La pantalla no se conecta con ninguna entidad en el diagrama.** En la arquitectura, la Vista observa a los Modelos para leer su estado y redibujarse cuando cambia (`DA-07`, relación *Muestra* del catálogo de la Aplicación Web), pero nunca los modifica ni decide con ellos. Esa observación de solo lectura **no se dibuja en la robustez**, porque el diagrama no admite conexiones de una frontera a una entidad. Lo que el diagrama sí muestra es la regla de fondo: toda acción de la pantalla pasa por `ControladorBusqueda`, que es el único que modifica los Modelos. En los diagramas de secuencia la observación aparece como una nota, no como un mensaje.
+- **La Vista nunca se conecta con el Backend:** el único camino hacia el servidor es `ControladorBusqueda → ClienteBackend → ControladorEjecucion`.
 - `AdaptadorBlast` recibe datos simples y devuelve los hits como datos, no como `Alineamiento`.
-- BLAST+ se alcanza solo a través de su frontera, y la base de datos solo a través del repositorio.
+- BLAST+ se alcanza solo a través de su frontera, y la base de datos solo a través de `RepositorioHistorial` y `ConexionBD`.
 
 #### 3.4.1 Dónde vive cada regla del negocio
 
@@ -300,9 +305,10 @@ flowchart LR
 | R3 | La tabla se devuelve solo después de que la búsqueda quedó en el historial | `ControladorEjecucion` (orden de los pasos) | Es una regla de coordinación entre dos colaboradores (el repositorio y quien pidió la ejecución), y por eso el orden lo fija el controlador |
 | R4 | Si BLAST+ no termina bien, no se muestra tabla ni se guarda nada (garantía mínima de `CU004`) | `AdaptadorBlast` (avisa con `ErrorBlast`) y `ControladorEjecucion` (el error corta el flujo antes de registrar y de guardar) | El Adaptador es quien sabe que BLAST+ falló (código de salida); el controlador no necesita ningún `if`, porque el error interrumpe la secuencia |
 | R5 | Los campos de la salida de BLAST+ que no se conocen se ignoran y se advierten, sin tocar los conocidos (`EC-02`) | `AdaptadorBlast` | Táctica *adaptar la interfaz*: el formato de BLAST+ se conoce en un solo lugar (`DA-03`) |
-| R6 | La ejecución pasa por los estados *en ejecución*, *finalizada* o *con error*, y la pantalla muestra progreso, tabla o mensaje según el estado | `ModeloBusqueda` (guarda el estado) y `ControladorBusqueda` (lo cambia) | Es estado de la interacción en el cliente, no del dominio. La Vista solo lo lee para decidir qué dibujar |
+| R6 | La ejecución pasa por los estados *en ejecución*, *finalizada* o *con error*, y la pantalla muestra progreso, tabla o mensaje según el estado | `ModeloBusqueda` (guarda el estado) y `ControladorBusqueda` (lo cambia) | Es estado de la interacción en el cliente, no del dominio. La Vista solo lo lee, al observar el Modelo, para saber qué dibujar |
+| R7 | El registro del historial se escribe completo o no se escribe (la búsqueda y todos sus alineamientos en una sola transacción) | `ConexionBD` | Si la escritura falla a la mitad, no puede quedar una búsqueda con parte de sus alineamientos. La transacción es un detalle del motor de base de datos, y solo la frontera hacia la base lo conoce |
 
-Las reglas del dominio (R1 a R5) viven en el Backend. La pantalla no aplica ninguna: solo muestra lo que los Modelos tienen.
+Las reglas del dominio (R1 a R5) viven en el Backend. La pantalla no aplica ninguna: solo muestra lo que tienen los Modelos.
 
 #### 3.4.2 Elementos del diagrama y componentes de la arquitectura
 
@@ -315,18 +321,21 @@ Las reglas del dominio (R1 a R5) viven en el Backend. La pantalla no aplica ning
 | `ClienteBackend` | controller | Aplicación Web | Cliente del Backend | Apoyo (fuera de la tríada MVC) |
 | `ControladorEjecucion` | controller | Backend | **Ejecución y persistencia** | Dominio |
 | `Busqueda`, `Alineamiento` | entity | Backend | Ejecución y persistencia | Dominio |
-| `RepositorioHistorial` | controller (interfaz) | Backend | Acceso a datos | Datos |
+| `RepositorioHistorial` | controller | Backend | Acceso a datos | Datos |
+| `ConexionBD` | boundary | Backend | Acceso a datos | Datos |
 | `AdaptadorBlast` | boundary | Backend | Adaptador BLAST+ | Datos |
 | BLAST+ | sistema externo | — | — | — |
 | Base de datos (historial D2) | almacén de datos | Base de datos (PostgreSQL) | — | — |
 
 **Nota sobre el componente Controladores del Backend.** El mensaje de `ClienteBackend` a `ControladorEjecucion` llega por HTTP a una ruta del Backend (componente **Controladores**) que solo convierte la solicitud JSON en la llamada a `ejecutar_busqueda` y el resultado en la respuesta JSON. Es código del framework web sin lógica propia, y por eso no se modela como clase. Así el recorrido respeta la cadena del patrón Capas: Controladores → Ejecución y persistencia → Acceso a datos / Adaptador BLAST+.
 
+**Nota sobre la persistencia intercambiable.** Que el historial se pueda guardar en memoria o en una base real sin tocar `ControladorEjecucion` es una decisión de clases (el controlador conocerá al repositorio solo por su interfaz). Se mostrará en el modelo de clases que se obtenga del código; la robustez no la representa con estereotipos.
+
 ### 3.5 Diagramas de secuencia
 
-Hay dos diagramas: el camino principal y el camino de error. Ambos usan los participantes del diagrama de robustez. **Cada flecha sólida es una llamada a una operación de la clase que la recibe**: el texto de la flecha es el nombre de esa operación, que aparece tal cual en el modelo de clases. Las flechas punteadas son respuestas. La única excepción es la flecha hacia BLAST+, que no es una clase nuestra sino un programa externo: su texto es la línea de comandos con que se lo invoca. El participante del Adaptador es la implementación `AdaptadorBlastCli`, porque `leer_salida` y `registrar_advertencia` son operaciones de esa clase; el controlador la conoce solo a través de la interfaz `AdaptadorBlast`.
+Hay dos diagramas: el camino principal y el camino de error. Ambos usan solo los participantes del diagrama de robustez. **Cada flecha sólida es una llamada a una operación de la clase que la recibe**: el texto de la flecha es el nombre de esa operación, que al implementar pasa al código con ese mismo nombre. Las flechas punteadas son respuestas. Las únicas excepciones son las flechas hacia BLAST+ y hacia la base de datos, que no son clases nuestras: su texto es la línea de comandos o la sentencia con que se las usa.
 
-**Cómo se redibuja la Vista.** Cuando `ControladorBusqueda` cambia un Modelo, la Vista se entera por suscripción (`Observable.suscribir`; con Tkinter, en el siguiente ciclo de la interfaz, ver D11) y lee el Modelo. En los diagramas eso aparece como una nota seguida de la lectura que hace `PantallaBusqueda`. El Modelo nunca llama a la Vista: no la conoce.
+**Cómo se redibuja la Vista.** Cuando `ControladorBusqueda` cambia un Modelo, la Vista se entera por suscripción (en React, el cambio de estado provoca que el componente se vuelva a dibujar) y lee el estado del Modelo, como fija `DA-07`. Como en la robustez no hay conexión de la pantalla con los Modelos, en las secuencias esa lectura se muestra como una nota seguida de lo que dibuja la pantalla (`mostrar_progreso`, `mostrar_resultados` o `mostrar_error`), y no como un mensaje. El Modelo nunca llama a la Vista: no la conoce.
 
 #### Secuencia 1 · Camino principal
 
@@ -341,24 +350,26 @@ sequenceDiagram
     participant CL as ClienteBackend
     participant CE as ControladorEjecucion
     participant B as Busqueda
-    participant AB as AdaptadorBlastCli<br/>(implementa AdaptadorBlast)
+    participant AB as AdaptadorBlast
     participant BL as BLAST+
     participant AL as Alineamiento
-    participant RH as RepositorioHistorial<br/>(interfaz)
+    participant RH as RepositorioHistorial
+    participant CBD as ConexionBD
+    participant BD as Base de datos
 
     Inv->>UI: presionar_ejecutar()
     UI->>CB: ejecutar()
     CB->>MB: configuracion()
     MB-->>CB: configuracion validada
     CB->>MB: marcar_en_ejecucion()
-    Note over UI,MB: la Vista observa el cambio y se redibuja
+    Note over UI,MB: la Vista observa el cambio del Modelo<br/>(solo lectura, DA-07) y se redibuja
     UI->>UI: mostrar_progreso()
     CB-)CL: ejecutar_busqueda(configuracion)
     Note over CB,CL: llamada asíncrona: la interfaz<br/>sigue navegable mientras espera (CA-01)
     CL->>CE: ejecutar_busqueda(configuracion)
     CE->>B: Busqueda(configuracion, fecha)
-    CE->>AB: ejecutar(programa, secuencia, base_datos, remota, parametros)
-    AB->>BL: programa -query … -db … -outfmt 5 [-remote] (subproceso propio, EC-01)
+    CE->>AB: ejecutar(variante, secuencia, base_datos, remota, parametros)
+    AB->>BL: blastn/blastp/… -query … -db … -outfmt 5 [-remote] (subproceso propio, EC-01)
     BL-->>AB: salida XML
     AB->>AB: leer_salida(salida_xml)
     opt la salida trae campos desconocidos (EC-02)
@@ -370,7 +381,10 @@ sequenceDiagram
         B->>AL: Alineamiento(hit, longitud_query)
     end
     CE->>RH: guardar(busqueda)
-    Note over RH: parámetros, base, fecha y todos<br/>los alineamientos crudos (CA-03)
+    Note over RH: arma el registro: parámetros, base, fecha<br/>y todos los alineamientos crudos (CA-03)
+    RH->>CBD: ejecutar_transaccion(registro)
+    CBD->>BD: INSERT … (una sola transacción, R7)
+    BD-->>CBD: confirmación
     CE->>B: tabla_resultados()
     loop por cada alineamiento
         B->>AL: porcentaje_identidad()
@@ -381,9 +395,7 @@ sequenceDiagram
     CL-->>CB: filas
     CB->>MR: cargar(filas)
     CB->>MB: marcar_finalizada()
-    Note over UI,MR: la Vista observa el cambio y se redibuja
-    UI->>MR: filas()
-    MR-->>UI: filas
+    Note over UI,MR: la Vista observa el cambio de los Modelos<br/>(solo lectura, DA-07) y se redibuja
     UI->>UI: mostrar_resultados(filas)
     UI-->>Inv: tabla con hit, score, E-value, % identidad y % cobertura
 ```
@@ -405,44 +417,41 @@ sequenceDiagram
     participant CL as ClienteBackend
     participant CE as ControladorEjecucion
     participant B as Busqueda
-    participant AB as AdaptadorBlastCli<br/>(implementa AdaptadorBlast)
+    participant AB as AdaptadorBlast
     participant BL as BLAST+
-    participant RH as RepositorioHistorial<br/>(interfaz)
+    participant RH as RepositorioHistorial
 
     Inv->>UI: presionar_ejecutar()
     UI->>CB: ejecutar()
     CB->>MB: configuracion()
     MB-->>CB: configuracion validada
     CB->>MB: marcar_en_ejecucion()
+    Note over UI,MB: la Vista observa el cambio del Modelo<br/>(solo lectura, DA-07) y se redibuja
     UI->>UI: mostrar_progreso()
     CB-)CL: ejecutar_busqueda(configuracion)
     CL->>CE: ejecutar_busqueda(configuracion)
     CE->>B: Busqueda(configuracion, fecha)
-    CE->>AB: ejecutar(programa, secuencia, base_datos, remota, parametros)
-    AB->>BL: programa -query … -db … -outfmt 5 [-remote]
+    CE->>AB: ejecutar(variante, secuencia, base_datos, remota, parametros)
+    AB->>BL: blastn/blastp/… -query … -db … -outfmt 5 [-remote]
     BL-->>AB: código de salida distinto de 0 y mensaje de error
     AB-->>CE: ErrorBlast(mensaje)
     Note over CE,RH: el error corta el flujo: no se registran<br/>resultados ni se llama a guardar (R4)
-    CE-->>CL: HTTP 502 {error: mensaje}
-    CL-->>CB: ErrorEjecucion(mensaje)
+    CE-->>CL: ErrorBlast(mensaje)
+    CL-->>CB: ErrorBlast(mensaje)
     CB->>MB: registrar_error(mensaje)
-    Note over UI,MB: la Vista observa el cambio y se redibuja
-    UI->>MB: mensaje_error()
-    MB-->>UI: mensaje
+    Note over UI,MB: la Vista observa el cambio del Modelo<br/>(solo lectura, DA-07) y se redibuja
     UI->>UI: mostrar_error(mensaje)
     UI-->>Inv: mensaje de BLAST+, sin tabla
 ```
 
-El mismo camino se recorre, con otro origen, en dos casos más: si la query llega sin residuos, el constructor de `Busqueda` lanza `ValueError` antes de invocar a BLAST+ y la ruta responde HTTP 422; y si el Backend no responde, `ClienteBackend` lanza `ErrorEjecucion` sin que el Backend intervenga. En los tres, `ControladorBusqueda` registra el mensaje y la Vista lo muestra sin tabla.
-
-Este camino cubre la garantía mínima de `CU004`: si la ejecución no termina bien, no se muestra ninguna tabla y no se escribe nada en el historial. `RepositorioHistorial` figura en el diagrama justamente para mostrar que no recibe ninguna llamada, y `ModeloResultados` no aparece porque no se carga nada. El tratamiento específico del error remoto (distinguir un timeout de un rechazo de NCBI) es de `HU10_CU004_E1`.
+Este camino cubre la garantía mínima de `CU004`: si la ejecución no termina bien, no se muestra ninguna tabla y no se escribe nada en el historial. `RepositorioHistorial` figura en el diagrama justamente para mostrar que no recibe ninguna llamada; `ModeloResultados`, `ConexionBD` y la base de datos no aparecen porque no se usan. El tratamiento específico del error remoto (distinguir un timeout de un rechazo de NCBI) es de `HU10_CU004_E1`.
 
 #### 3.5.1 Asignación de responsabilidades
 
 | Responsabilidad | Quién | Criterio GRASP |
 |---|---|---|
-| Recibir el clic y mostrar progreso, tabla o error según lo que tengan los Modelos | `PantallaBusqueda` | Bajo acoplamiento: solo conoce a `ControladorBusqueda` (para delegar) y a los Modelos (para leer); no decide nada |
-| Interpretar la acción "ejecutar" en el cliente: tomar la configuración, cambiar el estado, pedir la ejecución y cargar el resultado o el error | `ControladorBusqueda` | Controlador (del lado cliente) |
+| Recibir el clic y mostrar el progreso, la tabla o el error según lo que tengan los Modelos | `PantallaBusqueda` | Bajo acoplamiento: para actuar solo conoce a `ControladorBusqueda`; a los Modelos solo los observa para leer, y no decide nada |
+| Interpretar la acción "ejecutar" en el cliente: tomar la configuración, cambiar el estado, pedir la ejecución, cargar el resultado o el error | `ControladorBusqueda` | Controlador (del lado cliente) |
 | Conservar la configuración validada y el estado de la ejecución | `ModeloBusqueda` | Experto en información |
 | Conservar las filas recibidas para la tabla (y luego filtrarlas, en `HU11`) | `ModeloResultados` | Experto en información |
 | Hablar con el Backend por HTTP | `ClienteBackend` | Bajo acoplamiento y alta cohesión: es lo único del cliente que conoce la forma de la interfaz REST |
@@ -452,7 +461,41 @@ Este camino cubre la garantía mínima de `CU004`: si la ejecución no termina b
 | Calcular % identidad y % cobertura | `Alineamiento` | Experto en información |
 | Armar las filas de la tabla | `Busqueda` | Experto: conoce todos sus alineamientos |
 | Invocar a BLAST+ y leer su salida, advirtiendo los campos desconocidos | `AdaptadorBlast` | Bajo acoplamiento (es lo único que conoce a BLAST+) y alta cohesión |
-| Guardar la búsqueda en el historial | `RepositorioHistorial` | Alta cohesión, bajo acoplamiento y Polimorfismo (ver D9) |
+| Armar el registro del historial a partir de la búsqueda y pedir que se escriba | `RepositorioHistorial` | Alta cohesión y bajo acoplamiento: el controlador pide "guardar" sin saber cómo ni dónde se guarda |
+| Escribir el registro en la base de datos en una sola transacción | `ConexionBD` | Bajo acoplamiento y alta cohesión: es lo único que conoce el motor de base de datos y SQL |
+
+### 3.6 Verificación de coherencia con la arquitectura
+
+**Cada mensaje entre componentes distintos existe en el catálogo de relaciones.** Los mensajes entre elementos del mismo componente (por ejemplo, `ControladorEjecucion → Busqueda` o `RepositorioHistorial → ConexionBD`) no necesitan una relación en el catálogo.
+
+| Mensaje de la secuencia | Componente origen → destino | Relación del catálogo |
+|---|---|---|
+| `PantallaBusqueda → ControladorBusqueda`: `ejecutar()` | Pantallas → Controlador de búsqueda | *Delega* ([7.2.2](../architecture/architecture.md#722-catálogo-de-relaciones-de-la-aplicación-web)) |
+| Observación de `PantallaBusqueda` sobre `ModeloBusqueda` y `ModeloResultados` (notas de las secuencias) | Pantallas → Modelo de búsqueda y Modelo de resultados | *Muestra*, solo lectura (7.2.2). No se dibuja en la robustez porque el diagrama no admite frontera → entidad |
+| `ControladorBusqueda → ModeloBusqueda`: `configuracion()`, `marcar_en_ejecucion()`, `marcar_finalizada()`, `registrar_error()` | Controlador de búsqueda → Modelo de búsqueda | *Actualiza* (7.2.2) |
+| `ControladorBusqueda → ModeloResultados`: `cargar()` | Controlador de búsqueda → Modelo de resultados | *Carga resultados* (7.2.2) |
+| `ControladorBusqueda → ClienteBackend`: `ejecutar_busqueda()` | Controlador de búsqueda → Cliente del Backend | *Envía* (7.2.2) |
+| `ClienteBackend → ControladorEjecucion`: `ejecutar_busqueda()` | Cliente del Backend → Controladores → Ejecución y persistencia | *Solicita* (7.2.2 y 7.1.2) e *Invoca* ([7.1.2](../architecture/architecture.md#712-catálogo-de-relaciones-del-backend)) |
+| `ControladorEjecucion → AdaptadorBlast`: `ejecutar()` | Ejecución y persistencia → Adaptador BLAST+ | *Ejecuta* (7.1.2) |
+| `AdaptadorBlast → BLAST+` | Adaptador BLAST+ → BLAST+ | *Invoca*, CLI / subproceso (7.1.2) |
+| `ControladorEjecucion → RepositorioHistorial`: `guardar()` | Ejecución y persistencia → Acceso a datos | *Persiste* (7.1.2) |
+| `ConexionBD → Base de datos` | Acceso a datos → Base de datos | *Lee y escribe*, SQL (7.1.2) |
+
+**Patrones y estilo del TP de arquitectura.**
+
+- **Capas en el Backend (`DA-02`).** El recorrido baja siempre: Controladores → Ejecución y persistencia → Acceso a datos y Adaptador BLAST+. Ningún elemento de la capa de datos llama a uno de dominio; `RepositorioHistorial` recibe la `Busqueda` como parámetro y la traduce a un registro, que es la responsabilidad que el catálogo le da a Acceso a datos. No se saltea ninguna capa.
+- **MVC en la Aplicación Web (`DA-07`).** La Vista delega toda acción en el Controlador y a los Modelos solo los observa para leer; solo el Controlador modifica los Modelos; los Modelos no conocen a nadie; el Cliente del Backend solo lo usa el Controlador.
+- **Cliente-servidor (`DA-01`).** El único canal entre la Aplicación Web y el Backend es la solicitud JSON / HTTPS de `ClienteBackend`.
+- **Tácticas de calidad.** `EC-01` se ve en el subproceso propio que lanza `ejecutar` (`DA-04`); `EC-02`, en `leer_salida` y `registrar_advertencia` del Adaptador (`DA-03`).
+
+### 3.7 Cambios en los documentos anteriores
+
+Al bajar al diseño aparecieron diferencias con documentos anteriores. Se documentan y se actualizaron esos documentos:
+
+| Documento | Cambio | Motivo |
+|---|---|---|
+| [`modelo-dominio.md`](../requeriments/modelo-dominio.md#registro-de-cambios) | `VarianteBlast` y `ModoEjecucion` cuelgan de `ParametrosPreBusqueda`; `FiltroPostBusqueda` se conecta con `Alineamiento` y `Reporte` en vez de con `Busqueda` (cambios 8 y 9). `ProgramaBlast` se renombra `VarianteBlast` (cambio 11) | Casi todas las relaciones pasaban por `Busqueda`, aunque varias entidades se relacionan entre sí sin pasar por ella. El nombre `ProgramaBlast` se confundía con BLAST+ |
+| [`historias-usuario.md`](../requeriments/historias-usuario.md) y [`casos-de-uso.md`](../requeriments/casos-de-uso.md) | Orden de CA-03 de `HU08` y del flujo de `CU004`: primero se guarda en el historial y después se muestra la tabla | Ver la precisión de CA-03 en [3.1](#31-enunciado-y-criterios-de-aceptación) |
 
 ---
 
