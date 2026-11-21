@@ -484,24 +484,42 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
 - **Qué descartamos:** la consulta periódica del progreso y el registro de búsquedas en curso en el servidor (más piezas sin que la HU las pida), y la autenticación dentro del diseño de esta HU.
 - **Errores / imprecisiones detectadas:** la IA sobredimensionó el diseño, que es el riesgo que advertía la cátedra: más clases, interfaces y diagramas de los que la HU necesita. Algunos se justificaban con historias que no estábamos diseñando (cancelación, confidencialidad del historial).
 
-## Entrada 25 — Implementación y pruebas de `HU08_CU004_B` (TP4, partes B y C)
+## Entrada 25 — Correcciones del diseño detallado tras la consulta en clase
 
 - **Herramienta usada:** Claude.
-- **Tarea concreta:** le pasamos el repositorio y la consigna actualizada del TP4 y le pedimos que implementara en Python el diseño detallado de `HU08_CU004_B`, con una estructura en capas, la interfaz gráfica mínima, las pruebas unitarias y la documentación de las secciones 4, 6, 7 y 8 del diseño.
+- **Tarea concreta:** al consultar en clase la Parte A del diseño de `HU08_CU004_B` recibimos tres observaciones: (1) en el diagrama de dominio del diseño sobraba lo referido al Administrador, `Busqueda` recibía demasiadas líneas (hay entidades que se relacionan sin pasar por ella, como `FiltroPostBusqueda` con `Reporte`) y `ModoEjecucion` y `ProgramaBlast` podían ir con `ParametrosPreBusqueda`; (2) en la robustez faltaba una frontera hacia la base de datos y la pantalla no podía conectarse con los Modelos, porque una frontera no se conecta con una entidad; (3) el repositorio no debía llevar el estereotipo «interface», solo «controller». Le pasamos el repositorio, las consignas vigentes y las observaciones, y le pedimos aplicar las correcciones y revisar si faltaba algo de la Parte A.
 - **Qué generó:**
-  - El código en `src/` con las carpetas `dominio/`, `aplicacion/`, `infraestructura/` e `interfaz/`, siguiendo las dos secuencias: cada participante es una clase y cada mensaje, una operación con el mismo nombre. `ControladorEjecucion` quedó sin ningún `if` (complejidad 1).
-  - Las dos implementaciones de cada puerto: `AdaptadorBlastCli` (BLAST+ por subproceso y XML) y `AdaptadorBlastSimulado`; `RepositorioHistorialEnMemoria` y `RepositorioHistorialSql` (SQLAlchemy, SQLite por defecto). Se eligen con opciones de `main.py`.
-  - La ruta HTTP con FastAPI y la Aplicación cliente MVC **en Python con Tkinter** en lugar de React (decisión D11 del diseño).
-  - 60 pruebas con pytest (CP-01 a CP-60), la tabla de complejidad ciclomática, el reporte de cobertura (100 % de sentencias y ramas sobre lo medido) y el diagrama de clases obtenido con `pyreverse` y revisado.
-  - La tabla de validación del diagrama contra el diseño (sección 4.2 del diseño), con once diferencias y su resolución.
-- **Qué aceptamos:** _a completar por el grupo después de revisar el código._
-- **Qué modificamos:** _a completar por el grupo._
-- **Qué descartamos:** _a completar por el grupo._ Puntos que conviene decidir explícitamente: (1) si se adopta Tkinter o se vuelve a React para la Aplicación Web, y en el primer caso actualizar `architecture.md`; (2) si se mantienen `ControladorBusqueda.preparar` y `ModeloBusqueda.establecer_configuracion` como sustitutos de HU03 a HU07; (3) si el *score* de la tabla es el *bit score* (como en NCBI) o el *raw score*.
-- **Errores / imprecisiones detectadas (en la revisión de la propia IA, antes de entregar):**
-  - En la primera versión de la pantalla, el mensaje de estado compartía fila con el formulario y, con mensajes largos, achicaba los campos de entrada. Se detectó al mirar capturas de la interfaz y se movió a una fila propia.
-  - Las pruebas del repositorio SQL dejaban conexiones de SQLite abiertas (advertencias `ResourceWarning`). Se agregó `RepositorioHistorialSql.cerrar()` y las pruebas lo llaman al terminar.
-  - El diseño pasaba la longitud de la query como dato y no decía qué hacer con una query sin residuos, que habría dado una división por cero en R1. Se resolvió con `Busqueda.longitud_query()` y un invariante en la entidad (diferencias 5 y 6 de la sección 4.2).
-  - Las salidas XML de prueba (`tests/datos/`) están armadas a partir del formato de BLAST+ 2.14, no copiadas de una corrida real. Conviene reemplazarlas por una salida real del laboratorio (ver `docs/design/cobertura.md`).
+  - Un modelo de dominio reorganizado: `ProgramaBlast` (que después renombramos) y `ModoEjecucion` cuelgan de `ParametrosPreBusqueda`; `FiltroPostBusqueda` se conecta con `Alineamiento` (deja visibles) y con `Reporte`; `Busqueda` pasó de nueve relaciones a cinco más la de `Investigador`. En el diagrama del diseño se omitieron `Usuario` y `Administrador`.
+  - Una robustez con la frontera `ConexionBD` entre `RepositorioHistorial` y la base, sin flechas de la pantalla a los Modelos y con `RepositorioHistorial` solo como «controller». Los diagramas de secuencia se ajustaron a los mismos participantes.
+  - Un cambio en la arquitectura (`DA-07` y vista 7.2) para que la Vista dejara de observar a los Modelos (ver *Qué descartamos*).
+  - Una sección de verificación de cada mensaje contra el catálogo de relaciones, otra con los cambios a documentos anteriores, y el glosario y la bibliografía del documento.
+- **Qué aceptamos:**
+  - Sacar de la robustez las flechas de la pantalla a los Modelos y explicar en el documento por qué no se dibujan. En las secuencias, la observación de la Vista sobre los Modelos quedó como una nota, no como un mensaje.
+  - Renombrar `ProgramaBlast` a `VarianteBlast`, a pedido nuestro: el nombre anterior parecía referirse a BLAST+, el programa de alineamiento. En los requerimientos y en la interfaz sigue diciendo "programa BLAST", que es el término de NCBI que conoce el investigador.
+  - Separar `RepositorioHistorial` (qué se guarda) de `ConexionBD` (cómo se habla con el motor y la transacción), con una regla nueva (R7: el registro se escribe completo o no se escribe).
+- **Qué revisamos de sus alternativas:**
+  - La IA evaluó conectar `Busqueda` con `Alineamiento` por una flecha en la robustez y lo descartó: dos entidades no se conectan entre sí en la robustez, y la relación ya se ve en el agregado y en el modelo de dominio. Estuvimos de acuerdo.
+  - También evaluó colgar `BaseDeDatos` de `ParametrosPreBusqueda` para sacarle otra línea a `Busqueda`. Quedó en `Busqueda`, porque CA-03 distingue "los parámetros pre-búsqueda" de "la base de datos usada".
+- **Qué descartamos:**
+  - **El cambio de la variante de MVC en la arquitectura.** Para sacar la flecha de la pantalla a los Modelos, la IA cambió `DA-07` y la vista de componentes de la Aplicación Web a un MVC donde "el Controlador hace de mediador" y la Vista no conoce a los Modelos. Lo revertimos: en la aplicación la Vista sí observa a los Modelos (solo para leer y redibujarse), y así está bien en la arquitectura. Lo que no se puede es dibujar esa conexión en la robustez, porque viola la regla del diagrama (una frontera no se conecta con una entidad). El problema era del diagrama, no de la arquitectura.
+  - Dibujar el modelo de clases y la trazabilidad a código antes de implementar. La consigna vigente pide obtener el diagrama de clases del código, así que esas secciones quedan para después de la Parte B.
+- **Errores / imprecisiones detectadas:** el documento tenía referencias a secciones que ya no existían ("sección 8.2", "ver D9", el modelo de clases) de una versión anterior. Se corrigieron.
+
+## Entrada 26 — Implementación de `HU08_CU004_B`
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** implementar la HU con la Aplicación Web en React (respetando lo que decidieron las maquetas finales y sus evaluaciones heurísticas), el Backend en Python, el historial en SQLite y un BLAST+ simulado que también permita usar el BLAST+ real instalado en Linux. La pantalla arranca con una búsqueda ya validada, porque la validación no se implementa.
+- **Qué generó:**
+  - Backend en FastAPI con una carpeta por componente C4 y las clases y operaciones de los diagramas de secuencia: `ControladorEjecucion.ejecutar_busqueda`, `Busqueda.registrar_resultados` y `tabla_resultados`, `Alineamiento.porcentaje_identidad` y `porcentaje_cobertura`, `AdaptadorBlastCli.ejecutar`, `leer_salida` y `registrar_advertencia`, `RepositorioHistorial.guardar` y `ConexionBD.ejecutar_transaccion`.
+  - Aplicación Web MVC: `PantallaBusqueda` observa a `ModeloBusqueda` y `ModeloResultados` y le delega la acción a `ControladorBusqueda`, que usa `ClienteBackend`. Mantiene los elementos de las maquetas: chip "corriendo" en la barra lateral, chip "aún no guardada en el historial", mensaje literal de BLAST+ en bloque monoespaciado, chip "Guardado en el historial" y ayuda contextual en las columnas.
+  - Un BLAST+ simulado que reemplaza al programa externo (no al adaptador) devolviendo la salida grabada de una ejecución real. También datos de demostración sintéticos y un script para crear la base con `makeblastdb`.
+  - La sección 6 del diseño detallado (estructura del código, reemplazo de la persistencia y de BLAST+, decisiones tomadas al implementar) y las instrucciones del README.
+- **Cómo se verificó:** con BLAST+ 2.12 real, con el simulado y con el historial en memoria. Se recorrió la interfaz en un navegador (camino principal, navegación durante la ejecución y camino de error). Se lanzaron cinco búsquedas simultáneas de 2 segundos cada una, que terminaron en 2,1 segundos en total con sus propios resultados (`EC-01`). Se agregó un campo desconocido a la salida y quedó la advertencia sin perder los campos conocidos (`EC-02`). Por último, se instaló desde cero en un entorno nuevo siguiendo solo el README.
+- **Errores / imprecisiones detectadas:**
+  - La primera versión de los datos de demostración tenía acentos en los encabezados FASTA, y `makeblastdb` los rechaza (solo acepta ASCII). Se regeneraron sin acentos.
+  - No se pudo descargar una proteína real de UniProt desde el entorno de la IA, por eso la query de demostración es sintética. Se puede reemplazar por una real editando `src/web/src/busquedas-validadas.json`.
+  - El globo de ayuda de la primera columna quedaba cortado por el borde de la tabla. Se detectó en las capturas y se corrigió.
+- **Pendiente de revisión del grupo:** completar qué aceptamos, qué modificamos y qué descartamos después de revisar el código, en particular las decisiones I1 a I9 de la sección 6.3 del diseño detallado.
 
 ## Reflexión sobre el uso de IA
 

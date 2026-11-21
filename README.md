@@ -12,23 +12,31 @@
 LocalBlast_2026/
 ├── .gitignore
 ├── README.md
-├── requirements.txt
-├── pyproject.toml              # configuración de pytest y de la cobertura
-├── src/                        # código de HU08 (ver docs/design/diseno-detallado.md, sección 6)
-│   ├── main.py                 # punto de arranque
-│   ├── dominio/                # Busqueda, Alineamiento
-│   ├── aplicacion/             # ControladorEjecucion e interfaces (AdaptadorBlast, RepositorioHistorial)
-│   ├── infraestructura/        # BLAST+ real y simulado; historial en memoria y SQL
-│   └── interfaz/               # ruta HTTP del Backend y Aplicación Web (MVC, Tkinter)
-├── tests/                      # pruebas unitarias (pytest), misma estructura que src/
+├── requirements.txt              # dependencias del Backend (Python)
+├── datos/
+│   └── ejemplo/                  # query y base de proteínas sintéticas de demostración (FASTA)
+├── scripts/
+│   ├── crear_base_demo.sh        # construye la base BLAST de demostración (makeblastdb)
+│   └── generar_datos_demo.py     # regenera los FASTA de demostración
+├── src/
+│   ├── backend/                  # Backend (Python / FastAPI), una carpeta por componente C4
+│   │   ├── arranque.py           # punto de arranque: elige BLAST+ real o simulado y la persistencia
+│   │   ├── controladores/        # Controladores (presentación): ruta HTTP
+│   │   ├── ejecucion/            # Ejecución y persistencia (dominio): ControladorEjecucion, Busqueda, Alineamiento
+│   │   ├── acceso_datos/         # Acceso a datos: RepositorioHistorial (SQLite y memoria), ConexionBD
+│   │   └── adaptador_blast/      # Adaptador BLAST+: AdaptadorBlastCli y BLAST+ simulado
+│   └── web/                      # Aplicación Web (React + Vite, patrón MVC)
+│       └── src/
+│           ├── pantallas/        # Vista: PantallaBusqueda
+│           ├── controladores/    # ControladorBusqueda
+│           ├── modelos/          # ModeloBusqueda, ModeloResultados
+│           └── cliente/          # ClienteBackend
 └── docs/
     ├── architecture/
     │   ├── architecture.md
     │   └── contexto-inicial.md
     ├── design/
-    │   ├── diseno-detallado.md
-    │   ├── cobertura.md
-    │   └── generado/clases_pyreverse.mmd
+    │   └── diseno-detallado.md
     ├── requeriments/
     │   ├── casos-de-uso.md
     │   ├── historias-usuario.md
@@ -103,69 +111,81 @@ La evaluación heurística de usabilidad, con los prompts enviados a la IA, su r
 El documento de Especificación de Arquitectura, con la elección de interoperabilidad como driver único, la derivación hasta estilo cliente-servidor, patrón de capas en el Backend y patrón MVC en la Aplicación Web, las decisiones de arquitectura (`DA-01` a `DA-08`), las vistas de contenedores, de componentes y de despliegue del modelo C4 con sus catálogos, y la trazabilidad escenario → táctica → estilo/patrón → decisión → elemento C4, está en:
 👉 [`docs/architecture/architecture.md`](docs/architecture/architecture.md)
 
-El diseño detallado de la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados` (ficha y análisis tridimensional de la HU, diagrama de robustez, diagramas de secuencia, modelo de clases obtenido del código y su validación, justificación con GRASP, implementación, casos de prueba, complejidad ciclomática y trazabilidad hasta las pruebas) está en:
+El diseño detallado de la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados` (ficha y análisis tridimensional de la HU, diagrama de robustez, diagramas de secuencia, verificación de coherencia con la arquitectura y cambios que el diseño produjo en el modelo de dominio y en la arquitectura) está en:
 👉 [`docs/design/diseno-detallado.md`](docs/design/diseno-detallado.md)
-
-El reporte de cobertura de las pruebas de HU08 y su análisis están en:
-👉 [`docs/design/cobertura.md`](docs/design/cobertura.md)
 
 El diagrama de contexto completo del sistema está en:
 👉 [`docs/architecture/contexto-inicial.md`](docs/architecture/contexto-inicial.md)
 
 ---
 
-## 3. Cómo instalar y ejecutar (TP4)
+## 3. Cómo instalar y ejecutar
 
-El TP4 implementa `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados`: un Backend en Python (FastAPI) con capas dominio / aplicación / infraestructura, y una Aplicación cliente MVC con interfaz gráfica mínima en Tkinter.
+Lo implementado es la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados`. La pantalla arranca con una búsqueda ya validada, porque la carga y la validación son otras historias.
 
-### Requisitos
+### 3.1 Requisitos
 
-- **Python 3.10 o posterior**. En Windows y macOS el instalador de python.org ya trae Tkinter; en Debian/Ubuntu: `sudo apt install python3-tk`.
-- **BLAST+ 2.14 o posterior es opcional.** Si `blastn` no está en el `PATH`, el sistema usa un BLAST+ simulado con datos de demostración.
+* Python 3.10 o superior.
+* Node.js 18 o superior, con npm.
+* BLAST+ (opcional). Sin BLAST+, el sistema usa un BLAST+ simulado. Para usar el real: `sudo apt install ncbi-blast+`, o la instalación que ya tengan.
 
-### Instalación (máquina limpia)
+### 3.2 Instalación (una sola vez)
+
+Desde la raíz del repositorio:
 
 ```bash
-git clone https://github.com/AgustinGaitan2/LocalBlast_2026.git
-cd LocalBlast_2026
-python -m venv .venv
-# Windows:  .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+
+cd src/web
+npm install
+npm run build        # compila la interfaz; el Backend la sirve en el puerto 8000
+cd ../..
+
+bash scripts/crear_base_demo.sh   # solo para BLAST+ real: crea datos/blastdb/proteinas_demo
 ```
 
-### Ejecutar la interfaz
+### 3.3 Ejecutar la aplicación
+
+Con el entorno virtual activado y desde la raíz del repositorio:
 
 ```bash
-python src/main.py
+# BLAST+ simulado (no necesita BLAST+ instalado)
+uvicorn backend.arranque:app --app-dir src --port 8000
+
+# BLAST+ real de la máquina
+LOCALBLAST_BLAST=real uvicorn backend.arranque:app --app-dir src --port 8000
 ```
 
-Abre la ventana con una secuencia de ejemplo y la base `base_demo` ya cargadas. Para recorrer la HU en la defensa:
+Abrir <http://localhost:8000>.
 
-1. **Camino principal:** presionar **Ejecutar búsqueda**. Aparece el indicador de progreso (el simulado tarda 2 s, y la ventana se puede seguir usando), y luego la tabla con hit, score, E-value, % identidad y % cobertura. La búsqueda queda guardada en `localblast.db`.
-2. **Camino de rechazo:** cambiar la base de datos por `nt` (o cualquier otra) y ejecutar. Se muestra el mensaje de error de BLAST+, sin tabla, y no se guarda nada.
+* **Camino principal:** presionar *Ejecutar búsqueda*. Mientras corre se puede pasar a *Cómo leer los resultados* y volver; la ejecución no se interrumpe.
+* **Camino de error:** abrir <http://localhost:8000/?ejemplo=base-inexistente>. BLAST+ no encuentra la base, se muestra su mensaje literal, no aparece ninguna tabla y no se guarda nada.
 
-Opciones del punto de arranque (`python src/main.py --help`):
+El historial queda en `datos/historial.sqlite3`. Para consultarlo: `sqlite3 datos/historial.sqlite3 "SELECT fecha, variante, base_datos FROM busqueda;"`.
 
-| Opción | Qué hace |
-|---|---|
-| `--historial memoria` | Historial en memoria, sin archivo |
-| `--historial sqlite:///otra.db` | Historial en otro archivo SQLite (por defecto `sqlite:///localblast.db`, se crea solo) |
-| `--historial postgresql://usuario:clave@host/localblast` | Historial en PostgreSQL (requiere `pip install psycopg2-binary`; las tablas se crean al arrancar) |
-| `--adaptador cli` / `simulado` | Fuerza BLAST+ real o simulado (por defecto `auto`) |
-| `--blast-bin RUTA` | Carpeta de los binarios de BLAST+ si no están en el `PATH` |
-| `--demora 0.5` | Segundos que tarda el BLAST+ simulado |
-| `backend` | Levanta solo el Backend en `http://127.0.0.1:8000` (documentación interactiva en `/docs`) |
-
-Cambiar el historial o BLAST+ es cambiar una opción: `ControladorEjecucion` no se modifica (decisión D9 del diseño).
-
-### Ejecutar las pruebas
+**Modo desarrollo de la interfaz** (recarga al guardar cambios). Con el Backend corriendo en el puerto 8000, en otra terminal:
 
 ```bash
-python -m pytest                                          # 60 pruebas
-python -m pytest --cov --cov-branch --cov-report=term-missing   # con cobertura de ramas
-radon cc -s src                                           # complejidad ciclomática
+cd src/web && npm run dev     # abrir http://localhost:5173
 ```
+
+### 3.4 Configuración
+
+El Backend se configura con variables de entorno, todas opcionales:
+
+| Variable | Valores | Para qué |
+|---|---|---|
+| `LOCALBLAST_BLAST` | `simulado` (por defecto) · `real` | BLAST+ simulado o el instalado en la máquina |
+| `LOCALBLAST_BLAST_DIR` | carpeta | Dónde están `blastp`, `blastn`, etc., si no están en el `PATH` |
+| `LOCALBLAST_LIMITE_SEGUNDOS` | número (por defecto 1800) | Tiempo máximo de una ejecución de BLAST+ |
+| `LOCALBLAST_SIMULADO_DEMORA` | segundos (por defecto 3) | Cuánto tarda el simulado, para ver el indicador de progreso |
+| `LOCALBLAST_SIMULADO_CAMPO_NUEVO` | `1` | El simulado agrega un campo desconocido a la salida (escenario `EC-02`; la advertencia aparece en la consola) |
+| `LOCALBLAST_PERSISTENCIA` | `sqlite` (por defecto) · `memoria` | Historial en SQLite o en memoria; el controlador no cambia |
+| `LOCALBLAST_BD` | archivo | Ubicación del archivo SQLite (por defecto `datos/historial.sqlite3`) |
+
+**Usar otra secuencia u otra base.** Las búsquedas validadas de ejemplo están en `src/web/src/busquedas-validadas.json`. Se puede agregar una entrada con otra secuencia FASTA y la ruta de una base local propia (`base_datos`, relativa a la raíz del repositorio o absoluta), o una base de NCBI con `"modo": "remoto"`. Después se abre `http://localhost:8000/?ejemplo=<clave>`, previa recompilación con `npm run build`, o directamente en modo desarrollo. El BLAST+ simulado siempre devuelve la salida grabada de la búsqueda de demostración.
 
 ---
 

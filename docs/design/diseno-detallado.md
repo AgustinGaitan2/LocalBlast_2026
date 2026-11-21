@@ -2,7 +2,9 @@
 
 **HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados**
 
-Este documento baja la arquitectura de LocalBlast ([`architecture.md`](../architecture/architecture.md)) al nivel de clases para una historia de usuario. Parte de la HU y de sus criterios de aceptación, la analiza en sus tres dimensiones (funcionalidad, estructura y calidad) y deriva, en ese orden, el diagrama de robustez, los diagramas de secuencia y el modelo de clases. Cada diagrama sale del anterior: lo que no figura en la robustez no se invoca en las secuencias, y lo que no figura en las secuencias no aparece en el modelo de clases.
+Este documento baja la arquitectura de LocalBlast ([`architecture.md`](../architecture/architecture.md)) al nivel de clases para una historia de usuario. Parte de la HU y de sus criterios de aceptación, la analiza en sus tres dimensiones (funcionalidad, estructura y calidad) y deriva, en ese orden, el diagrama de robustez y los diagramas de secuencia. Cada diagrama sale del anterior: lo que no figura en la robustez no se invoca en las secuencias, y lo que no figura en las secuencias no se programa.
+
+La sección 6 describe la implementación. Las secciones 4, 5, 7 y 8 (modelo de clases, justificación del diseño, pruebas y trazabilidad) se agregan a partir del código implementado, porque el modelo de clases se obtiene de él y se valida contra estos diagramas.
 
 ---
 
@@ -11,11 +13,14 @@ Este documento baja la arquitectura de LocalBlast ([`architecture.md`](../archit
 1. [Introducción](#1-introducción)
 2. [Relación con la arquitectura](#2-relación-con-la-arquitectura)
 3. [Diseño de la HU](#3-diseño-de-la-hu)
-4. [Modelo de clases](#4-modelo-de-clases)
-5. [Justificación del diseño](#5-justificación-del-diseño)
+   - 3.1 [Enunciado y criterios de aceptación](#31-enunciado-y-criterios-de-aceptación)
+   - 3.2 [Entidades del modelo de dominio que intervienen](#32-entidades-del-modelo-de-dominio-que-intervienen)
+   - 3.3 [Análisis tridimensional](#33-análisis-tridimensional)
+   - 3.4 [Diagrama de robustez](#34-diagrama-de-robustez)
+   - 3.5 [Diagramas de secuencia](#35-diagramas-de-secuencia)
+   - 3.6 [Verificación de coherencia con la arquitectura](#36-verificación-de-coherencia-con-la-arquitectura)
+   - 3.7 [Cambios en los documentos anteriores](#37-cambios-en-los-documentos-anteriores)
 6. [Implementación](#6-implementación)
-7. [Pruebas](#7-pruebas)
-8. [Trazabilidad](#8-trazabilidad)
 9. [Glosario y bibliografía](#9-glosario-y-bibliografía)
 
 ---
@@ -499,488 +504,63 @@ Al bajar al diseño aparecieron diferencias con documentos anteriores. Se docume
 
 ---
 
-## 4. Modelo de clases
-
-### 4.1 Diagrama de clases obtenido del código
-
-El diagrama se obtuvo **por ingeniería inversa del código implementado** con `pyreverse` (incluido en `pylint`), que genera Mermaid directamente:
-
-```bash
-cd src
-pyreverse -o mmd -d ../docs/design/generado -p localblast dominio aplicacion infraestructura interfaz
-```
-
-La salida cruda está en [`generado/clases_pyreverse.mmd`](generado/clases_pyreverse.mmd). La herramienta no dibuja las asociaciones que se guardan en atributos privados (por ejemplo, `ControladorEjecucion → AdaptadorBlast`) ni los estereotipos, así que el grupo la revisó y agregó a mano esas relaciones, los estereotipos y los namespaces por contenedor. Lo que sigue es el diagrama revisado; cada clase, atributo y operación existe tal cual en el código. Se omiten los constructores, los métodos privados auxiliares y las clases de arranque (`main.py`) y de datos de demostración.
-
-```mermaid
-classDiagram
-    direction TB
-
-    namespace AplicacionWeb {
-        class PantallaBusqueda {
-            <<boundary>>
-            -controlador: ControladorBusqueda
-            -modelo_busqueda: ModeloBusqueda
-            -modelo_resultados: ModeloResultados
-            +presionar_ejecutar() None
-            +mostrar_progreso() None
-            +mostrar_resultados(filas: list~dict~) None
-            +mostrar_error(mensaje: str) None
-        }
-        class ControladorBusqueda {
-            -modelo_busqueda: ModeloBusqueda
-            -modelo_resultados: ModeloResultados
-            -cliente: ClienteBackend
-            -lanzar: Callable
-            +preparar(configuracion: dict) None
-            +ejecutar() None
-        }
-        class Observable {
-            +suscribir(observador: Callable) None
-        }
-        class ModeloBusqueda {
-            -configuracion_validada: dict
-            -estado: str
-            -error: Optional~str~
-            +establecer_configuracion(configuracion: dict) None
-            +configuracion() dict
-            +estado() str
-            +marcar_en_ejecucion() None
-            +marcar_finalizada() None
-            +registrar_error(mensaje: str) None
-            +mensaje_error() Optional~str~
-        }
-        class ModeloResultados {
-            -filas_recibidas: list~dict~
-            +cargar(filas: list~dict~) None
-            +filas() list~dict~
-        }
-        class ClienteBackend {
-            +url_base: str
-            +tiempo_maximo_segundos: float
-            +ejecutar_busqueda(configuracion: dict) list~dict~
-        }
-        class ErrorEjecucion {
-            <<exception>>
-            +mensaje: str
-        }
-    }
-
-    namespace Backend {
-        class ControladorEjecucion {
-            -adaptador_blast: AdaptadorBlast
-            -historial: RepositorioHistorial
-            -reloj: Callable
-            +ejecutar_busqueda(configuracion: dict) list~dict~
-        }
-        class Busqueda {
-            +secuencia: str
-            +programa: str
-            +base_datos: str
-            +remota: bool
-            +parametros: dict
-            +fecha: datetime
-            +alineamientos: list~Alineamiento~
-            +longitud_query() int
-            +registrar_resultados(hits: list~dict~) None
-            +tabla_resultados() list~dict~
-        }
-        class Alineamiento {
-            +hit_id: str
-            +descripcion: str
-            +score: float
-            +evalue: float
-            +identidades: int
-            +longitud_alineamiento: int
-            +query_desde: int
-            +query_hasta: int
-            +longitud_query: int
-            +porcentaje_identidad() float
-            +porcentaje_cobertura() float
-        }
-        class AdaptadorBlast {
-            <<interface>>
-            +ejecutar(programa, secuencia, base_datos, remota, parametros) list~dict~
-        }
-        class AdaptadorBlastCli {
-            +directorio_binarios: str
-            +tiempo_maximo_segundos: float
-            +ejecutar(programa, secuencia, base_datos, remota, parametros) list~dict~
-            +leer_salida(salida_xml: str) list~dict~
-            +registrar_advertencia(campos: list~str~) None
-        }
-        class AdaptadorBlastSimulado {
-            +hits_preparados: dict
-            +bases_disponibles: set~str~
-            +demora_segundos: float_o_dict
-            +hits_por_defecto: list~dict~
-            +invocaciones: list~dict~
-            +ejecutar(programa, secuencia, base_datos, remota, parametros) list~dict~
-        }
-        class ErrorBlast {
-            <<exception>>
-            +mensaje: str
-        }
-        class RepositorioHistorial {
-            <<interface>>
-            +guardar(busqueda: Busqueda) None
-        }
-        class RepositorioHistorialEnMemoria {
-            -busquedas: list~Busqueda~
-            +guardar(busqueda: Busqueda) None
-            +busquedas() tuple~Busqueda~
-        }
-        class RepositorioHistorialSql {
-            +url_conexion: str
-            +guardar(busqueda: Busqueda) None
-            +cerrar() None
-        }
-    }
-
-    PantallaBusqueda --> ControladorBusqueda : delega
-    PantallaBusqueda ..> ModeloBusqueda : observa
-    PantallaBusqueda ..> ModeloResultados : observa
-    ControladorBusqueda --> ModeloBusqueda : actualiza
-    ControladorBusqueda --> ModeloResultados : carga
-    ControladorBusqueda --> ClienteBackend : envía
-    Observable <|-- ModeloBusqueda
-    Observable <|-- ModeloResultados
-    ClienteBackend ..> ErrorEjecucion : lanza
-    ClienteBackend ..> ControladorEjecucion : JSON / HTTP
-
-    ControladorEjecucion --> AdaptadorBlast
-    ControladorEjecucion --> RepositorioHistorial
-    ControladorEjecucion ..> Busqueda : crea
-    Busqueda "1" *-- "*" Alineamiento : produce
-    AdaptadorBlastCli ..|> AdaptadorBlast
-    AdaptadorBlastSimulado ..|> AdaptadorBlast
-    AdaptadorBlast ..> ErrorBlast : lanza
-    RepositorioHistorialEnMemoria ..|> RepositorioHistorial
-    RepositorioHistorialSql ..|> RepositorioHistorial
-    RepositorioHistorial ..> Busqueda : guarda
-```
-
-**Correspondencia con las secuencias.**
-
-| Clase | Operaciones | Dónde aparecen |
-|---|---|---|
-| `PantallaBusqueda` | `presionar_ejecutar`, `mostrar_progreso`, `mostrar_resultados`, `mostrar_error` | Secuencias 1 y 2 (`mostrar_resultados` en 1, `mostrar_error` en 2) |
-| `ControladorBusqueda` | `ejecutar` | Secuencias 1 y 2. `preparar` es la precondición (ver 4.2, diferencia 2) |
-| `ModeloBusqueda` | `configuracion`, `marcar_en_ejecucion`, `marcar_finalizada`, `registrar_error`, `mensaje_error`, `estado` | Las dos primeras en 1 y 2; `marcar_finalizada` en 1; `registrar_error` y `mensaje_error` en 2; `estado` es la lectura de la nota "la Vista observa el cambio" |
-| `ModeloResultados` | `cargar`, `filas` | Secuencia 1 |
-| `Observable` | `suscribir` | Nota "la Vista observa el cambio y se redibuja" (secuencias 1 y 2) |
-| `ClienteBackend`, `ErrorEjecucion` | `ejecutar_busqueda` | Secuencias 1 y 2 (`ErrorEjecucion` en 2) |
-| `ControladorEjecucion` | `ejecutar_busqueda` | Secuencias 1 y 2 |
-| `Busqueda` | constructor, `longitud_query`, `registrar_resultados`, `tabla_resultados` | Constructor en 1 y 2; el resto en 1 |
-| `Alineamiento` | constructor, `porcentaje_identidad`, `porcentaje_cobertura` | Secuencia 1 |
-| `AdaptadorBlast` / `AdaptadorBlastCli` | `ejecutar`, `leer_salida`, `registrar_advertencia` | `ejecutar` en 1 y 2; las otras dos en 1 |
-| `RepositorioHistorial` | `guardar` | Secuencia 1 |
-| `ErrorBlast` | — (lo lanza `ejecutar`) | Secuencia 2 |
-| `AdaptadorBlastSimulado`, `RepositorioHistorialEnMemoria`, `RepositorioHistorialSql` | Implementan las interfaces que participan en las secuencias | Secuencias 1 y 2, detrás de su interfaz |
-
-**Clases por componente de la arquitectura.**
-
-| Contenedor | Componente | Clases | Archivo |
-|---|---|---|---|
-| Aplicación Web | Pantallas | `PantallaBusqueda` | `src/interfaz/cliente/pantalla_busqueda.py` |
-| Aplicación Web | Controlador de búsqueda | `ControladorBusqueda` | `src/interfaz/cliente/controlador_busqueda.py` |
-| Aplicación Web | Modelo de búsqueda | `ModeloBusqueda` (y `Observable`) | `src/interfaz/cliente/modelo_busqueda.py`, `observable.py` |
-| Aplicación Web | Modelo de resultados | `ModeloResultados` | `src/interfaz/cliente/modelo_resultados.py` |
-| Aplicación Web | Cliente del Backend | `ClienteBackend`, `ErrorEjecucion` | `src/interfaz/cliente/cliente_backend.py` |
-| Backend | Controladores | ninguna (ruta HTTP del framework) | `src/interfaz/rutas.py` |
-| Backend | Ejecución y persistencia | `ControladorEjecucion`, `Busqueda`, `Alineamiento` | `src/aplicacion/controlador_ejecucion.py`, `src/dominio/` |
-| Backend | Acceso a datos | `RepositorioHistorial`, `RepositorioHistorialEnMemoria`, `RepositorioHistorialSql` | `src/aplicacion/repositorio_historial.py`, `src/infraestructura/repositorio_historial_*.py` |
-| Backend | Adaptador BLAST+ | `AdaptadorBlast`, `ErrorBlast`, `AdaptadorBlastCli`, `AdaptadorBlastSimulado` | `src/aplicacion/adaptador_blast.py`, `src/infraestructura/adaptador_blast_*.py` |
-
-### 4.2 Validación del diagrama contra la robustez y las secuencias
-
-Se contrastó el diagrama obtenido del código con el diagrama de clases de diseño (versión anterior de esta sección), con la robustez (3.4) y con las dos secuencias (3.5). Todos los participantes de la robustez y de las secuencias son clases con el mismo nombre, y todos los mensajes son operaciones con el mismo nombre. Las diferencias encontradas y su resolución:
-
-| # | Diferencia | Resolución | Por qué |
-|---|---|---|---|
-| 1 | La Aplicación Web está escrita en **Python con Tkinter**, no en React | Se actualizó el diseño (D11). **Pendiente:** si el grupo adopta este cambio, actualizar la tecnología del contenedor en `architecture.md` | El grupo decidió implementar el TP4 completo en Python, el lenguaje que domina, y la consigna admite una interfaz de escritorio mínima. Las clases, los roles MVC y los mensajes no cambian: solo la tecnología de la Vista |
-| 2 | `ControladorBusqueda.preparar` y `ModeloBusqueda.establecer_configuracion` no estaban en el diseño | Se mantuvieron en el código y se documentan como **sustitutos de la precondición** (HU03 a HU07) | La configuración validada la deja en el Modelo la validación, que no es de esta HU. Para que la pantalla permita ingresar datos (Parte B) hacía falta cargarla; no se agregan a las secuencias porque ocurren antes del paso 1 |
-| 3 | `Observable.suscribir` y `ModeloBusqueda.estado` no estaban | Se actualizó el diagrama de clases | Son la forma concreta de la nota "la Vista observa el cambio y se redibuja" (MVC con suscripción, `DA-07`). Los Modelos siguen sin conocer a la Vista |
-| 4 | En el cliente el error es `ErrorEjecucion`, no `ErrorBlast` | Se actualizó la secuencia 2 | La Aplicación Web y el Backend son contenedores distintos: el error cruza como respuesta HTTP 502 con el mensaje, y el cliente no puede importar clases del Backend. `ErrorEjecucion` también cubre el caso "Backend caído" |
-| 5 | `Busqueda.longitud_query()` es una operación (en el diseño era un dato que se pasaba) | Se actualizó el diagrama de clases | Experto en información: la búsqueda tiene la secuencia, sabe contar sus residuos (sin el encabezado FASTA) y se los pasa a cada `Alineamiento` |
-| 6 | `Busqueda` rechaza una query sin residuos (`ValueError`, la ruta responde 422) | Se agregó como invariante de la entidad y se documenta en la secuencia 2 | Sin residuos, R1 dividiría por cero. Es un invariante del dominio, no una validación de formulario, así que vive en la entidad |
-| 7 | Los atributos de `Alineamiento` son públicos (en el diseño eran privados) y se agregó `descripcion` | Se actualizó el diagrama | El repositorio necesita leerlos para persistir los resultados crudos (CA-03); `descripcion` (`Hit_def`) hace legible la tabla |
-| 8 | `ControladorEjecucion` recibe un `reloj` por constructor | Se actualizó el diagrama | Para que las pruebas fijen la fecha guardada en el historial sin depender del reloj del sistema. Por defecto es `datetime.now` |
-| 9 | `AdaptadorBlastSimulado` tiene hits por secuencia, bases disponibles, demora por secuencia e `invocaciones` | Se actualizó el diagrama | Para probar `EC-01` (cada búsqueda debe recibir *sus* hits, con demoras distintas) y para reproducir el camino de error (base inexistente) en la demostración |
-| 10 | `AdaptadorBlastCli` valida programa y parámetros contra listas permitidas y tiene un tiempo máximo | Se mantuvo en el código | Defensa del subproceso: aunque la configuración llega validada, el adaptador no lanza un binario o una flag arbitrarios. Los rechazos salen como `ErrorBlast` (mismo camino de la secuencia 2) |
-| 11 | `RepositorioHistorialEnMemoria.busquedas` y `RepositorioHistorialSql.cerrar` | Se mantuvieron fuera de la interfaz | Lectura para las pruebas y liberación de conexiones. El controlador no las usa |
-
-Ninguna diferencia cambia la responsabilidad de una clase ni agrega una llamada entre componentes que no esté en el catálogo de relaciones de la arquitectura.
-
----
-
-## 5. Justificación del diseño
-
-### 5.1 Responsabilidades de las clases principales
-
-| Clase | Responsabilidad | Criterio GRASP |
-|---|---|---|
-| `ControladorBusqueda` | En el cliente, convierte el clic en la ejecución: toma la configuración del Modelo, cambia el estado, pide la ejecución al Backend en segundo plano y carga el resultado o el error en los Modelos | Controlador; bajo acoplamiento (la Vista no conoce al Backend) |
-| `ModeloBusqueda`, `ModeloResultados` | Guardan el estado que la Vista dibuja: configuración y estado de la ejecución, y filas recibidas | Experto en información; alta cohesión |
-| `ClienteBackend` | Único punto del cliente que habla HTTP con el Backend | Bajo acoplamiento y alta cohesión |
-| `ControladorEjecucion` | Orquesta la ejecución en el servidor: crea la búsqueda, pide la ejecución, hace registrar los resultados, guarda y devuelve la tabla. No tiene ningún `if` (complejidad ciclomática 1) | Controlador; bajo acoplamiento (depende de dos interfaces, no de sus implementaciones) |
-| `Busqueda` | Raíz del agregado: guarda la configuración y el momento de ejecución, cuenta los residuos de la query, crea sus alineamientos con todos los hits y arma la tabla | Experto en información y Creador |
-| `Alineamiento` | Calcula sus porcentajes | Experto en información |
-| `AdaptadorBlast` | Único punto de contacto con BLAST+: lanza el subproceso, lee la salida y advierte los campos que no conoce | Bajo acoplamiento y alta cohesión |
-| `RepositorioHistorial` | Interfaz con la base de datos: guarda la búsqueda terminada con todos sus alineamientos. Sus implementaciones deciden dónde | Alta cohesión y bajo acoplamiento; **Polimorfismo** y **Variaciones protegidas** (ver D9) |
-
-Las entidades del dominio tienen comportamiento propio (crear alineamientos, armar la tabla, calcular porcentajes, proteger su invariante): no son anémicas.
-
-### 5.2 Decisiones de diseño
-
-**D1 · La búsqueda no se guarda antes de ejecutarse.** La configuración validada la conserva `ModeloBusqueda` en el cliente y viaja completa en la solicitud de ejecución. `ControladorEjecucion` crea la `Busqueda` en memoria y la única escritura es la del historial, al final. Guardarla antes obligaba a una lectura extra, a un identificador de búsqueda previo y a manejar estados intermedios en el servidor, sin nada que lo pida en la HU.
-
-**D2 · El cliente hace la llamada de forma asíncrona y espera la respuesta.** `ControladorBusqueda` marca la búsqueda *en ejecución* (la Vista muestra el progreso) y pide la ejecución a `ClienteBackend` en un hilo aparte; cuando llega la respuesta, carga los Modelos. Es lo mínimo que cumple CA-01: la interfaz sigue navegable y el servidor nunca inicia la comunicación (`DA-01`). Se descartó que el cliente consulte el estado periódicamente, porque obliga a guardar en el servidor las búsquedas en curso y a tener una segunda operación de consulta. **Costo asumido:** una búsqueda remota muy larga mantiene abierta la solicitud HTTP todo ese tiempo. Si aparecieran cortes por tiempo, se pasaría a la consulta periódica sin cambiar las clases de dominio. Cómo se lanza la tarea en segundo plano se recibe por constructor (`lanzar`), para poder probar el controlador sin hilos.
-
-**D3 · Concurrencia sin estado compartido.** La ruta HTTP es una función `def` (no `async`), así que FastAPI atiende cada solicitud en su propio hilo (hasta cinco a la vez, como pide `EC-01`), y cada hilo lanza y espera su propio subproceso de BLAST+. Los resultados vuelven por la misma llamada que los pidió. Al no existir un registro compartido de búsquedas en curso, no hay dónde puedan cruzarse. El único objeto compartido es el repositorio en memoria, que protege su lista con un candado.
-
-**D4 · Primero guardar, después devolver la tabla.** `ControladorEjecucion` llama a `guardar` antes de `tabla_resultados`. Si guardar falla, la llamada termina con error y el cliente no recibe tabla. Así nunca se muestra una tabla sin su entrada en el historial (CA-03 y garantía mínima de `CU004`).
-
-**D5 · El Adaptador recibe datos simples y devuelve los hits como datos.** `ejecutar` recibe el programa, la secuencia, la base, el modo y los parámetros, y devuelve una lista de hits (diccionarios con los campos conocidos). El Adaptador no conoce las entidades del dominio (una frontera no toca entidades) y el dominio no conoce flags de línea de comandos ni etiquetas XML (`DA-03`). Es `Busqueda` quien convierte cada hit en un `Alineamiento`.
-
-**D6 · Interfaces solo donde hay más de una implementación.** `AdaptadorBlast` tiene la implementación real (`AdaptadorBlastCli`) y una simulada (`AdaptadorBlastSimulado`), que hace falta para probar `EC-01` con demoras controladas y para correr el sistema donde BLAST+ no está instalado. `RepositorioHistorial` tiene la implementación en memoria y la SQL (ver D9). Las demás clases no tienen interfaz porque tienen una sola implementación posible.
-
-**D7 · Salida XML (`-outfmt 5`).** La salida tabular (`-outfmt 6`) tiene columnas por posición, y una columna nueva corre las demás. En XML cada campo tiene nombre. Por eso es el formato que permite cumplir `EC-02`: tomar los campos conocidos por su nombre e ignorar los nuevos. La columna *score* de la tabla es el *bit score* (`Hsp_bit-score`), que es el que muestra NCBI; de cada hit se toma su primer HSP, que BLAST+ ordena como el mejor.
-
-**D8 · `ErrorBlast` en lugar de un valor de retorno especial.** Cuando BLAST+ termina con error, el Adaptador lanza `ErrorBlast` con el mensaje de BLAST+. El error corta la secuencia antes de registrar y de guardar; la ruta HTTP lo convierte en una respuesta 502 con el mensaje, `ClienteBackend` la convierte en `ErrorEjecucion` y `ControladorBusqueda` la registra en `ModeloBusqueda` para que la Vista la muestre. `ControladorEjecucion` no necesita ramas para ese caso.
-
-**D9 · Interfaz con la base de datos, resuelta por polimorfismo.** Si mañana el historial pasa de una base a otra, el programa no debe cambiar. Para eso `ControladorEjecucion` no guarda en ninguna base concreta: llama a `guardar(busqueda)` sobre la interfaz `RepositorioHistorial`, y es la implementación que recibió por constructor la que decide dónde termina la búsqueda. Hay dos:
-
-- `RepositorioHistorialEnMemoria`: guarda en una lista de Python. Sirve para las pruebas y para correr el sistema sin instalar nada.
-- `RepositorioHistorialSql`: guarda en una base relacional, con la búsqueda y sus alineamientos en una sola transacción. Usa SQLAlchemy (la tecnología del componente Acceso a datos), así que la misma clase funciona con SQLite (desarrollo y defensa) o con PostgreSQL (producción, según la arquitectura) cambiando solo `url_conexion`.
-
-Elegir una u otra es un argumento del punto de arranque (`--historial memoria` o `--historial sqlite:///localblast.db`). El controlador, las entidades y las secuencias no cambian. Son dos criterios GRASP que se suman a los cinco básicos: **Polimorfismo** (la variación "dónde se guarda" se resuelve con clases distintas que responden a la misma operación, en lugar de un `if` sobre el tipo de base) y **Variaciones protegidas** (la interfaz protege al resto del sistema del punto que puede cambiar). Agregar otra base en el futuro es agregar otra clase que implemente `RepositorioHistorial`, sin tocar las existentes.
-
-**D10 · La Aplicación Web respeta el MVC de la arquitectura.** La Vista (`PantallaBusqueda`) nunca habla con el Backend ni modifica datos: delega cada acción en `ControladorBusqueda`, que actualiza los Modelos y, cuando hace falta, usa `ClienteBackend`. La Vista se redibuja observando a los Modelos, que no la conocen (`DA-07`). Para esta HU alcanza con un controlador y los dos Modelos que la arquitectura ya define; el Controlador de resultados no interviene porque su trabajo (filtrar y descargar) es de `HU11` a `HU13`.
-
-**D11 · La Vista se implementó con Tkinter en lugar de React.** El grupo decidió escribir todo el TP4 en Python, el lenguaje que domina (restricción tecnológica de la arquitectura), y la consigna admite una interfaz de escritorio mínima (por ejemplo, Tkinter). Se mantuvieron las cinco clases de la Aplicación Web con sus roles MVC y sus mensajes; solo cambia la tecnología de `PantallaBusqueda`. La comunicación con el Backend sigue siendo cliente-servidor por HTTP/JSON (`DA-01`): la interfaz arranca el Backend en un hilo y le habla por `http://127.0.0.1:8000`, igual que lo haría la Aplicación Web en el servidor del laboratorio. Como Tkinter no admite que otro hilo toque sus widgets, la Vista no se redibuja dentro del aviso del Modelo: anota que hubo un cambio y se redibuja en el siguiente ciclo de la interfaz. Pasar a React más adelante implica reescribir las clases del cliente en JavaScript, sin tocar el Backend.
-
-### 5.3 Patrones de diseño usados
-
-| Patrón | Problema que resuelve | Dónde está en el diagrama |
-|---|---|---|
-| **Repository** | Que el controlador guarde la búsqueda sin saber si el historial está en memoria, en SQLite o en PostgreSQL | `RepositorioHistorial` (interfaz) con `RepositorioHistorialEnMemoria` y `RepositorioHistorialSql` |
-| **Adapter** (GoF) | BLAST+ habla por línea de comandos y XML; el dominio necesita "ejecutá esto y devolveme los hits". El Adaptador traduce una interfaz en la otra | `AdaptadorBlast` (interfaz) y `AdaptadorBlastCli` (adaptador) |
-| **Observer** (GoF), solo en el cliente | Que la Vista se entere de los cambios de los Modelos sin que los Modelos la conozcan (MVC con suscripción, `DA-07`) | `Observable` con `ModeloBusqueda` y `ModeloResultados`; `PantallaBusqueda` se suscribe |
-
-**Se consideraron y se descartaron:**
-
-- **Observer en el Backend** para que el Adaptador avise al controlador cuando BLAST+ termina: sería una llamada de la capa de datos hacia el dominio, prohibida por `DA-02`. Esperar el subproceso en el mismo hilo resuelve lo mismo. (En el cliente sí se usa, porque ahí lo pide el MVC.)
-- **Strategy** para el modo local y el remoto: la diferencia es la flag `-remote`, que resuelve BLAST+. Serían dos clases casi idénticas.
-
----
-
 ## 6. Implementación
+
+La HU está implementada en `src/`: el Backend en Python (FastAPI) y la Aplicación Web en React (Vite). La persistencia usa SQLite, y BLAST+ puede ser el real de la máquina o uno simulado. Las instrucciones para instalar y ejecutar están en la [sección 3 del README](../../README.md#3-cómo-instalar-y-ejecutar).
 
 ### 6.1 Estructura del código
 
-```text
-src/
-├── main.py                         # punto de arranque: elige implementaciones y las inyecta
-├── dominio/                        # entidades (no importa nada de las otras capas)
-│   ├── busqueda.py                 #   Busqueda
-│   └── alineamiento.py             #   Alineamiento
-├── aplicacion/                     # controlador del Backend e interfaces (puertos)
-│   ├── controlador_ejecucion.py    #   ControladorEjecucion
-│   ├── adaptador_blast.py          #   AdaptadorBlast (interfaz) y ErrorBlast
-│   └── repositorio_historial.py    #   RepositorioHistorial (interfaz)
-├── infraestructura/                # implementaciones de los puertos
-│   ├── adaptador_blast_cli.py      #   BLAST+ real, por subproceso y XML
-│   ├── adaptador_blast_simulado.py #   doble de BLAST+ (pruebas y demo)
-│   ├── datos_demo.py               #   hits de demostración para el simulado
-│   ├── repositorio_historial_en_memoria.py
-│   └── repositorio_historial_sql.py#   SQLAlchemy: SQLite o PostgreSQL
-└── interfaz/
-    ├── rutas.py                    # Backend · Controladores: ruta HTTP (FastAPI)
-    └── cliente/                    # Aplicación Web (MVC), en Python
-        ├── pantalla_busqueda.py    #   Vista (Tkinter)
-        ├── controlador_busqueda.py #   Controlador
-        ├── modelo_busqueda.py      #   Modelo
-        ├── modelo_resultados.py    #   Modelo
-        ├── observable.py           #   suscripción de los Modelos
-        └── cliente_backend.py      #   Cliente del Backend (HTTP)
-tests/                              # misma estructura que src/, más datos/ con salidas XML de BLAST+
-```
+Cada carpeta corresponde a un componente C4 del documento de arquitectura, de modo que la estructura deja ver las capas del Backend y la tríada MVC de la Aplicación Web.
 
-**Sentido de las dependencias.** `interfaz` → `aplicacion` → `dominio`, e `infraestructura` → `aplicacion` (implementa sus interfaces) y `dominio`. El dominio no importa nada de las demás carpetas, y `aplicacion` no importa nada de `infraestructura` ni de `interfaz`. El cliente (`interfaz/cliente/`) no importa nada del Backend: solo le habla por HTTP. El único archivo que conoce las implementaciones concretas es `main.py`.
-
-**Correspondencia con la arquitectura.** `aplicacion/controlador_ejecucion.py` y `dominio/` son el componente **Ejecución y persistencia**; `aplicacion/repositorio_historial.py` e `infraestructura/repositorio_historial_*` son **Acceso a datos**; `aplicacion/adaptador_blast.py` e `infraestructura/adaptador_blast_*` son el **Adaptador BLAST+**; `interfaz/rutas.py` es **Controladores**; cada archivo de `interfaz/cliente/` es el componente homónimo de la Aplicación Web.
-
-### 6.2 Cómo se ejecuta
-
-Las instrucciones completas (instalación en una máquina limpia, interfaz y pruebas) están en el [`README.md`](../../README.md#3-cómo-instalar-y-ejecutar-tp4). En resumen:
-
-```bash
-pip install -r requirements.txt
-python src/main.py                    # Backend + interfaz gráfica, con BLAST+ simulado si no está instalado
-python -m pytest --cov --cov-branch   # pruebas y cobertura
-```
-
-### 6.3 Cómo se reemplazan la persistencia y BLAST+
-
-`main.py` es el único lugar que crea las implementaciones concretas y se las pasa a `ControladorEjecucion` por su constructor:
-
-| Opción | Implementación que se inyecta |
-|---|---|
-| `--historial memoria` | `RepositorioHistorialEnMemoria` |
-| `--historial sqlite:///localblast.db` (por defecto) | `RepositorioHistorialSql` sobre SQLite |
-| `--historial postgresql://usuario:clave@host/localblast` | `RepositorioHistorialSql` sobre PostgreSQL (requiere `pip install psycopg2-binary`) |
-| `--adaptador cli` (o `auto` con `blastn` en el `PATH`) | `AdaptadorBlastCli` (BLAST+ real; `--blast-bin` indica la carpeta de los binarios) |
-| `--adaptador simulado` (o `auto` sin BLAST+) | `AdaptadorBlastSimulado` con los datos de `datos_demo.py` |
-
-En ninguno de los casos cambia `ControladorEjecucion`, las entidades ni la interfaz: es la demostración de D9 que pide la defensa.
-
----
-
-## 7. Pruebas
-
-Las pruebas son unitarias (pytest) y no pasan por la interfaz gráfica: se prueban las entidades, los controladores (del Backend y del cliente), la ruta HTTP y las implementaciones de los puertos. Los colaboradores se reemplazan por dobles: `AdaptadorBlastSimulado`, `RepositorioHistorialEnMemoria`, un `subprocess.run` falso para el adaptador real y un `urlopen` falso para el cliente HTTP. `RepositorioHistorialSql` se prueba contra un archivo SQLite temporal (prueba de integración liviana, sin instalar nada).
-
-### 7.1 Casos de prueba
-
-CN = caja negra (desde los criterios de aceptación y los escenarios de calidad); CB = caja blanca (desde el código, un caso por camino independiente, ver 7.2). Cada fila es una función `test_cpNN_...` en `tests/`.
-
-| ID | Técnica | Origen | Dado (entrada y estado) | Resultado esperado |
-|---|---|---|---|---|
-| CP-01 | CN, partición | CA-02, R1 | Hit con 90 identidades en 120 posiciones | % identidad = 75 |
-| CP-02 | CN, límite | CA-02, R1 | Identidades = longitud del alineamiento | % identidad = 100 |
-| CP-03 | CN, partición | CA-02, R1 | Hit que cubre las posiciones 11 a 60 de una query de 100 | % cobertura = 50 (tramo inclusivo) |
-| CP-04 | CN, límite | CA-02, R1 | Hit que cubre la query completa (1 a 250 de 250) | % cobertura = 100 |
-| CP-05 | CB | `Alineamiento.__init__` | Hit con valores como texto (así llegan del XML) | Atributos convertidos a `str`, `float`, `int` |
-| CP-06 | CN | CA-03 | Configuración completa | La búsqueda guarda programa, base, modo, parámetros y fecha; sin alineamientos |
-| CP-07 | CB | `Busqueda.__init__` (rama sin parámetros) | Configuración sin `remota` ni `parametros` | Modo local y parámetros vacíos |
-| CP-08 | CN, partición | R1 | Query FASTA con encabezado, saltos de línea y espacios | Longitud = solo residuos (8) |
-| CP-09 | CB | `Busqueda.longitud_query` (sin encabezado) | Query en texto plano con un espacio | Longitud = 6 |
-| CP-10 | CN, límite | Invariante de `Busqueda` | Query con encabezado y sin residuos | `ValueError` |
-| CP-11 | CN | CA-03, R2 | Tres hits, uno con E-value alto y otro con 1 identidad | Tres alineamientos, ninguno descartado |
-| CP-12 | CN | R1 | Hit que cubre 25 de los 100 residuos | El alineamiento recibe la longitud de la query (25 %) |
-| CP-13 | CB, límite | `registrar_resultados` y `tabla_resultados` (0 vueltas) | BLAST+ sin hits | Tabla vacía |
-| CP-14 | CN | CA-02 | Un hit | Fila con hit, descripción, score, E-value, % identidad y % cobertura redondeados |
-| CP-15 | CN | CA-02 | Adaptador con dos hits | Dos filas con las columnas de CA-02 |
-| CP-16 | CN | Secuencia 1, mensaje `ejecutar` | Configuración remota con parámetros | El adaptador recibe programa, secuencia, base, modo y parámetros |
-| CP-17 | CN | CA-03 | Dos hits, reloj fijo | El historial tiene una búsqueda con base, parámetros, fecha y los dos alineamientos crudos |
-| CP-18 | CN | CA-03, R3 (D4) | Repositorio que falla al guardar | Error; no se devuelve tabla |
-| CP-19 | CN | Garantía mínima de `CU004`, R4 | Base inexistente: BLAST+ falla | `ErrorBlast` con el mensaje; historial vacío |
-| CP-20 | CN | Invariante de `Busqueda` | Query sin residuos | `ValueError`; BLAST+ no se invoca y no se guarda nada |
-| CP-21 | CN | **`EC-01`** | Cinco búsquedas simultáneas con demoras distintas (0,05 a 0,3 s) | Cada una recibe exactamente sus hits; cinco búsquedas guardadas, cada una con los suyos (**cero cruces**) |
-| CP-22 | CN | CA-02 | Salida XML real de BLAST+ 2.14 con dos hits | Hits con los seis campos obligatorios, hit_id y descripción |
-| CP-23 | CB | `leer_salida` (sin campos desconocidos) | Salida de 2.14 | Ninguna advertencia en el log |
-| CP-24 | CN | **`EC-02`**, R5 | La misma salida con campos nuevos (`Hit_taxid`, `Hsp_cigar`) y versión 2.15 | Hits idénticos a los de CP-22 y **una** advertencia que nombra los campos nuevos |
-| CP-25 | CB | `_leer_hit` (falta un obligatorio) | HSP sin E-value, identidad ni posiciones | `ErrorBlast` que nombra los campos faltantes |
-| CP-26 | CB | `leer_salida` (XML inválido) | Texto que no es XML | `ErrorBlast` |
-| CP-27 | CB | `leer_salida` (hit sin HSP) | Un hit sin HSP | Se ignora (lista vacía) |
-| CP-28 | CB, límite | `leer_salida` (0 hits) | Salida sin hits | Lista vacía |
-| CP-29 | CN | `DA-03`, D7 | Ejecución local con `evalue` | Comando `blastn -db … -outfmt 5 -evalue …`, query por la entrada estándar |
-| CP-30 | CB | `_armar_comando` (modo remoto) | `remota = True` | El comando incluye `-remote` |
-| CP-31 | CB | `_armar_comando` (carpeta de binarios) | `directorio_binarios` configurado | Se invoca el binario de esa carpeta |
-| CP-32 | CN | R4 | BLAST+ termina con código 2 y mensaje | `ErrorBlast` con el mensaje de BLAST+ |
-| CP-33 | CB | `ejecutar` (error sin mensaje) | Código 3 sin texto de error | `ErrorBlast` que informa el código |
-| CP-34 | CB | `ejecutar` (`FileNotFoundError`) | BLAST+ no instalado | `ErrorBlast` "No se encontró…" |
-| CP-35 | CB | `ejecutar` (`TimeoutExpired`) | Ejecución que supera el tiempo máximo | `ErrorBlast` |
-| CP-36 | CB | `_armar_comando` (programa no válido) | Programa `rm` | `ErrorBlast`; no se lanza ningún subproceso |
-| CP-37 | CB | `_armar_comando` (parámetro no admitido) | Parámetro `out` | `ErrorBlast`; no se lanza ningún subproceso |
-| CP-38 | CB | `AdaptadorBlastSimulado.ejecutar` | Secuencia con hits preparados | Devuelve esos hits |
-| CP-39 | CB | `AdaptadorBlastSimulado.ejecutar` | Otra secuencia | Devuelve los hits por defecto |
-| CP-40 | CB | `AdaptadorBlastSimulado.ejecutar` | Base no disponible | `ErrorBlast` como el de BLAST+ |
-| CP-41 | CB | `_demora_para` (por secuencia) | Demora solo para una secuencia | Una vuelve enseguida y la otra tarda lo indicado |
-| CP-42 | CB | `_demora_para` (fija) | Demora fija | La búsqueda tarda lo indicado |
-| CP-43 | CN | CA-03 | Dos búsquedas en memoria | Guardadas en orden |
-| CP-44 | CN | CA-03 | Búsqueda con dos hits en SQLite | Una fila en `busquedas` (base, fecha, parámetros) y dos en `alineamientos` ligadas a ella |
-| CP-45 | CB | `RepositorioHistorialSql.guardar` (sin hits) | Búsqueda sin alineamientos | Se guarda la búsqueda sola |
-| CP-46 | CN | CA-03 (atomicidad) | Un alineamiento inválido | Error y **nada** guardado: ni la búsqueda ni sus alineamientos |
-| CP-47 | CN | CA-02 | POST con configuración válida | HTTP 200 con las filas |
-| CP-48 | CN | R4 | POST con base inexistente | HTTP 502 con el mensaje de BLAST+ |
-| CP-49 | CN | Invariante de `Busqueda` | POST con query sin residuos | HTTP 422 |
-| CP-50 | CN | CA-01 | Ejecutar, con la respuesta todavía pendiente | Estado *en ejecución* (la Vista muestra el progreso) |
-| CP-51 | CN | **CA-01** | Ejecutar con un hilo real y un Backend que no responde hasta que la prueba lo libera | `ejecutar()` vuelve enseguida en estado *en ejecución*; al responder, queda *finalizada* con las filas |
-| CP-52 | CN | CA-02, R6 | Llega la respuesta con filas | Filas en `ModeloResultados`, estado *finalizada* |
-| CP-53 | CN | R4, R6 | Llega un error | Estado *con error*, mensaje guardado, ninguna fila |
-| CP-54 | CN | `DA-07` (suscripción) | Cambios en los dos Modelos | Cada cambio se avisa al suscriptor, en orden |
-| CP-55 | CB | `marcar_en_ejecucion` | Nueva ejecución tras un error | El error anterior se borra |
-| CP-56 | CN | Relación Cliente del Backend → Backend | Respuesta 200 | Envía la configuración por POST a la URL correcta y devuelve las filas |
-| CP-57 | CB | `ClienteBackend.ejecutar_busqueda` (HTTP 502) | Error con cuerpo JSON | `ErrorEjecucion` con el mensaje de BLAST+ |
-| CP-58 | CB | `_mensaje_de` (cuerpo no JSON) | Error 500 sin JSON | `ErrorEjecucion` que informa el código |
-| CP-59 | CB | `ClienteBackend.ejecutar_busqueda` (sin conexión) | Backend caído | `ErrorEjecucion` "No se pudo conectar…" |
-| CP-60 | CB | `AdaptadorBlastSimulado.ejecutar` | Secuencia con un salto de línea al final (así la entrega la pantalla) | Encuentra los hits preparados igual |
-
-**Cada criterio de aceptación llega a una prueba:** CA-01 → CP-50, CP-51; CA-02 → CP-01 a CP-04, CP-14, CP-15, CP-22, CP-47, CP-52; CA-03 → CP-11, CP-17, CP-18, CP-43, CP-44, CP-46. **Cada escenario de calidad tiene la prueba de su medida:** `EC-01` → CP-21; `EC-02` → CP-24.
-
-### 7.2 Complejidad ciclomática
-
-Calculada como decisiones + 1 (`if`, `for`, `except`, `and`/`or`, condiciones de comprensiones) para las operaciones que implementa la HU, y verificada con `radon cc -s src`. Los constructores sin decisiones y las operaciones de complejidad 1 que solo asignan o delegan no se listan, salvo las de la HU.
-
-| Operación | Decisiones | Complejidad | Casos que cubren cada camino |
-|---|---|---|---|
-| `Alineamiento.porcentaje_identidad` | 0 | 1 | CP-01 (CP-02 es el límite) |
-| `Alineamiento.porcentaje_cobertura` | 0 | 1 | CP-03 (CP-04 es el límite) |
-| `Busqueda.__init__` | 2 (`parametros or {}`, query sin residuos) | 3 | CP-06 (con parámetros), CP-07 (sin parámetros), CP-10 (sin residuos) |
-| `Busqueda.longitud_query` | 2 (`for` e `if` de la comprensión) | 3 | CP-08 (línea de encabezado descartada), CP-09 (sin encabezado), CP-10 (ninguna línea con residuos) |
-| `Busqueda.registrar_resultados` | 1 (`for`) | 2 | CP-13 (cero hits), CP-11 (varios hits) |
-| `Busqueda.tabla_resultados` | 1 (`for`) | 2 | CP-13 (cero), CP-14 (uno) |
-| `ControladorEjecucion.ejecutar_busqueda` | 0 | **1** | CP-15. Sus "rechazos" no son ramas: son excepciones de los colaboradores que cortan la secuencia (CP-18, CP-19, CP-20) |
-| `AdaptadorBlastCli.ejecutar` | 4 (`except` × 2, código ≠ 0, `or` del mensaje) | 5 | CP-29, CP-34, CP-35, CP-32, CP-33 |
-| `AdaptadorBlastCli.leer_salida` | 6 (`except`, `for`, sin HSP, dos comprensiones, campos desconocidos) | 7 | CP-26, CP-28, CP-27, CP-22/CP-23 (sin desconocidos), CP-24 (con desconocidos), más las dos comprensiones recorridas en CP-22 y CP-24 |
-| `AdaptadorBlastCli._leer_hit` | 4 (`for`, comprensión `for` e `if`, faltantes) | 5 | CP-22 (ninguno falta), CP-25 (faltan). Los caminos "cero vueltas" de los `for` no son posibles: los campos obligatorios son siempre seis |
-| `AdaptadorBlastCli._armar_comando` | 5 (programa no válido, carpeta de binarios, remota, `for`, parámetro no admitido) | 6 | CP-36, CP-31, CP-30, CP-29 (con parámetros), CP-30 (sin parámetros), CP-37 |
-| Ruta `ejecutar_busqueda` (`rutas.py`) | 2 (`except` × 2) | 3 | CP-47, CP-48, CP-49 |
-| `ControladorBusqueda.ejecutar` | 0 | 1 | CP-50 |
-| `ControladorBusqueda._esperar_resultados` | 1 (`except`) | 2 | CP-52, CP-53 |
-| `ClienteBackend.ejecutar_busqueda` | 2 (`except` × 2) | 3 | CP-56, CP-57, CP-59 |
-| `ClienteBackend._mensaje_de` | 1 (`except`) | 2 | CP-57, CP-58 |
-| `RepositorioHistorialSql.guardar` | 2 (comprensión, `if filas`) | 3 | CP-44, CP-45, CP-46 |
-
-Ninguna operación supera 7, y el controlador del Backend tiene complejidad 1: la secuencia no tiene `alt` porque el error corta el flujo por excepción (D8). Es la señal de que el controlador no hace trabajo del dominio.
-
-### 7.3 Resultados y cobertura
-
-Las 60 pruebas pasan al ejecutarlas desde cero en un entorno virtual nuevo (`python -m pytest`). La cobertura de **sentencias y de ramas es del 100 %** sobre el código medido (dominio, aplicación, infraestructura, ruta HTTP y clases del cliente), con `PantallaBusqueda`, `main.py` y `datos_demo.py` excluidos. El reporte completo y su análisis están en [`cobertura.md`](cobertura.md).
-
----
-
-## 8. Trazabilidad
-
-### 8.1 HU → componente C4 → clases → archivo → pruebas
-
-Extiende la tabla 11.2 de la arquitectura con las columnas de diseño y de pruebas.
-
-| Criterio / escenario | Componente C4 | Clases | Archivo | Pruebas |
-|---|---|---|---|---|
-| CA-01 · Ejecución sin bloquear, con progreso | Pantallas → Controlador de búsqueda → Modelo de búsqueda; Controlador de búsqueda → Cliente del Backend → Controladores → Ejecución y persistencia | `PantallaBusqueda`, `ControladorBusqueda`, `ModeloBusqueda`, `ClienteBackend`, `ControladorEjecucion` | `interfaz/cliente/`, `interfaz/rutas.py`, `aplicacion/controlador_ejecucion.py` | CP-50, CP-51, CP-54 (y la demostración con la interfaz) |
-| CA-02 · Tabla al finalizar | Ejecución y persistencia → Adaptador BLAST+; Controlador de búsqueda → Modelo de resultados → Pantallas | `ControladorEjecucion`, `AdaptadorBlast`, `Busqueda`, `Alineamiento`, `ControladorBusqueda`, `ModeloResultados`, `PantallaBusqueda` | `aplicacion/controlador_ejecucion.py`, `dominio/busqueda.py`, `dominio/alineamiento.py`, `infraestructura/adaptador_blast_cli.py`, `interfaz/cliente/` | CP-01 a CP-05, CP-08, CP-09, CP-12 a CP-16, CP-22, CP-29, CP-47, CP-52, CP-56 |
-| CA-03 · Persistencia en el historial | Ejecución y persistencia → Acceso a datos | `ControladorEjecucion`, `Busqueda`, `RepositorioHistorial` y sus implementaciones | `aplicacion/controlador_ejecucion.py`, `aplicacion/repositorio_historial.py`, `infraestructura/repositorio_historial_en_memoria.py`, `infraestructura/repositorio_historial_sql.py` | CP-06, CP-07, CP-11, CP-17, CP-18, CP-43 a CP-46 |
-| Camino de error (garantía mínima de `CU004`) | Ejecución y persistencia → Adaptador BLAST+; Controlador de búsqueda → Modelo de búsqueda → Pantallas | `AdaptadorBlast`, `ErrorBlast`, `ControladorEjecucion`, `ClienteBackend`, `ErrorEjecucion`, `ControladorBusqueda`, `ModeloBusqueda`, `PantallaBusqueda` | `aplicacion/adaptador_blast.py`, `aplicacion/controlador_ejecucion.py`, `infraestructura/adaptador_blast_*.py`, `interfaz/rutas.py`, `interfaz/cliente/` | CP-10, CP-19, CP-20, CP-25, CP-26, CP-32 a CP-37, CP-40, CP-48, CP-49, CP-53, CP-55, CP-57 a CP-59 |
-| `EC-01` · Cero cruces con cinco concurrentes | Ejecución y persistencia → Adaptador BLAST+ | `ControladorEjecucion`, `AdaptadorBlast`, `RepositorioHistorialEnMemoria` | `aplicacion/controlador_ejecucion.py`, `interfaz/rutas.py` (`def`, un hilo por solicitud), `infraestructura/adaptador_blast_cli.py` (un subproceso por llamada) | **CP-21**, CP-38, CP-39, CP-41, CP-60 |
-| `EC-02` · Campos nuevos en la salida | Adaptador BLAST+ | `AdaptadorBlastCli` | `infraestructura/adaptador_blast_cli.py` | **CP-24**, CP-22, CP-23 |
-
-### 8.2 Verificación de coherencia
-
-| Verificación | ¿Se cumple? | Evidencia |
+| Elemento del diseño | Componente C4 (capa o rol) | Archivo |
 |---|---|---|
-| Cada participante de las secuencias pertenece a un componente de la ficha | Sí | Tabla 3.4.2 y tabla de clases por componente (sección 4.1) |
-| Cada mensaje entre componentes está en el catálogo de relaciones de la arquitectura | Sí | En la Aplicación Web (catálogo 7.2.2): `PantallaBusqueda → ControladorBusqueda` = Pantallas → Controlador de búsqueda (*Delega*); `PantallaBusqueda → ModeloBusqueda / ModeloResultados` = Pantallas → Modelos (*Muestra*, solo lectura); `ControladorBusqueda → ModeloBusqueda` (*Actualiza*); `ControladorBusqueda → ModeloResultados` (*Carga resultados*); `ControladorBusqueda → ClienteBackend` (*Envía*). Entre contenedores: `ClienteBackend → ControladorEjecucion` = Cliente del Backend → Backend (*Solicita*), que entra por Controladores y llega a Ejecución y persistencia (*Invoca*). En el Backend (catálogo 7.1.2): `ControladorEjecucion → AdaptadorBlast` (*Ejecuta*); `AdaptadorBlast → BLAST+` (*Invoca*); `ControladorEjecucion → RepositorioHistorial` (*Persiste*); `RepositorioHistorial → Base de datos` (*Lee y escribe*, SQL) |
-| El diseño respeta las restricciones del estilo y de los patrones del contenedor | Sí | Cliente-servidor: el cliente inicia la comunicación y espera la respuesta. Capas: `dominio/` no importa nada de las otras carpetas y `aplicacion/` no importa `infraestructura/` ni `interfaz/` (6.1). MVC: los Modelos no conocen a la Vista (solo avisan a suscriptores anónimos); la Vista no modifica Modelos; solo el Controlador usa `ClienteBackend` |
-| La táctica del escenario de calidad aparece como operación o mensaje | Sí | `EC-01`: `subprocess.run` dentro de `AdaptadorBlastCli.ejecutar`, en el hilo de cada solicitud. `EC-02`: `leer_salida` y `registrar_advertencia` |
-| Cada entidad del diagrama de robustez está en el modelo de dominio (o se agregó) | Sí | `Busqueda` y `Alineamiento` están en el modelo de dominio. `ModeloBusqueda` y `ModeloResultados` son su representación en el cliente |
-| Cada entidad que interviene según el paso 1 aparece en el diseño, o se explica por qué no | Sí | `Busqueda` y `Alineamiento` son clases. Las otras cinco intervienen como atributos de `Busqueda` (3.2) |
-| El diagrama de clases coincide con el código | Sí | Obtenido con `pyreverse` y revisado; diferencias con el diseño previo en 4.2 |
-| La medida del escenario tiene una prueba que la verifica | Sí | `EC-01` → CP-21 (cero cruces con cinco ejecuciones simultáneas); `EC-02` → CP-24 (campos obligatorios intactos y advertencia registrada) |
-| Todo criterio de aceptación llega al menos a una prueba | Sí | Tabla 8.1 y cierre de 7.1 |
-| Toda clase del diagrama aparece en alguna secuencia | Sí | Tabla de correspondencia de la sección 4.1 |
+| `PantallaBusqueda` | Pantallas (Vista) | `src/web/src/pantallas/PantallaBusqueda.jsx` |
+| `ControladorBusqueda` | Controlador de búsqueda (Controlador) | `src/web/src/controladores/ControladorBusqueda.js` |
+| `ModeloBusqueda` | Modelo de búsqueda (Modelo) | `src/web/src/modelos/ModeloBusqueda.js` |
+| `ModeloResultados` | Modelo de resultados (Modelo) | `src/web/src/modelos/ModeloResultados.js` |
+| `ClienteBackend`, `ErrorBlast` del cliente | Cliente del Backend (apoyo) | `src/web/src/cliente/ClienteBackend.js` |
+| Ruta `POST /api/busquedas/ejecucion` | Controladores (presentación) | `src/backend/controladores/rutas.py` |
+| `ControladorEjecucion` | Ejecución y persistencia (dominio) | `src/backend/ejecucion/controlador_ejecucion.py` |
+| `Busqueda` | Ejecución y persistencia (dominio) | `src/backend/ejecucion/busqueda.py` |
+| `Alineamiento` | Ejecución y persistencia (dominio) | `src/backend/ejecucion/alineamiento.py` |
+| `RepositorioHistorial` (interfaz) | Acceso a datos (datos) | `src/backend/acceso_datos/repositorio_historial.py` |
+| `RepositorioHistorialSqlite`, `RepositorioHistorialEnMemoria` | Acceso a datos (datos) | `src/backend/acceso_datos/repositorio_historial_sqlite.py`, `repositorio_historial_memoria.py` |
+| `ConexionBD` y esquema del historial | Acceso a datos (datos) | `src/backend/acceso_datos/conexion_bd.py`, `esquema.sql` |
+| `AdaptadorBlast` (interfaz), `ErrorBlast` | Adaptador BLAST+ (datos) | `src/backend/adaptador_blast/adaptador_blast.py` |
+| `AdaptadorBlastCli` | Adaptador BLAST+ (datos) | `src/backend/adaptador_blast/adaptador_blast_cli.py` |
+| BLAST+ simulado | Reemplaza al sistema externo BLAST+ | `src/backend/adaptador_blast/blast_simulado.py` |
+| Armado de los objetos | Punto de arranque | `src/backend/arranque.py`, `src/web/src/main.jsx` |
 
-### 8.3 Actualizaciones a documentos anteriores
+Las operaciones conservan los nombres de los diagramas de secuencia, también en JavaScript (`marcar_en_ejecucion`, `ejecutar_busqueda`, `registrar_error`), para que cada mensaje se pueda encontrar en el código.
 
-| Documento | Cambio | Motivo |
+### 6.2 Cómo se reemplazan la persistencia y BLAST+
+
+Los colaboradores se reciben por el constructor y se arman en un solo lugar, `arranque.py`, que los elige según variables de entorno. `ControladorEjecucion` conoce solo las interfaces `RepositorioHistorial` y `AdaptadorBlast`, así que no cambia con ninguna de estas variantes.
+
+| Qué se reemplaza | Opciones | Cómo se elige |
 |---|---|---|
-| [`modelo-dominio.md`](../requeriments/modelo-dominio.md) | Corrección de multiplicidades, nueva entidad `ProgramaBlast`, composiciones, relaciones del `Reporte` y ciclo de vida de la búsqueda (ver su *Registro de cambios*) | El modelo era previo a la partición de los casos de uso y a la arquitectura |
-| [`historias-usuario.md`](../requeriments/historias-usuario.md) | CA-03 de `HU08_CU004_B`: la búsqueda se registra en el historial **antes** de presentar la tabla | Conflicto con la garantía mínima de `CU004` (3.1 y D4) |
-| [`casos-de-uso.md`](../requeriments/casos-de-uso.md) | Flujo principal de `CU004`: el paso de persistencia pasa antes que el de presentación | Mismo motivo |
-| [`architecture.md`](../architecture/architecture.md) | La secuencia y la configuración ya no se guardan antes de ejecutar; la ejecución deja de tener una "consulta de progreso" aparte; *Ejecución y persistencia* persiste antes de entregar los resultados; `DA-04` explica cómo se evita el cruce de resultados | Decisiones D1, D2, D3 y D4 de este diseño |
-| [`architecture.md`](../architecture/architecture.md) | **Pendiente de decisión del grupo:** la tecnología del contenedor Aplicación Web figura como React; en el TP4 se implementó en Python (Tkinter) | Decisión D11. Si se adopta, actualizar las vistas de contenedores y de despliegue |
+| Persistencia del historial | `RepositorioHistorialSqlite` (con `ConexionBD`, archivo SQLite) o `RepositorioHistorialEnMemoria` | `LOCALBLAST_PERSISTENCIA=sqlite` o `memoria` |
+| BLAST+ | El programa real de la máquina (`ejecutar_subproceso`) o `BlastSimulado` | `LOCALBLAST_BLAST=real` o `simulado` |
+
+**El simulado reemplaza a BLAST+, no al adaptador.** `AdaptadorBlastCli` recibe por el constructor quién ejecuta el comando. Con BLAST+ simulado, el adaptador arma la misma línea de comandos y lee la salida con el mismo `leer_salida`. Lo único que cambia es que, en lugar de lanzar el programa, se devuelve la salida grabada de una ejecución real de `blastp` sobre la base de demostración, o el mismo error de BLAST+ si la base no existe. Así la lectura de la salida (`EC-02`) se ejercita en todos los modos. Para las pruebas del controlador, en cambio, alcanza con un doble de `AdaptadorBlast` que devuelva hits o lance `ErrorBlast`.
+
+**Datos de demostración.** La query y la base son proteínas sintéticas (`datos/ejemplo/`), generadas por `scripts/generar_datos_demo.py`: doce variantes de la query a distintos porcentajes de identidad y de cobertura, y seis proteínas sin relación. La base BLAST se construye con `scripts/crear_base_demo.sh` (`makeblastdb`). Con BLAST+ real y con el simulado se obtienen los mismos 15 alineamientos.
+
+### 6.3 Decisiones tomadas al implementar
+
+Estas decisiones no estaban en los diagramas. Se revisan en la validación del modelo de clases (paso 5).
+
+| # | Decisión | Motivo |
+|---|---|---|
+| I1 | `RepositorioHistorial` y `AdaptadorBlast` son interfaces con sus implementaciones aparte | Persistencia y servicio externo detrás de interfaces, como pide la implementación; en la robustez y las secuencias figuran sin estereotipo |
+| I2 | La query se le pasa a BLAST+ por la entrada estándar | Evita archivos temporales; cada subproceso recibe solo su propia query (`EC-01`) |
+| I3 | De cada hit se toma el primer HSP (el de mejor score) | La tabla muestra una fila por hit (CA-02) |
+| I4 | La cobertura usa el tramo absoluto de la query y se limita a 100 % | BLAST+ puede informar el tramo invertido en marcos negativos (`blastx`) |
+| I5 | `Busqueda.registrar_resultados` solo se puede llamar una vez | Protege R2: el conjunto de alineamientos es el que devolvió BLAST+, sin agregados posteriores |
+| I6 | `ModeloBusqueda.marcar_en_ejecucion` solo acepta una búsqueda validada o con error | Regla del ciclo de vida (solo se ejecuta una búsqueda validada); la pantalla además deshabilita la acción |
+| I7 | `ConexionBD` crea el esquema al construirse, y SQLite trabaja en modo WAL | Instalación sin pasos manuales; varias búsquedas pueden escribir a la vez (`EC-01`) |
+| I8 | La ruta HTTP responde 502 con `{"tipo": "ErrorBlast", "mensaje": …}` y 422 si la solicitud está mal formada | `ClienteBackend` distingue el error de BLAST+ (que muestra literal) de un error de comunicación |
+| I9 | `PantallaBusqueda` dibuja además el estado previo a ejecutar y una sección de ayuda | El estado previo es el punto de partida de las secuencias; la sección de ayuda permite comprobar que se puede navegar sin interrumpir la ejecución (CA-01) |
 
 ---
 
@@ -990,18 +570,22 @@ Extiende la tabla 11.2 de la arquitectura con las columnas de diseño y de prueb
 
 | Término | Significado en este documento |
 |---|---|
-| Agregado | Grupo de entidades que se tratan como una unidad y se acceden a través de una entidad raíz. Aquí, `Busqueda` con sus alineamientos |
-| Hit | Cada secuencia de la base de datos que BLAST+ encontró parecida a la query. En la salida de BLAST+ llega como datos; en el dominio se convierte en un `Alineamiento` |
-| Historial | Conjunto de búsquedas ejecutadas con sus resultados crudos (almacén D2) |
-| Polimorfismo | Que objetos de clases distintas respondan a la misma operación, cada uno a su manera. Aquí, las implementaciones de `RepositorioHistorial` responden a `guardar` cada una en su almacén |
-| Subproceso | Proceso del sistema operativo que lanza el Backend para ejecutar un programa de BLAST+ |
+| Agregado | Grupo de entidades que se tratan como una unidad: se crean, se guardan y se acceden desde una entidad raíz (`Busqueda` con sus `Alineamiento`) |
+| *Boundary* (frontera) | Elemento de la robustez que conecta al sistema con un actor o con algo que no es código nuestro (pantalla, BLAST+, motor de base de datos) |
+| *Controller* (controlador) | Elemento de la robustez que coordina la funcionalidad: decide qué se hace y en qué orden. Los repositorios son controladores técnicos |
+| *Entity* (entidad) | Elemento de la robustez que representa un concepto del dominio, con sus datos y sus reglas |
+| Hit | Cada coincidencia que BLAST+ informa entre la query y una secuencia de la base; en el dominio es un `Alineamiento` |
+| Historial | Conjunto de búsquedas finalizadas de un investigador, con sus resultados crudos (almacén D2) |
+| Resultados crudos | Todos los alineamientos que devolvió BLAST+, antes de cualquier filtro post-búsqueda |
+| Subproceso | Programa que el Backend lanza aparte (una invocación de BLAST+ por búsqueda) y del que espera su salida |
+| Transacción | Grupo de escrituras en la base que se confirman todas juntas o ninguna |
 
-Los términos del dominio (BLAST, BLAST+, query, E-value, FASTA, etc.) están en el [glosario del SRS](../requeriments/srs.md#10-glosario).
+Los términos del dominio (BLAST, BLAST+, query, FASTA, E-value, etc.) están definidos en el [Glosario del SRS](../requeriments/srs.md#10-glosario).
 
 ### 9.2 Bibliografía
 
 - Valotto, V. *Diseño tridimensional de software*. 2025.
-- Rosenberg, D. y Stephens, K. *Use Case Driven Object Modeling with UML: Theory and Practice*. Apress, 2007.
-- Larman, C. *Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development*. Prentice Hall.
-- Gamma, E., Helm, R., Johnson, R. y Vlissides, J. *Design Patterns: Elements of Reusable Object-Oriented Software*. Addison-Wesley.
-- Camacho, C. et al. *BLAST+ Command Line Applications User Manual*. NCBI.
+- Rosenberg, D. y Stephens, K. *Use Case Driven Object Modeling with UML: Theory and Practice*. Apress, 2007. Diagrama de robustez y sus reglas de conexión.
+- Larman, C. *Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development*. Prentice Hall. Criterios GRASP.
+- Krasner, G. y Pope, S. "A Cookbook for Using the Model-View-Controller User Interface Paradigm in Smalltalk-80". *Journal of Object-Oriented Programming*, 1(3), 1988. Patrón MVC.
+- Camacho, C. et al. "BLAST+: architecture and applications". *BMC Bioinformatics*, 10:421, 2009. Formato de invocación y salida de BLAST+.
