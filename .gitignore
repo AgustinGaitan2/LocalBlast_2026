@@ -28,3 +28,5 @@ node_modules/
 src/web/dist/
 datos/blastdb/
 datos/*.sqlite3*
+.coverage
+src/web/coverage/

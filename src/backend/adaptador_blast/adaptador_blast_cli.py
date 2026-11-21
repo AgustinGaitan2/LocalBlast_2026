@@ -28,6 +28,8 @@ logger = logging.getLogger("localblast.adaptador_blast")
 
 @dataclass(frozen=True)
 class ResultadoComando:
+    """Resultado de ejecutar un comando: código de salida, salida estándar y errores."""
+
     codigo: int
     salida: str
     errores: str
@@ -39,7 +41,7 @@ EjecutorComando = Callable[[list[str], str, Path | None, float | None], Resultad
 def ejecutar_subproceso(
     comando: list[str], entrada: str, directorio: Path | None, limite_segundos: float | None
 ) -> ResultadoComando:
-    """Ejecuta BLAST+ real como subproceso independiente (DA-04)."""
+    """Ejecuta el comando como subproceso independiente y devuelve su resultado (DA-04)."""
     proceso = subprocess.run(
         comando,
         input=entrada,
@@ -86,6 +88,8 @@ PREFIJO_ID_ORDINAL = "gnl|BL_ORD_ID|"
 
 
 class AdaptadorBlastCli(AdaptadorBlast):
+    """Adaptador que invoca a BLAST+ por línea de comandos y traduce su salida XML a hits."""
+
     def __init__(
         self,
         ejecutor: EjecutorComando = ejecutar_subproceso,
@@ -93,7 +97,8 @@ class AdaptadorBlastCli(AdaptadorBlast):
         directorio_trabajo: Path | None = None,
         limite_segundos: float | None = None,
     ) -> None:
-        self._ejecutor = ejecutor
+        """Recibe quién ejecuta BLAST+ (real o simulado), dónde está y cuánto puede tardar."""
+        self._ejecutor: EjecutorComando = ejecutor
         self._directorio_blast = directorio_blast
         self._directorio_trabajo = directorio_trabajo
         self._limite_segundos = limite_segundos
@@ -106,6 +111,7 @@ class AdaptadorBlastCli(AdaptadorBlast):
         remota: bool,
         parametros: dict,
     ) -> list[Hit]:
+        """Lanza BLAST+ en un subproceso propio y devuelve los hits que leyó de su salida."""
         comando = self._armar_comando(variante, base_datos, remota, parametros)
         try:
             resultado = self._ejecutor(
@@ -126,6 +132,7 @@ class AdaptadorBlastCli(AdaptadorBlast):
         return self.leer_salida(resultado.salida)
 
     def leer_salida(self, salida_xml: str) -> list[Hit]:
+        """Lee los hits de la salida XML de BLAST+ y advierte los campos que no conoce."""
         try:
             raiz = ET.fromstring(salida_xml)
         except ET.ParseError as error:
@@ -136,6 +143,7 @@ class AdaptadorBlastCli(AdaptadorBlast):
         return [self._leer_hit(hit) for hit in raiz.iter("Hit")]
 
     def registrar_advertencia(self, campos: list[str]) -> None:
+        """Deja en el registro una advertencia con los campos desconocidos de la salida."""
         logger.warning(
             "La salida de BLAST+ trae campos que el sistema no conoce y se ignoran: %s",
             ", ".join(campos),
@@ -146,6 +154,7 @@ class AdaptadorBlastCli(AdaptadorBlast):
     def _armar_comando(
         self, variante: str, base_datos: str, remota: bool, parametros: dict
     ) -> list[str]:
+        """Arma la línea de comandos de BLAST+ con la base, el modo y los parámetros."""
         programa = str(self._directorio_blast / variante) if self._directorio_blast else variante
         # Sin -query: BLAST+ lee la secuencia de la entrada estándar.
         comando = [programa, "-db", base_datos, "-outfmt", "5"]
@@ -157,27 +166,29 @@ class AdaptadorBlastCli(AdaptadorBlast):
         return comando
 
     def _leer_hit(self, hit: ET.Element) -> Hit:
+        """Convierte un elemento <Hit> en un Hit, tomando su mejor alineamiento (primer HSP)."""
         hsp = hit.find("Hit_hsps/Hsp")  # El primer HSP es el de mejor score.
         if hsp is None:
             raise ErrorBlast("La salida de BLAST+ tiene un hit sin alineamientos (Hsp).")
-        identificador = _campo(hit, "Hit_id")
-        descripcion = _campo(hit, "Hit_def")
+        identificador = _leer_campo_obligatorio(hit, "Hit_id")
+        descripcion = _leer_campo_obligatorio(hit, "Hit_def")
         if identificador.startswith(PREFIJO_ID_ORDINAL):
             # Base sin -parse_seqids: el identificador real es la primera palabra de la definición.
             identificador, _, descripcion = descripcion.partition(" ")
         return Hit(
             id_hit=identificador,
             descripcion=descripcion,
-            score=float(_campo(hsp, "Hsp_bit-score")),
-            evalue=float(_campo(hsp, "Hsp_evalue")),
-            identidades=int(_campo(hsp, "Hsp_identity")),
-            longitud_alineamiento=int(_campo(hsp, "Hsp_align-len")),
-            query_desde=int(_campo(hsp, "Hsp_query-from")),
-            query_hasta=int(_campo(hsp, "Hsp_query-to")),
+            score=float(_leer_campo_obligatorio(hsp, "Hsp_bit-score")),
+            evalue=float(_leer_campo_obligatorio(hsp, "Hsp_evalue")),
+            identidades=int(_leer_campo_obligatorio(hsp, "Hsp_identity")),
+            longitud_alineamiento=int(_leer_campo_obligatorio(hsp, "Hsp_align-len")),
+            query_desde=int(_leer_campo_obligatorio(hsp, "Hsp_query-from")),
+            query_hasta=int(_leer_campo_obligatorio(hsp, "Hsp_query-to")),
         )
 
 
-def _campo(elemento: ET.Element, nombre: str) -> str:
+def _leer_campo_obligatorio(elemento: ET.Element, nombre: str) -> str:
+    """Lee el texto de un campo obligatorio; lanza ErrorBlast si la salida no lo trae."""
     texto = elemento.findtext(nombre)
     if texto is None:
         raise ErrorBlast(f"La salida de BLAST+ no tiene el campo obligatorio {nombre}.")

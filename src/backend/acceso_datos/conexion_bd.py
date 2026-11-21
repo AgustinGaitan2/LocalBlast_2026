@@ -17,18 +17,22 @@ Sentencia = tuple[str, tuple]
 
 
 class ConexionBD:
+    """Frontera hacia el motor SQLite: abre conexiones y ejecuta transacciones."""
+
     def __init__(self, ruta: Path, limite_espera_segundos: float = 30.0) -> None:
+        """Prepara la base en la ruta indicada y crea el esquema si todavía no existe."""
         self._ruta = ruta
         self._limite_espera_segundos = limite_espera_segundos
         ruta.parent.mkdir(parents=True, exist_ok=True)
-        conexion = self._abrir()
+        conexion = self._abrir_conexion()
         try:
             conexion.executescript(ESQUEMA.read_text(encoding="utf-8"))
         finally:
             conexion.close()
 
     def ejecutar_transaccion(self, registro: list[Sentencia]) -> None:
-        conexion = self._abrir()
+        """Ejecuta todas las sentencias del registro en una sola transacción (todas o ninguna)."""
+        conexion = self._abrir_conexion()
         try:
             with conexion:  # confirma al salir, o deshace todo si hubo una excepción
                 for sentencia, valores in registro:
@@ -36,7 +40,8 @@ class ConexionBD:
         finally:
             conexion.close()
 
-    def _abrir(self) -> sqlite3.Connection:
+    def _abrir_conexion(self) -> sqlite3.Connection:
+        """Abre una conexión nueva con las claves foráneas activadas."""
         conexion = sqlite3.connect(self._ruta, timeout=self._limite_espera_segundos)
         conexion.execute("PRAGMA foreign_keys = ON")
         return conexion

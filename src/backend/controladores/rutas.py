@@ -20,7 +20,7 @@ from backend.ejecucion.controlador_ejecucion import ControladorEjecucion, ErrorB
 
 
 class SolicitudEjecucion(BaseModel):
-    """Configuración validada que envía la Aplicación Web (los campos extra se ignoran)."""
+    """Solicitud de ejecución con la configuración validada (los campos extra se ignoran)."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -32,10 +32,12 @@ class SolicitudEjecucion(BaseModel):
 
 
 def crear_app(controlador: ControladorEjecucion, carpeta_web: Path | None = None) -> FastAPI:
+    """Crea la aplicación HTTP con la ruta de ejecución y, si existe, la interfaz compilada."""
     app = FastAPI(title="LocalBlast", version="1.0")
 
     @app.post("/api/busquedas/ejecucion")
     def ejecutar_busqueda(solicitud: SolicitudEjecucion):
+        """Pide la ejecución al controlador y responde las filas, o el error de BLAST+ (502)."""
         try:
             filas = controlador.ejecutar_busqueda(solicitud.model_dump())
         except ErrorBlast as error:

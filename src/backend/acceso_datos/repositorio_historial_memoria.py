@@ -15,15 +15,20 @@ if TYPE_CHECKING:
 
 
 class RepositorioHistorialEnMemoria(RepositorioHistorial):
+    """Repositorio que guarda las búsquedas en una lista mientras corre el proceso."""
+
     def __init__(self) -> None:
-        self._guardadas: list["Busqueda"] = []
+        """Crea el historial vacío."""
+        self._guardadas: list[Busqueda] = []
         self._candado = Lock()
 
     def guardar(self, busqueda: "Busqueda") -> None:
+        """Agrega la búsqueda al historial en memoria."""
         with self._candado:
             self._guardadas.append(busqueda)
 
     @property
-    def guardadas(self) -> tuple["Busqueda", ...]:
+    def busquedas_guardadas(self) -> tuple["Busqueda", ...]:
+        """Búsquedas guardadas hasta el momento, en el orden en que llegaron."""
         with self._candado:
             return tuple(self._guardadas)

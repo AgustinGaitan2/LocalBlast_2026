@@ -9,10 +9,11 @@ import {
 } from './formato.js'
 import { useObservar } from './useObservar.js'
 
-// PantallaBusqueda (Vista, «boundary»).
 // - Delega la única acción del investigador ("Ejecutar búsqueda") en ControladorBusqueda.
 // - Observa a ModeloBusqueda y ModeloResultados para leer qué dibujar (DA-07).
 // - No contiene reglas del negocio ni habla con el Backend.
+
+/** Pantalla de búsqueda (Vista, «boundary»): muestra la búsqueda y le delega la ejecución al controlador. */
 export function PantallaBusqueda({ controlador, modeloBusqueda, modeloResultados, ejemplos }) {
   useObservar(modeloBusqueda)
   useObservar(modeloResultados)
@@ -20,7 +21,7 @@ export function PantallaBusqueda({ controlador, modeloBusqueda, modeloResultados
   // porque el estado de la búsqueda vive en los Modelos y no en esta pantalla (CA-01).
   const [seccion, setSeccion] = useState('busqueda')
 
-  const estado = modeloBusqueda.estado()
+  const estado = modeloBusqueda.obtener_estado()
 
   return (
     <>
@@ -48,7 +49,7 @@ export function PantallaBusqueda({ controlador, modeloBusqueda, modeloResultados
           </button>
         </nav>
         <main className="principal">
-          <AvisoAccesible estado={estado} cantidad={modeloResultados.filas().length} />
+          <AvisoAccesible estado={estado} cantidad={modeloResultados.obtener_filas().length} />
           {seccion === 'busqueda' ? (
             <SeccionBusqueda
               controlador={controlador}
@@ -64,9 +65,10 @@ export function PantallaBusqueda({ controlador, modeloBusqueda, modeloResultados
   )
 }
 
+/** Sección principal: dibuja el paso de la ejecución que corresponde al estado de la búsqueda. */
 function SeccionBusqueda({ controlador, modeloBusqueda, modeloResultados }) {
-  const estado = modeloBusqueda.estado()
-  const configuracion = modeloBusqueda.configuracion()
+  const estado = modeloBusqueda.obtener_estado()
+  const configuracion = modeloBusqueda.obtener_configuracion()
   const ejecutar = () => controlador.ejecutar()
 
   return (
@@ -75,15 +77,16 @@ function SeccionBusqueda({ controlador, modeloBusqueda, modeloResultados }) {
       {estado === Estado.VALIDADA && mostrar_busqueda_validada(configuracion, ejecutar)}
       {estado === Estado.EN_EJECUCION && <Progreso modeloBusqueda={modeloBusqueda} />}
       {estado === Estado.CON_ERROR &&
-        mostrar_error(modeloBusqueda.mensaje_error(), configuracion, ejecutar)}
+        mostrar_error(modeloBusqueda.obtener_mensaje_error(), configuracion, ejecutar)}
       {estado === Estado.FINALIZADA &&
-        mostrar_resultados(modeloResultados.filas(), configuracion, modeloBusqueda)}
+        mostrar_resultados(modeloResultados.obtener_filas(), configuracion, modeloBusqueda)}
     </div>
   )
 }
 
 // --- Estados que dibuja la pantalla (nombres de las secuencias) --------------------
 
+/** Muestra la búsqueda validada con el botón para ejecutarla. */
 function mostrar_busqueda_validada(configuracion, ejecutar) {
   return (
     <>
@@ -112,12 +115,14 @@ function mostrar_busqueda_validada(configuracion, ejecutar) {
   )
 }
 
+/** Indicador de progreso que actualiza el tiempo transcurrido cada segundo. */
 function Progreso({ modeloBusqueda }) {
-  const configuracion = modeloBusqueda.configuracion()
-  const transcurrido = useTiempoTranscurrido(modeloBusqueda.inicio())
-  return mostrar_progreso(configuracion, modeloBusqueda.inicio(), transcurrido)
+  const configuracion = modeloBusqueda.obtener_configuracion()
+  const transcurrido = useContarTiempoTranscurrido(modeloBusqueda.obtener_inicio())
+  return mostrar_progreso(configuracion, modeloBusqueda.obtener_inicio(), transcurrido)
 }
 
+/** Muestra que BLAST+ está corriendo, con el tiempo transcurrido y la configuración. */
 function mostrar_progreso(configuracion, inicio, transcurrido) {
   return (
     <>
@@ -161,6 +166,7 @@ function mostrar_progreso(configuracion, inicio, transcurrido) {
   )
 }
 
+/** Muestra que la búsqueda no se completó, con el mensaje literal y la opción de reintentar. */
 function mostrar_error(mensaje, configuracion, reintentar) {
   return (
     <>
@@ -191,6 +197,7 @@ function mostrar_error(mensaje, configuracion, reintentar) {
   )
 }
 
+/** Muestra la tabla de resultados y la confirmación de que la búsqueda se guardó en el historial. */
 function mostrar_resultados(filas, configuracion, modeloBusqueda) {
   return (
     <>
@@ -205,10 +212,10 @@ function mostrar_resultados(filas, configuracion, modeloBusqueda) {
           </p>
         </div>
         <span className="chip chip-exito chip-grande">
-          ✓ Guardado en el historial · {formatearHora(modeloBusqueda.fin())}
+          ✓ Guardado en el historial · {formatearHora(modeloBusqueda.obtener_fin())}
         </span>
       </div>
-      <BarraResumen configuracion={configuracion} inicio={modeloBusqueda.inicio()} />
+      <BarraResumen configuracion={configuracion} inicio={modeloBusqueda.obtener_inicio()} />
       <section className="panel panel-tabla">
         {filas.length === 0 ? (
           <div className="sin-hits">
@@ -254,6 +261,7 @@ const COLUMNAS = [
   },
 ]
 
+/** Tabla con las columnas que exige CA-02: hit, score, E-value, % identidad y % cobertura. */
 function TablaResultados({ filas }) {
   return (
     <div className="envoltorio-tabla">
@@ -289,6 +297,7 @@ function TablaResultados({ filas }) {
   )
 }
 
+/** Porcentaje con su barra horizontal. */
 function Porcentaje({ valor }) {
   return (
     <span className="porcentaje">
@@ -300,6 +309,7 @@ function Porcentaje({ valor }) {
   )
 }
 
+/** Ícono de ayuda que muestra la explicación de una columna al pasar el mouse o enfocarlo. */
 function Ayuda({ texto }) {
   return (
     <span className="ayuda" tabIndex={0} aria-label={texto}>
@@ -308,6 +318,7 @@ function Ayuda({ texto }) {
   )
 }
 
+/** Resumen en dos columnas de la configuración validada. */
 function ResumenConfiguracion({ configuracion, inicio }) {
   const parametros = configuracion.parametros ?? {}
   const datos = [
@@ -333,6 +344,7 @@ function ResumenConfiguracion({ configuracion, inicio }) {
   )
 }
 
+/** Resumen de la configuración en una línea, arriba de la tabla. */
 function BarraResumen({ configuracion, inicio }) {
   const parametros = configuracion.parametros ?? {}
   return (
@@ -357,6 +369,7 @@ function BarraResumen({ configuracion, inicio }) {
   )
 }
 
+/** Describe la query con su nombre y su longitud. */
 function describirQuery(configuracion) {
   const partes = [configuracion.query_nombre ?? 'query']
   if (configuracion.query_longitud) {
@@ -367,6 +380,7 @@ function describirQuery(configuracion) {
 
 const PASOS = ['Secuencia query', 'Configuración', 'Ejecución', 'Resultados']
 
+/** Pasos del flujo de búsqueda, con el actual resaltado. */
 function Pasos({ estado }) {
   const actual = estado === Estado.FINALIZADA ? 3 : 2
   return (
@@ -392,6 +406,7 @@ const TEXTO_ESTADO = {
   [Estado.CON_ERROR]: { texto: 'con error', clase: 'chip-error' },
 }
 
+/** Etiqueta del estado de la búsqueda en la barra lateral. */
 function ChipEstado({ estado }) {
   const { texto, clase } = TEXTO_ESTADO[estado]
   return (
@@ -402,7 +417,7 @@ function ChipEstado({ estado }) {
   )
 }
 
-// Anuncia los cambios de estado a lectores de pantalla (visibilidad del estado del sistema).
+/** Anuncia los cambios de estado a los lectores de pantalla (visibilidad del estado del sistema). */
 function AvisoAccesible({ estado, cantidad }) {
   const mensajes = {
     [Estado.VALIDADA]: '',
@@ -417,6 +432,7 @@ function AvisoAccesible({ estado, cantidad }) {
   )
 }
 
+/** Sección de ayuda: explica las columnas y lista las búsquedas de demostración. */
 function SeccionAyuda({ ejemplos, estado }) {
   return (
     <div className="contenedor">
@@ -455,7 +471,8 @@ function SeccionAyuda({ ejemplos, estado }) {
   )
 }
 
-function useTiempoTranscurrido(inicio) {
+/** Cuenta los milisegundos transcurridos desde el inicio, actualizándose cada segundo. */
+function useContarTiempoTranscurrido(inicio) {
   const [ahora, setAhora] = useState(() => Date.now())
   useEffect(() => {
     const intervalo = setInterval(() => setAhora(Date.now()), 1000)

@@ -26,10 +26,14 @@ INSERTAR_ALINEAMIENTO = """
 
 
 class RepositorioHistorialSqlite(RepositorioHistorial):
+    """Repositorio que traduce cada búsqueda a filas del historial en SQLite."""
+
     def __init__(self, conexion: ConexionBD) -> None:
-        self._conexion = conexion
+        """Recibe la conexión con la que escribe en la base de datos."""
+        self._conexion: ConexionBD = conexion
 
     def guardar(self, busqueda: "Busqueda") -> None:
+        """Arma el registro de la búsqueda y sus alineamientos y pide escribirlo en una transacción."""
         id_busqueda = str(uuid4())
         registro = [(
             INSERTAR_BUSQUEDA,

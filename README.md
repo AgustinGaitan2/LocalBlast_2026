@@ -12,7 +12,8 @@
 LocalBlast_2026/
 ├── .gitignore
 ├── README.md
-├── requirements.txt              # dependencias del Backend (Python)
+├── pyproject.toml                # configuración de pytest y de la cobertura
+├── requirements.txt              # dependencias del Backend y de sus pruebas (Python)
 ├── datos/
 │   └── ejemplo/                  # query y base de proteínas sintéticas de demostración (FASTA)
 ├── scripts/
@@ -31,12 +32,17 @@ LocalBlast_2026/
 │           ├── controladores/    # ControladorBusqueda
 │           ├── modelos/          # ModeloBusqueda, ModeloResultados
 │           └── cliente/          # ClienteBackend
+├── tests/
+│   ├── backend/                  # pruebas unitarias del Backend (pytest)
+│   └── web/                      # pruebas unitarias de la Aplicación Web (Vitest)
 └── docs/
     ├── architecture/
     │   ├── architecture.md
     │   └── contexto-inicial.md
     ├── design/
-    │   └── diseno-detallado.md
+    │   ├── diseno-detallado.md
+    │   ├── clases-backend-pyreverse.md
+    │   └── cobertura.md
     ├── requeriments/
     │   ├── casos-de-uso.md
     │   ├── historias-usuario.md
@@ -111,8 +117,11 @@ La evaluación heurística de usabilidad, con los prompts enviados a la IA, su r
 El documento de Especificación de Arquitectura, con la elección de interoperabilidad como driver único, la derivación hasta estilo cliente-servidor, patrón de capas en el Backend y patrón MVC en la Aplicación Web, las decisiones de arquitectura (`DA-01` a `DA-08`), las vistas de contenedores, de componentes y de despliegue del modelo C4 con sus catálogos, y la trazabilidad escenario → táctica → estilo/patrón → decisión → elemento C4, está en:
 👉 [`docs/architecture/architecture.md`](docs/architecture/architecture.md)
 
-El diseño detallado de la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados` (ficha y análisis tridimensional de la HU, diagrama de robustez, diagramas de secuencia, verificación de coherencia con la arquitectura y cambios que el diseño produjo en el modelo de dominio y en la arquitectura) está en:
+El diseño detallado de la historia `HU08_CU004_B · Ejecutar la búsqueda validada y ver sus resultados` (ficha y análisis tridimensional de la HU, diagrama de robustez, diagramas de secuencia, modelo de clases obtenido del código y su validación, justificación del diseño, implementación, pruebas y trazabilidad) está en:
 👉 [`docs/design/diseno-detallado.md`](docs/design/diseno-detallado.md)
+
+El reporte de cobertura de las pruebas y su análisis están en:
+👉 [`docs/design/cobertura.md`](docs/design/cobertura.md)
 
 El diagrama de contexto completo del sistema está en:
 👉 [`docs/architecture/contexto-inicial.md`](docs/architecture/contexto-inicial.md)
@@ -290,6 +299,23 @@ curl -X POST http://localhost:8000/api/busquedas/ejecucion \
 ```
 
 La respuesta trae las filas de la tabla en JSON (`{"filas": [...]}`) o, si BLAST+ falló, `{"tipo": "ErrorBlast", "mensaje": "..."}`. La búsqueda se guarda en el historial igual que desde la interfaz.
+
+### 3.6 Ejecutar las pruebas
+
+Las dependencias de las pruebas se instalan con las de la sección 3.2 (`requirements.txt` y `npm install`). Ninguna prueba necesita BLAST+ ni el Backend en ejecución.
+
+```bash
+# Backend (desde la raíz del repositorio, con el entorno virtual activado)
+pytest                                      # todas las pruebas
+pytest --cov --cov-report=term-missing      # con el reporte de cobertura de líneas y de ramas
+
+# Aplicación Web
+cd src/web
+npm test                                    # todas las pruebas
+npm run test:cobertura                      # con el reporte de cobertura
+```
+
+Las dos pruebas de `tests/backend/test_blast_real.py` usan el BLAST+ instalado en la máquina. Si `blastp` no está en el `PATH`, o no se creó la base de demostración con `bash scripts/crear_base_demo.sh`, se omiten (aparecen como *skipped*) y el resto pasa igual.
 
 ---
 

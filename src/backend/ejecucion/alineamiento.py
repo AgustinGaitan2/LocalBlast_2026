@@ -9,9 +9,10 @@ from backend.adaptador_blast.adaptador_blast import Hit
 
 
 class Alineamiento:
-    """Parte del agregado Busqueda: solo la crea su Busqueda."""
+    """Hit de BLAST+ que forma parte del agregado Busqueda y calcula sus propios porcentajes."""
 
     def __init__(self, hit: Hit, longitud_query: int) -> None:
+        """Crea el alineamiento a partir de un hit, rechazando longitudes en cero."""
         if hit["longitud_alineamiento"] <= 0:
             raise ValueError("Un alineamiento no puede tener longitud 0.")
         if longitud_query <= 0:
@@ -26,10 +27,12 @@ class Alineamiento:
         self.query_hasta: int = hit["query_hasta"]
         self.longitud_query: int = longitud_query
 
-    def porcentaje_identidad(self) -> float:
+    def calcular_porcentaje_identidad(self) -> float:
+        """Calcula qué porcentaje de las posiciones del alineamiento son idénticas."""
         return self.identidades / self.longitud_alineamiento * 100
 
-    def porcentaje_cobertura(self) -> float:
+    def calcular_porcentaje_cobertura(self) -> float:
+        """Calcula qué porcentaje de la query cubre el alineamiento, sin pasar de 100."""
         # BLAST+ puede informar el tramo invertido (por ejemplo, en marcos negativos de blastx).
         tramo = abs(self.query_hasta - self.query_desde) + 1
         return min(tramo / self.longitud_query * 100, 100.0)

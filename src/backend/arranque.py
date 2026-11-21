@@ -35,6 +35,7 @@ logger = logging.getLogger("localblast")
 
 
 def crear_adaptador() -> AdaptadorBlast:
+    """Crea el adaptador de BLAST+ con el BLAST+ real o el simulado, según la configuración."""
     tipo = os.environ.get("LOCALBLAST_BLAST", "simulado")
     if tipo == "real":
         ejecutor = ejecutar_subproceso
@@ -56,6 +57,7 @@ def crear_adaptador() -> AdaptadorBlast:
 
 
 def crear_repositorio() -> RepositorioHistorial:
+    """Crea el repositorio del historial en SQLite o en memoria, según la configuración."""
     tipo = os.environ.get("LOCALBLAST_PERSISTENCIA", "sqlite")
     if tipo == "memoria":
         logger.info("Historial: en memoria")

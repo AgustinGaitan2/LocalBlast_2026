@@ -13,9 +13,10 @@ from backend.ejecucion.alineamiento import Alineamiento
 
 
 class Busqueda:
-    """Una consulta BLAST con su configuración validada y los alineamientos que produjo."""
+    """Consulta BLAST con su configuración validada y los alineamientos que produjo."""
 
     def __init__(self, configuracion: dict, fecha: datetime) -> None:
+        """Crea la búsqueda con la configuración validada y el momento en que se ejecuta."""
         self.secuencia: str = configuracion["secuencia"]
         self.variante: str = configuracion["variante"]
         self.modo: str = configuracion["modo"]
@@ -26,7 +27,8 @@ class Busqueda:
         self._resultados_registrados = False
 
     @property
-    def remota(self) -> bool:
+    def es_remota(self) -> bool:
+        """Indica si la búsqueda se ejecuta contra una base de NCBI (modo remoto)."""
         return self.modo == "remoto"
 
     @property
@@ -37,24 +39,27 @@ class Busqueda:
 
     @property
     def alineamientos(self) -> tuple[Alineamiento, ...]:
+        """Alineamientos de la búsqueda, en el orden en que los devolvió BLAST+."""
         return tuple(self._alineamientos)
 
     def registrar_resultados(self, hits: list[Hit]) -> None:
+        """Crea un Alineamiento por cada hit de BLAST+; solo se puede hacer una vez."""
         if self._resultados_registrados:
             raise ValueError("La búsqueda ya tiene sus resultados registrados.")
         longitud = self.longitud_query
         self._alineamientos = [Alineamiento(hit, longitud) for hit in hits]
         self._resultados_registrados = True
 
-    def tabla_resultados(self) -> list[dict]:
+    def armar_tabla_resultados(self) -> list[dict]:
+        """Arma las filas de la tabla de resultados, una por alineamiento."""
         return [
             {
                 "id_hit": alineamiento.id_hit,
                 "descripcion": alineamiento.descripcion,
                 "score": alineamiento.score,
                 "evalue": alineamiento.evalue,
-                "porcentaje_identidad": alineamiento.porcentaje_identidad(),
-                "porcentaje_cobertura": alineamiento.porcentaje_cobertura(),
+                "porcentaje_identidad": alineamiento.calcular_porcentaje_identidad(),
+                "porcentaje_cobertura": alineamiento.calcular_porcentaje_cobertura(),
             }
             for alineamiento in self._alineamientos
         ]

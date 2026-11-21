@@ -24,12 +24,15 @@ BASES_LOCALES = frozenset({"proteinas_demo"})
 
 
 class BlastSimulado:
+    """Reemplazo del programa BLAST+ que responde con una salida grabada de una ejecución real."""
+
     def __init__(
         self,
         demora_segundos: float = 3.0,
         campo_nuevo: bool = False,
         salida_grabada: Path = SALIDA_GRABADA,
     ) -> None:
+        """Configura la demora simulada, el campo desconocido opcional y la salida grabada."""
         self._demora_segundos = demora_segundos
         self._campo_nuevo = campo_nuevo
         self._salida = salida_grabada.read_text(encoding="utf-8")
@@ -41,6 +44,7 @@ class BlastSimulado:
         directorio: Path | None,
         limite_segundos: float | None,
     ) -> ResultadoComando:
+        """Ejecuta el comando simulado: responde como BLAST+ con la salida grabada o con su error."""
         time.sleep(self._demora_segundos)
         base = comando[comando.index("-db") + 1]
         if "-remote" not in comando and Path(base).name not in BASES_LOCALES:

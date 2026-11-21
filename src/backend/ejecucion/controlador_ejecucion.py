@@ -16,23 +16,27 @@ from backend.ejecucion.busqueda import Busqueda
 __all__ = ["ControladorEjecucion", "ErrorBlast"]
 
 
-def ahora() -> datetime:
+def obtener_hora_actual() -> datetime:
+    """Devuelve la fecha y hora actuales con la zona horaria del servidor."""
     return datetime.now().astimezone()
 
 
 class ControladorEjecucion:
+    """Controlador que orquesta la ejecución de una búsqueda sin hacer el trabajo del dominio."""
+
     def __init__(
         self,
         adaptador: AdaptadorBlast,
         repositorio: RepositorioHistorial,
-        reloj: Callable[[], datetime] = ahora,
+        reloj: Callable[[], datetime] = obtener_hora_actual,
     ) -> None:
-        self._adaptador = adaptador
-        self._repositorio = repositorio
-        self._reloj = reloj
+        """Recibe sus colaboradores (adaptador, repositorio y reloj) por inyección."""
+        self._adaptador: AdaptadorBlast = adaptador
+        self._repositorio: RepositorioHistorial = repositorio
+        self._reloj: Callable[[], datetime] = reloj
 
     def ejecutar_busqueda(self, configuracion: dict) -> list[dict]:
-        """Ejecuta la búsqueda validada, la guarda en el historial y devuelve las filas de la tabla.
+        """Ejecuta la búsqueda, la guarda en el historial y devuelve las filas de la tabla.
 
         Lanza ErrorBlast si BLAST+ no termina bien; en ese caso no se guarda nada.
         """
@@ -41,9 +45,9 @@ class ControladorEjecucion:
             busqueda.variante,
             busqueda.secuencia,
             busqueda.base_datos,
-            busqueda.remota,
+            busqueda.es_remota,
             busqueda.parametros,
         )
         busqueda.registrar_resultados(hits)
         self._repositorio.guardar(busqueda)
-        return busqueda.tabla_resultados()
+        return busqueda.armar_tabla_resultados()

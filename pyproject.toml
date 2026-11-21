@@ -1,0 +1,20 @@
+# Configuración de las pruebas del Backend (pytest y coverage).
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests/backend"]
+addopts = "-q"
+# Starlette 1.x sugiere httpx2 para su TestClient; httpx sigue funcionando y es el que piden las versiones anteriores.
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
+markers = [
+    "blast_real: usa el BLAST+ instalado en la máquina (se omite si no está o si falta la base de demostración)",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/backend"]
+# Punto de arranque: solo lee variables de entorno y arma los objetos; se verifica al ejecutar la aplicación.
+omit = ["src/backend/arranque.py"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_also = ["if TYPE_CHECKING:", "@abstractmethod"]

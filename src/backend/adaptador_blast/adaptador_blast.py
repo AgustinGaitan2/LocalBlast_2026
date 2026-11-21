@@ -10,11 +10,11 @@ from typing import TypedDict
 
 
 class ErrorBlast(Exception):
-    """BLAST+ no terminó bien. El mensaje es el que informó BLAST+, sin reinterpretar."""
+    """Error de BLAST+; su mensaje es el que informó BLAST+, sin reinterpretar."""
 
 
 class Hit(TypedDict):
-    """Un hit leído de la salida de BLAST+, como datos simples (no como entidad)."""
+    """Hit leído de la salida de BLAST+, como datos simples (no como entidad)."""
 
     id_hit: str
     descripcion: str
@@ -27,6 +27,8 @@ class Hit(TypedDict):
 
 
 class AdaptadorBlast(ABC):
+    """Interfaz para invocar a BLAST+ sin conocer cómo se lo ejecuta ni su formato de salida."""
+
     @abstractmethod
     def ejecutar(
         self,
@@ -36,4 +38,4 @@ class AdaptadorBlast(ABC):
         remota: bool,
         parametros: dict,
     ) -> list[Hit]:
-        """Invoca a BLAST+ y devuelve sus hits. Lanza ErrorBlast si BLAST+ falla."""
+        """Invoca a BLAST+ y devuelve sus hits; lanza ErrorBlast si BLAST+ falla."""

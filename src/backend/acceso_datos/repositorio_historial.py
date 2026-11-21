@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class RepositorioHistorial(ABC):
+    """Interfaz del historial de búsquedas: dice qué se puede hacer, no cómo ni dónde."""
+
     @abstractmethod
     def guardar(self, busqueda: "Busqueda") -> None:
         """Guarda la búsqueda con sus parámetros, base, fecha y todos sus alineamientos crudos."""

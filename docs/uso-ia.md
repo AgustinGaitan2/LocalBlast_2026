@@ -521,6 +521,34 @@ Este documento registra el uso crítico de asistentes de IA generativa durante e
   - El globo de ayuda de la primera columna quedaba cortado por el borde de la tabla. Se detectó en las capturas y se corrigió.
 - **Pendiente de revisión del grupo:** completar qué aceptamos, qué modificamos y qué descartamos después de revisar el código, en particular las decisiones I1 a I9 de la sección 6.3 del diseño detallado.
 
+## Entrada 27 — Pruebas unitarias de `HU08_CU004_B`
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** resolver la Parte C: tabla de casos de prueba (caja negra desde los criterios de aceptación y los escenarios de calidad, caja blanca desde el código), complejidad ciclomática de las operaciones de la HU con una prueba por camino, pruebas automatizadas, y reporte de cobertura con su análisis.
+- **Qué generó:**
+  - 59 casos de prueba (`CP-01` a `CP-59`) implementados en 62 pruebas de pytest para el Backend y 18 de Vitest para la Aplicación Web. Incluye las medidas de `EC-01` (cinco búsquedas simultáneas sin cruces, con una barrera que obliga a que estén en curso a la vez) y de `EC-02` (campos desconocidos advertidos sin alterar los conocidos), y dos pruebas de integración opcionales con el BLAST+ real.
+  - La tabla de complejidad ciclomática, confirmada con `radon` (Python) y con la regla `complexity` de ESLint (JavaScript).
+  - El reporte de cobertura (`docs/design/cobertura.md`), la sección 7 del diseño detallado y las instrucciones del README para ejecutar las pruebas.
+- **Errores / imprecisiones detectadas:**
+  - **Una prueba que pasaba sin verificar la regla.** Para comprobar que las pruebas verifican comportamiento real, se introdujeron seis errores a propósito en las reglas de la HU. El cálculo del % de identidad dividido por la longitud equivocada no lo detectó ninguna prueba: la primera versión de `CP-04` usaba la misma longitud para el alineamiento y la query, así que cualquiera de las dos fórmulas daba lo mismo. Se corrigió la prueba.
+  - **Caminos sin prueba con 100 % de ramas cubiertas.** Al armar la tabla de complejidad aparecieron dos caminos independientes sin prueba (secuencia vacía en `longitud_query` y simulado sin carpeta de trabajo). La cobertura de ramas no los marcaba. Se agregaron.
+  - **Conexiones a SQLite sin cerrar en las pruebas.** `with sqlite3.connect(...)` confirma la transacción pero no cierra la conexión; se usó `closing`.
+  - **Vitest no leía `tests/web`** por estar fuera de la carpeta de la Aplicación Web. Se habilitó solo esa carpeta en la configuración de Vite.
+- **Pendiente de revisión del grupo:** completar qué aceptamos, qué modificamos y qué descartamos después de revisar las pruebas y la tabla de casos.
+
+## Entrada 28 — Modelo de clases, justificación, trazabilidad y revisión de nombres
+
+- **Herramienta usada:** Claude.
+- **Tarea concreta:** revisar el TP4 completo contra lo entregado y hacer lo que faltaba (el paso 5 de la Parte A: modelo de clases obtenido del código, su validación, la justificación del diseño y la trazabilidad). Además, revisar que las clases tuvieran nombre de sustantivo, que los métodos tuvieran nombre de verbo y que cada uno llevara un comentario de una oración.
+- **Qué generó:**
+  - El diagrama de clases del Backend por ingeniería inversa con `pyreverse` (salida guardada en `docs/design/clases-backend-pyreverse.md`). El de la Aplicación Web se tomó del código y se revisó clase por clase. Con los dos se armó el diagrama único de la sección 4 del diseño detallado.
+  - La validación del diagrama contra la robustez y las secuencias (V1 a V10), la justificación con GRASP, las decisiones D1 a D7, los patrones (Adapter, Observer, Repository) y la tabla de trazabilidad HU → C4 → clases → archivo → pruebas.
+  - El renombrado de operaciones y clases, y un comentario (`""" """` en Python, `/** */` en JavaScript) en cada clase, método y función, incluidas las de las pruebas. Se verificó con un análisis automático que no quedara ninguna sin comentario.
+- **Errores / imprecisiones detectadas:**
+  - **`pyreverse` no mostraba las asociaciones de los controladores.** Los atributos inyectados no declaraban su tipo, así que la herramienta no podía saber a qué clase apuntaban. Se agregaron los tipos y el diagrama regenerado las mostró. Es la diferencia V1 de la validación.
+  - **Nombres de sustantivo en operaciones que venían del diseño** (`porcentaje_identidad`, `tabla_resultados`, `configuracion`, `filas`) **y una clase con nombre de adjetivo** (`Observable`). Se renombraron en el código, en las pruebas y en los diagramas de secuencia, para que sigan coincidiendo.
+- **Pendiente de revisión del grupo:** revisar el diagrama de clases contra el código y completar qué aceptamos, qué modificamos y qué descartamos.
+
 ## Reflexión sobre el uso de IA
 
 La bitácora deja ver un patrón claro: la IA nos sirvió como acelerador de redacción y como espejo para nuestras propias inconsistencias, pero nunca como fuente de verdad sobre el dominio. Los errores que fuimos detectando como proponer descargar SwissProt automáticamente, sugerir un E-value por defecto que no distinguía por programa, plantear un fallback automático de bases locales a remotas cuando esas equivalencias no existen, arrastrar la persistencia en D2 al lugar equivocado, o dejar la salvedad rebuscada de "las capacidades de P2 se profundizan pero P2 como proceso no", no eran errores de forma sino de entendimiento del dominio. Solo las pudimos atrapar porque el grupo discutió el modelo antes de aceptar el texto, y porque cuando algo nos hacía ruido lo cuestionamos en vez de pasarlo por alto. También apareció, con mucha regularidad, un patrón operativo: cuando un cambio conceptual tocaba varios archivos, la IA lo aplicaba bien al cuerpo del documento y se olvidaba de las introducciones, resúmenes, tablas de trazabilidad o diagramas, hasta el punto de que ya lo esperábamos y lo chequeábamos antes de commitear. La lección que nos llevamos para los próximos TPs es que la IA acelera lo que ya entendemos, no reemplaza el entendimiento: es útil para escribir más rápido, para aplicar cambios transversales de forma consistente y para que un integrante le explique algo a otro por escrito con menos fricción, pero el trabajo real, discutir el modelo, decidir qué se profundiza, cerrar una definición de dominio, sigue siendo del grupo. Como grupo mantuvimos, en cada iteración, la última palabra sobre qué entraba al repo; y eso es lo que hizo que la IA fuera una herramienta y no un delegado.
