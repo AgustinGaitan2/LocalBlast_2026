@@ -185,7 +185,111 @@ El Backend se configura con variables de entorno, todas opcionales:
 | `LOCALBLAST_PERSISTENCIA` | `sqlite` (por defecto) · `memoria` | Historial en SQLite o en memoria; el controlador no cambia |
 | `LOCALBLAST_BD` | archivo | Ubicación del archivo SQLite (por defecto `datos/historial.sqlite3`) |
 
-**Usar otra secuencia u otra base.** Las búsquedas validadas de ejemplo están en `src/web/src/busquedas-validadas.json`. Se puede agregar una entrada con otra secuencia FASTA y la ruta de una base local propia (`base_datos`, relativa a la raíz del repositorio o absoluta), o una base de NCBI con `"modo": "remoto"`. Después se abre `http://localhost:8000/?ejemplo=<clave>`, previa recompilación con `npm run build`, o directamente en modo desarrollo. El BLAST+ simulado siempre devuelve la salida grabada de la búsqueda de demostración.
+**Usar otra secuencia u otra base:** ver la sección 3.5.
+
+### 3.5 Probar otras secuencias con BLAST+ real
+
+La pantalla no tiene un campo para pegar una secuencia: cargarla y validarla son otras historias de usuario (HU01 a HU07). Las búsquedas que se pueden ejecutar son las de `src/web/src/busquedas-validadas.json`, cada una con una clave que se elige desde la URL (`?ejemplo=<clave>`). Para probar otra secuencia se agrega ahí una entrada nueva.
+
+> Con el BLAST+ **simulado** los resultados son siempre los de la búsqueda de demostración, sin importar la secuencia. Para probar secuencias propias hay que usar **BLAST+ real** (`LOCALBLAST_BLAST=real`).
+
+#### Paso 1 · Convertir el FASTA en texto para el JSON
+
+En el JSON la secuencia va en una sola línea, con `\n` en los saltos de línea. Este comando hace la conversión (desde la raíz del repositorio):
+
+```bash
+python3 -c "import json,sys; print(json.dumps(open(sys.argv[1]).read()))" mi_proteina.fasta
+```
+
+Imprime algo como `">mi_proteina Descripción\nMKTAYIAKQRQ...\n"`, comillas incluidas, listo para pegar en el campo `secuencia`.
+
+#### Paso 2 · Agregar la búsqueda al JSON
+
+Se agrega una entrada en `src/web/src/busquedas-validadas.json`, junto a `"demostracion"` y `"base-inexistente"`. Hay que respetar las comas entre entradas. Según dónde se quiera buscar:
+
+**a) Contra una base de NCBI (modo remoto).** Necesita conexión a internet.
+
+```json
+"mi-prueba-ncbi": {
+  "titulo": "Mi proteína contra SwissProt (NCBI)",
+  "descripcion": "prueba remota con BLAST+ real",
+  "configuracion": {
+    "query_nombre": "mi_proteina.fasta",
+    "secuencia": "<pegar acá lo que imprimió el paso 1>",
+    "variante": "blastp",
+    "modo": "remoto",
+    "base_datos": "swissprot",
+    "base_datos_nombre": "SwissProt (NCBI)",
+    "parametros": { "evalue": 0.001, "matrix": "BLOSUM62" }
+  }
+}
+```
+
+**b) Contra una base local propia.** Primero se crea la base a partir de un FASTA con `makeblastdb`. Los encabezados del FASTA tienen que ser ASCII, sin acentos ni eñes.
+
+```bash
+makeblastdb -in mis_secuencias.fasta -dbtype prot -parse_seqids -out datos/blastdb/mi_base
+```
+
+```json
+"mi-prueba-local": {
+  "titulo": "Mi proteína contra mi base local",
+  "descripcion": "prueba local con BLAST+ real",
+  "configuracion": {
+    "query_nombre": "mi_proteina.fasta",
+    "secuencia": "<pegar acá lo que imprimió el paso 1>",
+    "variante": "blastp",
+    "modo": "local",
+    "base_datos": "datos/blastdb/mi_base",
+    "base_datos_nombre": "Mi base local",
+    "parametros": { "evalue": 10, "matrix": "BLOSUM62" }
+  }
+}
+```
+
+Qué significa cada campo:
+
+| Campo | Qué poner |
+|---|---|
+| `variante` | `blastp` (proteína contra proteínas), `blastn` (nucleótidos contra nucleótidos), `blastx`, `tblastn` o `tblastx`, de acuerdo con el tipo de la query y de la base |
+| `modo` | `local` (una base de la máquina) o `remoto` (una base de NCBI; BLAST+ se invoca con `-remote`) |
+| `base_datos` | En modo local, la ruta de la base sin extensión, relativa a la raíz del repositorio o absoluta. En modo remoto, el nombre de la base de NCBI: `swissprot`, `nr`, `pdb`, `refseq_protein` para proteínas; `nt` para nucleótidos |
+| `parametros` | Opcionales: `evalue`, `word_size`, `matrix`, `gapopen`, `gapextend`, `max_target_seqs`. Tienen que corresponder a la variante; por ejemplo, `matrix` es solo para proteínas, así que con `blastn` no va |
+| `query_nombre`, `query_longitud`, `query_unidad`, `base_datos_nombre` | Solo se muestran en la pantalla; no cambian la búsqueda |
+
+#### Paso 3 · Compilar la interfaz y arrancar con BLAST+ real
+
+El JSON queda incluido en la interfaz compilada, así que hay que volver a compilarla:
+
+```bash
+cd src/web && npm run build && cd ../..
+LOCALBLAST_BLAST=real uvicorn backend.arranque:app --app-dir src --port 8000
+```
+
+Otra opción, que evita recompilar en cada cambio: dejar el Backend corriendo en una terminal y, en otra, `cd src/web && npm run dev`. Vite toma los cambios del JSON solo y la página queda en el puerto 5173.
+
+#### Paso 4 · Ejecutar
+
+Abrir `http://localhost:8000/?ejemplo=mi-prueba-ncbi` (o la clave que se haya usado; en el puerto 5173 si se usa el modo desarrollo) y presionar **Ejecutar búsqueda**. Las búsquedas disponibles también figuran en la sección *Cómo leer los resultados → Datos de demostración*.
+
+Qué esperar:
+
+- **Modo local:** con bases chicas el resultado aparece en segundos.
+- **Modo remoto:** NCBI encola las búsquedas, así que puede tardar de uno a varios minutos. Mientras tanto se ve el indicador de progreso y se puede navegar. El límite es de 30 minutos; se cambia con `LOCALBLAST_LIMITE_SEGUNDOS`.
+- **Si algo falla** (secuencia mal formada, parámetro que no corresponde a la variante, base inexistente, NCBI no responde): se muestra el mensaje literal de BLAST+, no aparece ninguna tabla y no se guarda nada.
+- **Si sale bien:** la búsqueda queda en el historial, en `datos/historial.sqlite3`.
+
+#### Alternativa sin tocar la interfaz: llamar a la API
+
+Con el Backend corriendo, se puede enviar cualquier búsqueda directamente:
+
+```bash
+curl -X POST http://localhost:8000/api/busquedas/ejecucion \
+  -H "Content-Type: application/json" \
+  -d '{"secuencia": ">mi_proteina\nMKTAYIAKQRQ...", "variante": "blastp", "modo": "remoto", "base_datos": "swissprot", "parametros": {"evalue": 0.001}}'
+```
+
+La respuesta trae las filas de la tabla en JSON (`{"filas": [...]}`) o, si BLAST+ falló, `{"tipo": "ErrorBlast", "mensaje": "..."}`. La búsqueda se guarda en el historial igual que desde la interfaz.
 
 ---
 
